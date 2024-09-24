@@ -1,4 +1,4 @@
-class SparseMatrixCSR {
+class Math::SparseMatrix::CSR does Positional {
     has @.values;
     has @.col-index;
     has @.row-ptr;
@@ -74,6 +74,18 @@ class SparseMatrixCSR {
     }
 
     #=================================================================
+    # Access
+    #=================================================================
+    method elems(::?CLASS:D:) { $!nrow * $!ncol }
+
+    method value-at(Int:D $row, Int:D $col) {
+        for @!row-ptr[$row] ..^ @!row-ptr[$row + 1] -> $ip {
+            return @!values[$ip] if @!col-index[$ip] == $col;
+        }
+        return $!implicit-value;
+    }
+
+    #=================================================================
     # Rules
     #=================================================================
     method rules() {
@@ -92,7 +104,7 @@ class SparseMatrixCSR {
     #=================================================================
     # Slicing
     #=================================================================
-    method head(Int $n = 1 --> SparseMatrixCSR:D) {
+    method head(Int $n = 1 --> Math::SparseMatrix::CSR:D) {
         my $end = min($n, $.nrow);
         my @values-slice;
         my @col-index-slice;
@@ -105,7 +117,7 @@ class SparseMatrixCSR {
             @col-index-slice.append(@.col-index[$start ..^ $stop]);
         }
 
-        return SparseMatrixCSR.new(
+        return Math::SparseMatrix::CSR.new(
                 :values(@values-slice),
                 :col-index(@col-index-slice),
                 :row-ptr(@row-ptr-slice),
@@ -130,7 +142,7 @@ class SparseMatrixCSR {
 
         @row-ptr-slice .= map(*- @.row-ptr[$start]);
 
-        return SparseMatrixCSR.new(
+        return Math::SparseMatrix::CSR.new(
                 :values(@values-slice),
                 :col-index(@col-index-slice),
                 :row-ptr(@row-ptr-slice),
@@ -142,9 +154,9 @@ class SparseMatrixCSR {
     #=================================================================
     # Transpose
     #=================================================================
-    method transpose-first(--> SparseMatrixCSR) {
+    method transpose-first(--> Math::SparseMatrix::CSR) {
         my @rules = |self.rules;
-        return SparseMatrixCSR.new(
+        return Math::SparseMatrix::CSR.new(
                 rules => @rules.map({ $_.key.reverse => $_.value }),
                 nrow => self.ncol,
                 ncol => self.nrow
@@ -196,7 +208,7 @@ class SparseMatrixCSR {
             }
         }
 
-        return SparseMatrixCSR.new(
+        return Math::SparseMatrix::CSR.new(
                 values => @ANT,
                 col-index => @JAT,
                 row-ptr => @IAT,
@@ -222,9 +234,56 @@ class SparseMatrixCSR {
     #=================================================================
     # Matrix-matrix multiplication
     #=================================================================
-    multi method dot(SparseMatrixCSR:D $B --> SparseMatrixCSR:D) {
+    method dot-pattern(Math::SparseMatrix::CSR $other) {
+        die 'The number of rows of the argument is expected to be equal to the number of columns of the object.'
+        unless $!ncol == $other.nrow;
+
+        my @IC = 0 xx ($!nrow + 1);
+        my @JC;
+        my @IX = 0 xx $other.ncol;
+        my $IP = 0;
+
+        for 0 ..^ $other.ncol -> $i {
+            @IX[$i] = 0;
+        }
+
+        for ^$!nrow -> $i {
+            @IC[$i] = $IP;
+            my $IAA = @!row-ptr[$i];
+            my $IAB = @!row-ptr[$i + 1] - 1;
+            if $IAB >= $IAA {
+                for $IAA .. $IAB -> $jp {
+                    my $j = @!col-index[$jp];
+                    my $IBA = $other.row-ptr[$j];
+                    my $IBB = $other.row-ptr[$j + 1] - 1;
+                    if $IBB >= $IBA {
+                        for $IBA .. $IBB -> $kp {
+                            my $k = $other.col-index[$kp];
+                            if @IX[$k] != $i + 1 {
+                                @JC[$IP++] = $k;
+                                @IX[$k] = $i + 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        @IC[$!nrow] = $IP;
+        return Math::SparseMatrix::CSR.new(
+                values => (1 xx $IP),
+                col-index => @JC,
+                row-ptr => @IC,
+                :$!nrow,
+                ncol => $other.ncol
+                );
+    }
+
+    multi method dot(Math::SparseMatrix::CSR:D $B --> Math::SparseMatrix::CSR:D) {
         die 'The number of rows of the argument is expected to be equal to the number of columns of the object.'
         unless $!ncol == $B.nrow;
+
+        # my $pattern = self.dot-pattern($B);
 
         my @values;
         my @col-index;
@@ -255,7 +314,7 @@ class SparseMatrixCSR {
             @row-ptr[$i + 1] = @values.elems;
         }
 
-        return SparseMatrixCSR.bless(
+        return Math::SparseMatrix::CSR.bless(
                 :@values,
                 :@col-index,
                 :@row-ptr,
@@ -268,33 +327,76 @@ class SparseMatrixCSR {
     #=================================================================
     # Add
     #=================================================================
-    multi method add(Numeric:D $a --> SparseMatrixCSR:D) {
+    #| Element-wise addition
+    multi method add(Numeric:D $a --> Math::SparseMatrix::CSR:D) {
         my @values = @!values >>+>> $a;
-        return SparseMatrixCSR.bless(
+        return Math::SparseMatrix::CSR.bless(
                 :@values,
                 :@!col-index,
                 :@!row-ptr,
                 :$!nrow,
                 :$!ncol,
-                :$!implicit-value + $a
+                implicit-value => $!implicit-value + $a
                 );
     }
 
-    multi method add(SparseMatrixCSR $other --> SparseMatrixCSR:D) {
-        my @CN = 0 xx @!values.elems;
-        my @X = 0 xx $!ncol;
+    #| Symbolic addition of two matrices
+    method add-pattern(Math::SparseMatrix::CSR $other) {
+        my @IC = 0 xx ($!nrow + 1);
+        my @JC;
+        my @IX = 0 xx $!ncol;
+        my $IP = 0;
+
+        for ^$!nrow -> $i {
+            @IC[$i] = $IP;
+            my $IAA = @!row-ptr[$i];
+            my $IAB = @!row-ptr[$i + 1] - 1;
+            if $IAB >= $IAA {
+                for $IAA .. $IAB -> $jp {
+                    my $j = @!col-index[$jp];
+                    @JC[$IP++] = $j;
+                    @IX[$j] = $i + 1;
+                }
+            }
+
+            my $IBA = $other.row-ptr[$i];
+            my $IBB = $other.row-ptr[$i + 1] - 1;
+            if $IBB >= $IBA {
+                for $IBA .. $IBB -> $jp {
+                    my $j = $other.col-index[$jp];
+                    if @IX[$j] != $i + 1 {
+                        @JC[$IP++] = $j;
+                    }
+                }
+            }
+        }
+
+        @IC[$!nrow] = $IP;
+        return Math::SparseMatrix::CSR.new(
+                values => (1 xx $IP),
+                col-index => @JC,
+                row-ptr => @IC,
+                :$!nrow,
+                :$!ncol
+                );
+    }
+
+    #| Numeric addition of two matrices
+    multi method add(Math::SparseMatrix::CSR $other --> Math::SparseMatrix::CSR:D) {
+        my $pattern = self.add-pattern($other);
+
+        my @CN = 0 xx $pattern.values.elems;
+        my @X = 0 xx $pattern.ncol;
 
         for ^$!nrow -> $i {
             my $IH = $i + 1;
-            my $ICA = @!row-ptr[$i];
-            my $ICB = @!row-ptr[$IH] - 1;
+            my $ICA = $pattern.row-ptr[$i];
+            my $ICB = $pattern.row-ptr[$IH] - 1;
 
-            if $ICB < $ICA {
-                next;
-            }
+            next if $ICB < $ICA;
 
             for $ICA .. $ICB -> $ip {
-                @X[@!col-index[$ip]] = 0;
+                @X[$pattern.col-index[$ip]] = 0;
             }
 
             my $IAA = @!row-ptr[$i];
@@ -317,31 +419,32 @@ class SparseMatrixCSR {
             }
 
             for $ICA .. $ICB -> $ip {
-                @CN[$ip] = @X[@!col-index[$ip]];
+                @CN[$ip] = @X[$pattern.col-index[$ip]];
             }
         }
 
-        return SparseMatrixCSR.new(
+        return Math::SparseMatrix::CSR.new(
                 values => @CN,
-                :@!col-index,
-                :@!row-ptr,
+                col-index => $pattern.col-index,
+                row-ptr => $pattern.row-ptr,
                 :$!nrow,
                 :$!ncol,
                 implicit-value => $!implicit-value + $other.implicit-value
                 );
     }
+
     #=================================================================
     # Mult
     #=================================================================
-    multi method mult(Numeric:D $a --> SparseMatrixCSR:D) {
+    multi method mult(Numeric:D $a --> Math::SparseMatrix::CSR:D) {
         my @values = @!values >>*>> $a;
-        return SparseMatrixCSR.bless(
+        return Math::SparseMatrix::CSR.bless(
                 :@values,
                 :@!col-index,
                 :@!row-ptr,
                 :$!nrow,
                 :$!ncol,
-                :$!implicit-value * $a
+                implicit-value => $!implicit-value * $a
                 );
     }
 
