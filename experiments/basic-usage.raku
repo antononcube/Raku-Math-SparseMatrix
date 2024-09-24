@@ -2,7 +2,7 @@
 use v6.d;
 
 use lib <. lib>;
-use SparseMatrixCSR;
+use Math::SparseMatrix::CSR;
 
 # Example tuples: (row, col, value)
 my @entries = (
@@ -19,7 +19,7 @@ my @rules = @entries.map({ Pair.new($_.head(2).List, $_.tail) });
 say (@rules.raku);
 
 # Create a row-major sparse matrix
-my $matrix = SparseMatrixCSR.new(:@rules);
+my $matrix = Math::SparseMatrix::CSR.new(:@rules);
 
 say "Matrix: ", $matrix.raku;
 
@@ -36,7 +36,7 @@ say '-' x 100;
 
 # Multiply with a dense vector
 my @vector = [1, 2, 3];
-my @result = $matrix.multiply-vector(@vector);
+my @result = $matrix.dot(@vector);
 say "Matrix * Vector: ", @result;
 
 # Transpose the matrix
