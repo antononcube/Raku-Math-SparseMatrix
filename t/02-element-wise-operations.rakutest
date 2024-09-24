@@ -1,0 +1,47 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSR;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+my $matrix2 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+
+## 1
+isa-ok $matrix1, Math::SparseMatrix::CSR;
+
+## 2
+isa-ok $matrix1, Math::SparseMatrix::CSR;
+
+## 3
+isa-ok $matrix1.add(4.3), Math::SparseMatrix::CSR;
+
+## 4
+isa-ok $matrix1.add($matrix2), Math::SparseMatrix::CSR;
+
+## 5
+## Too contrived?
+my %rules5;
+for $matrix1.rules -> $r1 {
+    for $matrix2.rules -> $r2 {
+        if $r1.key eqv $r2.key {
+            %rules5{$r1.key.Str} = $r1.value + $r2.value
+        } else {
+            if %rules5{$r1.key.Str}:!exists { %rules5{$r1.key.Str} = $r1.value}
+            if %rules5{$r2.key.Str}:!exists { %rules5{$r2.key.Str} = $r2.value}
+        }
+    }
+}
+
+is-deeply
+        $matrix1.add($matrix2).rules.Hash,
+        %rules5,
+        "Same rules of elementwise-addition";
+
+done-testing;
