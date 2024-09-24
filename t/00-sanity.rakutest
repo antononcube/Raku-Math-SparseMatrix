@@ -1,0 +1,7 @@
+use v6.d;
+use Test;
+
+use-ok 'Math::SparseMatrix';
+use-ok 'Math::SparseMatrix::CSR';
+
+done-testing;

@@ -1,0 +1,25 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSR;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+$matrix1.print;
+
+## 1
+isa-ok $matrix1, Math::SparseMatrix::CSR;
+
+## 2
+is $matrix1.elems, $nrow * $ncol;
+
+## 3
+ok $matrix1.value-at(2, 6);
+
+done-testing;
