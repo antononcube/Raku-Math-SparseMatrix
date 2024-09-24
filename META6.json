@@ -11,9 +11,18 @@
   "build-depends": [],
   "test-depends": [],
   "provides": {
-    "SparseMatrixCSR": "lib/SparseMatrixCSR.rakumod"
+    "Math::SparseMatrix": "lib/Math/SparseMatrix.rakumod",
+    "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod"
   },
   "resources": [],
   "license": "Artistic-2.0",
+  "tags": [
+    "math",
+    "mathematics",
+    "matrix",
+    "sparse matrix algebra",
+    "sparse matrix",
+    "sparse"
+  ],
   "source-url": "https://github.com/antononcube/Raku-Math-SparseMatrix.git"
 }
