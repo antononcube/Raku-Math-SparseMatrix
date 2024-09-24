@@ -11,7 +11,6 @@ my $density = 0.25;
 my $tol = 0.01;
 
 my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
-$matrix1.print;
 
 ## 1
 isa-ok $matrix1, Math::SparseMatrix::CSR;
@@ -20,6 +19,13 @@ isa-ok $matrix1, Math::SparseMatrix::CSR;
 is $matrix1.elems, $nrow * $ncol;
 
 ## 3
-ok $matrix1.value-at(2, 6);
+isa-ok $matrix1.value-at(2, 6), Numeric:D;
+
+## 4
+my @rules4 = $matrix1.rules;
+is
+        ([&&] |@rules4.map({ $matrix1.value-at(|$_.key) == $_.value })),
+        True,
+        'Same values from .rules and .value-at';
 
 done-testing;
