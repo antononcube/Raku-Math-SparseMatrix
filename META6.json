@@ -12,7 +12,8 @@
   "test-depends": [],
   "provides": {
     "Math::SparseMatrix": "lib/Math/SparseMatrix.rakumod",
-    "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod"
+    "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod",
+    "Math::SparseMatrix::Utilities": "lib/Math/SparseMatrix/Utilities.rakumod"
   },
   "resources": [],
   "license": "Artistic-2.0",
