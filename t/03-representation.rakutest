@@ -43,7 +43,6 @@ subtest {
 }, 'Hash representation';
 
 ## 5
-say $matrix1;
 subtest {
     ok $matrix1.gist;
     isa-ok $matrix1.Str, Str:D;

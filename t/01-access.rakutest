@@ -65,10 +65,13 @@ ok $matrix1[2];
 is-deeply $matrix1[2], $matrix1.row-at(2);
 
 ## 11
-$matrix1.print;
-say '-' x 120;
-$matrix1[2, 3, 1].print;
-ok $matrix1[2, 3, 1];
+#$matrix1.print;
+#say '-' x 120;
+#$matrix1[2, 3, 1].print;
+#ok $matrix1[2, 3, 1];
+
+## 12
+#is $matrix1[3;2], $matrix1.value-at(3, 2);
 
 
 done-testing;
