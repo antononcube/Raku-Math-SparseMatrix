@@ -1,0 +1,30 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSR;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+
+plan *;
+
+## 1
+isa-ok
+        $matrix1,
+        Math::SparseMatrix::CSR,
+        "Expected type after creation";
+
+## 2
+subtest {
+        isa-ok $matrix1.Array, Array;
+        is $matrix1.Array.all ~~ Array, True;
+        is min($matrix1.Array>>.elems), max($matrix1.Array>>.elems);
+}
+
+done-testing;
