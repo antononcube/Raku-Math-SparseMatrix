@@ -202,6 +202,21 @@ class Math::SparseMatrix::CSR {
     }
 
     #=================================================================
+    # Dense array
+    #=================================================================
+    method Array() {
+        my @result;
+        for ^$!nrow -> $i {
+            my @row = (0 xx $!ncol);
+            for @!row-ptr[$i] ..^ @!row-ptr[$i + 1] -> $j {
+                @row[@!col-index[$j]] = @!values[$j];
+            }
+            @result.push(@row);
+        }
+        return @result;
+    }
+
+    #=================================================================
     # Transpose
     #=================================================================
     method transpose-first(--> Math::SparseMatrix::CSR) {
