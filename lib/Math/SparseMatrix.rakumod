@@ -25,23 +25,20 @@ multi sub generate-random-sparse-matrix(
 }
 
 #=====================================================================
-multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) {
-    die 'The indexes are expected to be non-negative integers.'
-    unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
-
-    my @mats = @indexes.map({ $mat.row-at($_) });
-    my $res = @mats.head;
-    for @mats.tail(*-1) -> $m {
-        $res = $res.row-bind($m)
-    }
-    return $res;
-}
-
-#multi sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) {
-#    note (:@indexes);
-#    return $mat.value-at(|@indexes);
+#proto sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {*}
+#sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {
+#    die 'The indexes are expected to be non-negative integers.'
+#    unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
+#
+#    my @mats = @indexes.map({ $mat.row-at($_) });
+#    my $res = @mats.head;
+#    for @mats.tail(*-1) -> $m {
+#        $res = $res.row-bind($m)
+#    }
+#    return $res;
 #}
 
-#multi sub postcircumfix:<[;]>(Math::SparseMatrix::CSR:D $mat, Int:D $row, Int:D $col) {
-#    return $mat.value-at($row, $col);
+#sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, @indexes) is export {
+#    note (:@indexes);
+#    return $mat.value-at(@indexes[0], @indexes[1]);
 #}
