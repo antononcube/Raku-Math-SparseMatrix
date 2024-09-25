@@ -22,9 +22,17 @@ isa-ok
 
 ## 2
 subtest {
-        isa-ok $matrix1.Array, Array;
-        is $matrix1.Array.all ~~ Array, True;
-        is min($matrix1.Array>>.elems), max($matrix1.Array>>.elems);
-}
+    isa-ok $matrix1.Array, Array;
+    is $matrix1.Array.all ~~ Array, True;
+    is min($matrix1.Array>>.elems), max($matrix1.Array>>.elems);
+}, "All arrays of same length";
+
+## 3
+subtest {
+    my @arr = $matrix1.Array;
+    my @v1 = ((^@arr.elems) X (^@arr.head.elems)).map({ @arr[$_.head][$_.tail] });
+    my @v2 = ((^@arr.elems) X (^@arr.head.elems)).map({ $matrix1.value-at(|$_) });
+    is-deeply @v1, @v2;
+}, "All elements are the same";
 
 done-testing;
