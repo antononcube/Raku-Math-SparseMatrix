@@ -61,7 +61,6 @@ is-deeply
 ## 9
 ok $matrix1[2];
 
-#`[
 ## 10
 is-deeply $matrix1[2], $matrix1.row-at(2);
 
@@ -70,6 +69,6 @@ $matrix1.print;
 say '-' x 120;
 $matrix1[2, 3, 1].print;
 ok $matrix1[2, 3, 1];
-]
+
 
 done-testing;

@@ -1,4 +1,4 @@
-class Math::SparseMatrix::CSR does Positional {
+class Math::SparseMatrix::CSR {
     has @.values;
     has @.col-index;
     has @.row-ptr;
@@ -123,14 +123,6 @@ class Math::SparseMatrix::CSR does Positional {
         # Not effective, but very quick to implement.
         return self.transpose.row-at($col).transpose;
     }
-
-    multi method AT-POS(::?CLASS:D: $index) {
-        return self.row-at($index);
-    }
-
-#    multi method AT-POS(::?CLASS:D: **@indexes) {
-#        return self.row-at(1);
-#    }
 
     #=================================================================
     # Rules
