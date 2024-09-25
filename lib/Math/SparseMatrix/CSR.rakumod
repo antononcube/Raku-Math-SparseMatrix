@@ -119,6 +119,18 @@ class Math::SparseMatrix::CSR {
                 );
     }
 
+    method row-slice(*@indexes) {
+        die 'The indexes are expected to be non-negative integers.'
+        unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
+
+        my @mats = @indexes.map({ self.row-at($_) });
+        my $res = @mats.head;
+        for @mats.tail(*-1) -> $m {
+            $res = $res.row-bind($m)
+        }
+        return $res;
+    }
+
     method column-at(Int:D $col --> Math::SparseMatrix::CSR) {
         # Not effective, but very quick to implement.
         return self.transpose.row-at($col).transpose;
@@ -130,17 +142,6 @@ class Math::SparseMatrix::CSR {
         }
         die "Only one index is expected.";
     }
-    #    method postcircumfix:<[ ]>(::?CLASS:D: **@indexes) {
-    #        die 'The indexes are expected to be non-negative integers.'
-    #        unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
-    #
-    #        my @mats = @indexes.map({ self.row-at($_) });
-    #        my $res = @mats.head;
-    #        for @mats.tail(*-1) -> $m {
-    #            $res = $res.row-bind($m)
-    #        }
-    #        return $res;
-    #    }
 
     #=================================================================
     # Rules

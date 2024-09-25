@@ -26,19 +26,29 @@ multi sub generate-random-sparse-matrix(
 
 #=====================================================================
 #proto sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {*}
-#sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {
-#    die 'The indexes are expected to be non-negative integers.'
-#    unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
-#
-#    my @mats = @indexes.map({ $mat.row-at($_) });
-#    my $res = @mats.head;
-#    for @mats.tail(*-1) -> $m {
-#        $res = $res.row-bind($m)
-#    }
-#    return $res;
-#}
+multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {
+    return $mat.row-slice(@indexes);
+}
 
-#sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, @indexes) is export {
-#    note (:@indexes);
-#    return $mat.value-at(@indexes[0], @indexes[1]);
-#}
+multi sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, @indexes) is export {
+    return do given (@indexes[0], @indexes[1]) {
+        when $_.head ~~ Int && $_.tail ~~ Int {
+            $mat.value-at(@indexes[0], @indexes[1]);
+        }
+        when $_.head ~~ Range && $_.tail ~~ Int {
+            $mat.row-slice($_.head).column-at($_.tail)
+        }
+        when $_.head.isa(Whatever) && $_.tail ~~ Int {
+            $mat.column-at($_.tail)
+        }
+        when $_.head.isa(Whatever) && $_.tail ~~ Range {
+            $mat.transpose.row-slice($_.tail).transpose
+        }
+        when $_.head ~~ Range && $_.tail ~~ Range {
+            $mat.row-slice($_.head).transpose.row-slice($_.tail).transpose
+        }
+        default {
+            die "Cannot process the given range"
+        }
+    }
+}
