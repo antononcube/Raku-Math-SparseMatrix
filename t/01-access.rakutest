@@ -12,11 +12,19 @@ my $tol = 0.01;
 
 my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
 
+plan *;
+
 ## 1
-isa-ok $matrix1, Math::SparseMatrix::CSR;
+isa-ok
+        $matrix1,
+        Math::SparseMatrix::CSR,
+        "Expected type after creation";
 
 ## 2
-is $matrix1.elems, $nrow * $ncol;
+is
+        $matrix1.elems,
+        $nrow,
+        "Expected number of elements";
 
 ## 3
 isa-ok $matrix1.value-at(2, 6), Numeric:D;
@@ -27,5 +35,41 @@ is
         ([&&] |@rules4.map({ $matrix1.value-at(|$_.key) == $_.value })),
         True,
         'Same values from .rules and .value-at';
+
+## 5
+my $rowInd5 = 3;
+isa-ok $matrix1.row-at($rowInd5), Math::SparseMatrix::CSR;
+
+## 6
+my @rules6 = $matrix1.rules.grep({ $_.key.head == $rowInd5 }).map({ (0, $_.key.tail) => $_.value });
+is-deeply
+        $matrix1.row-at($rowInd5).rules.Hash,
+        @rules6.Hash,
+        'Same values from .rules and .row-at';
+
+## 7
+my $colInd7 = 3;
+isa-ok $matrix1.column-at($colInd7), Math::SparseMatrix::CSR;
+
+## 8
+my $matrix8 = $matrix1.column-at($colInd7);
+is-deeply
+        (^$nrow).map({ $matrix8.value-at($_, 0) }).List,
+        (^$nrow).map({ $matrix1.value-at($_, $colInd7) }).List,
+        'Same value-at values for .column-at';
+
+## 9
+ok $matrix1[2];
+
+#`[
+## 10
+is-deeply $matrix1[2], $matrix1.row-at(2);
+
+## 11
+$matrix1.print;
+say '-' x 120;
+$matrix1[2, 3, 1].print;
+ok $matrix1[2, 3, 1];
+]
 
 done-testing;
