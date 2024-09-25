@@ -124,6 +124,24 @@ class Math::SparseMatrix::CSR {
         return self.transpose.row-at($col).transpose;
     }
 
+    method AT-POS(*@index) {
+        if @index.elems == 1 {
+            return self.row-at(@index.head);
+        }
+        die "Only one index is expected.";
+    }
+    #    method postcircumfix:<[ ]>(::?CLASS:D: **@indexes) {
+    #        die 'The indexes are expected to be non-negative integers.'
+    #        unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
+    #
+    #        my @mats = @indexes.map({ self.row-at($_) });
+    #        my $res = @mats.head;
+    #        for @mats.tail(*-1) -> $m {
+    #            $res = $res.row-bind($m)
+    #        }
+    #        return $res;
+    #    }
+
     #=================================================================
     # Rules
     #=================================================================
@@ -132,12 +150,52 @@ class Math::SparseMatrix::CSR {
         for @.row-ptr.kv -> $i, $ptr {
             my $next_ptr = $i == @.row-ptr.end ?? @.values.elems !! @.row-ptr[$i + 1];
             for $ptr ..^ $next_ptr -> $j {
-                if @.values[$j] != 0 {
-                    @rules.push(Pair.new(($i, @.col-index[$j]), @.values[$j]))
-                }
+                # We show all explicit values
+                # i.e. using this check is wrong: if @.values[$j] != $!implicit-value { ...
+                @rules.push(Pair.new(($i, @.col-index[$j]), @.values[$j]))
             }
         }
         return @rules;
+    }
+
+    #=================================================================
+    # Info
+    #=================================================================
+    method adjacency-lists() {
+        my @adj-lists;
+        for @.row-ptr.kv -> $i, $ptr {
+            my $next_ptr = $i == @.row-ptr.end ?? @.values.elems !! @.row-ptr[$i + 1];
+            my @list;
+            for $ptr ..^ $next_ptr -> $j {
+                @list.push(@.col-index[$j])
+            }
+            @adj-lists.push(@list)
+        }
+        return @adj-lists;
+    }
+
+    method column-indices() {
+        return @!col-index.clone;
+    }
+
+    method density() {
+        return @!values.elems / ($!nrow * $!ncol);
+    }
+
+    method explicit-length() {
+        return @!values.elems;
+    }
+
+    method explicit-positions() {
+        return self.rules.keys;
+    }
+
+    method explicit-values() {
+        return @!values.clone;
+    }
+
+    method row-pointers() {
+        return @!row-ptr.clone;
     }
 
     #=================================================================
@@ -152,7 +210,7 @@ class Math::SparseMatrix::CSR {
 
         my @values = @!values.clone.append($other.values);
         my @col-index = @!col-index.clone.append($other.col-index);
-        my @row-ptr = @!row-ptr.clone.Array.append($other.row-ptr.tail(*-1).map({ $_ + @!row-ptr[*-1] }));
+        my @row-ptr = @!row-ptr.clone.Array.append($other.row-ptr.tail(*- 1).map({ $_ + @!row-ptr[*- 1] }));
 
         return Math::SparseMatrix::CSR.new(
                 :@values,
@@ -219,7 +277,7 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Transpose
     #=================================================================
-    method transpose-first(--> Math::SparseMatrix::CSR) {
+    method transpose-by-rules(--> Math::SparseMatrix::CSR) {
         my @rules = |self.rules;
         return Math::SparseMatrix::CSR.new(
                 rules => @rules.map({ $_.key.reverse => $_.value }),
@@ -283,6 +341,7 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Matrix-vector multiplication
     #=================================================================
+    #| Dot product of a sparse matrix with dense vector
     multi method dot(@vector --> Array:D) {
         my @result = 0 xx @!row-ptr.elems - 1;
         for @!row-ptr.kv -> $i, $row-start {
@@ -396,6 +455,7 @@ class Math::SparseMatrix::CSR {
                 );
     }
 
+    #| Dot product of two sparse matrices
     multi method dot(Math::SparseMatrix::CSR:D $B --> Math::SparseMatrix::CSR:D) {
         die 'The number of rows of the argument is expected to be equal to the number of columns of the object.'
         unless $!ncol == $B.nrow;
@@ -583,5 +643,34 @@ class Math::SparseMatrix::CSR {
         for @rows -> @row {
             say @row.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
         }
+    }
+
+    #=================================================================
+    # Representation
+    #=================================================================
+    #| To Hash
+    multi method Hash(::?CLASS:D:-->Hash) {
+        return
+                {
+                    specified-elements => self.explicit-length,
+                    dimensions => ($!nrow, $!ncol),
+                    default => $!implicit-value,
+                    density => self.density,
+                    elements => self.rules,
+                    #                    column-indices => self.column-indices,
+                    #                    row-pointers => self.row-pointers,
+                    #                    explicit-values => self.explicit-values,
+                };
+    }
+
+    #| To string
+    multi method Str(::?CLASS:D:-->Str) {
+        return self.gist;
+    }
+
+    #| To gist
+    multi method gist(::?CLASS:D:-->Str) {
+        return 'Math::SparseMatrix::CSR' ~ (specified-elements => self.explicit-length, dimensions => ($!nrow, $!ncol),
+                                            density => self.density).List.raku;
     }
 }
