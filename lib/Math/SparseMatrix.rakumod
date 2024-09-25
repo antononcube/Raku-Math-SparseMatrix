@@ -2,6 +2,7 @@ unit module Math::SparseMatrix;
 
 use Math::SparseMatrix::CSR;
 
+#=====================================================================
 proto sub generate-random-sparse-matrix(|) is export {*}
 
 multi sub generate-random-sparse-matrix(
@@ -23,9 +24,8 @@ multi sub generate-random-sparse-matrix(
     return Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol);
 }
 
-proto sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, |) is export {*}
-
-multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {
+#=====================================================================
+multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) {
     die 'The indexes are expected to be non-negative integers.'
     unless (@indexes.all ~~ Int:D) && min(@indexes) ≥ 0;
 
@@ -36,3 +36,12 @@ multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is expo
     }
     return $res;
 }
+
+#multi sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) {
+#    note (:@indexes);
+#    return $mat.value-at(|@indexes);
+#}
+
+#multi sub postcircumfix:<[;]>(Math::SparseMatrix::CSR:D $mat, Int:D $row, Int:D $col) {
+#    return $mat.value-at($row, $col);
+#}
