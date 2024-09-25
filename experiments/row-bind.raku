@@ -8,7 +8,7 @@ use Math::SparseMatrix::CSR;
 
 my $nrow = 5;
 my $ncol = 8;
-my $density = 0.2;
+my $density = 0.25;
 my $tol = 0.01;
 
 say "-" x 100;
@@ -22,25 +22,18 @@ say "-" x 100;
 
 say "-" x 100;
 say "Matrix 2:";
-my $matrix2 = generate-random-sparse-matrix($ncol, $nrow, :$density, :$tol);
+my $matrix2 = generate-random-sparse-matrix($nrow, $ncol+2, :$density, :$tol);
 #say "Non-zero values 2: ", $matrix2.values;
 say "Non-zero values 2: ", $matrix2.values.elems;
 $matrix2.print;
 say "-" x 100;
 
 
-my $pattern = $matrix1.dot-pattern($matrix2);
-
-say "-" x 100;
-say "Pattern :";
-$pattern.print();
-
-my $result = $matrix1.dot($matrix2);
+#my $result = $matrix1.row-bind($matrix2);
+my $result = $matrix1.column-bind($matrix2);
 say "-" x 100;
 say "Result :";
 $result.print();
 
-my $result2 = $matrix1.dot-numeric($matrix2);
-say "-" x 100;
-say "Result2 :";
-$result2.print();
+say "=" x 100;
+note $matrix1.transpose.verify():pairs;
