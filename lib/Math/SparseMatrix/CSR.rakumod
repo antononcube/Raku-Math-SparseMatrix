@@ -74,15 +74,54 @@ class Math::SparseMatrix::CSR does Positional {
     }
 
     #=================================================================
+    # Verify
+    #=================================================================
+    method verify(Bool:D :$pairs = False) {
+        my %res =
+                row-ptr-elems => @!row-ptr.elems == $!nrow + 1,
+                row-ptr-head => @!row-ptr.head == 0,
+                row-ptr-tail => @!row-ptr.tail == @!values.elems,
+                values-elems => @!values.elems == @!col-index.elems;
+        return $pairs ?? %res !! [&&] %res.values;
+    }
+
+    #=================================================================
     # Access
     #=================================================================
-    method elems(::?CLASS:D:) { $!nrow * $!ncol }
+    method elems(::?CLASS:D:) {
+        $!nrow * $!ncol
+    }
 
     method value-at(Int:D $row, Int:D $col) {
         for @!row-ptr[$row] ..^ @!row-ptr[$row + 1] -> $ip {
             return @!values[$ip] if @!col-index[$ip] == $col;
         }
         return $!implicit-value;
+    }
+
+    method row-at(Int:D $row --> Math::SparseMatrix::CSR) {
+        my @values;
+        my @row-ptr;
+        my @col-index;
+
+        for @!row-ptr[$row] ..^ @!row-ptr[$row + 1] -> $ip {
+            @values[$ip - @!row-ptr[$row]] = @!values[$ip];
+            @col-index[$ip - @!row-ptr[$row]] = @!col-index[$ip];
+        }
+        @row-ptr = [0, @values.elems];
+        return Math::SparseMatrix::CSR.new(
+                :@values,
+                :@col-index,
+                :@row-ptr,
+                nrow => 1,
+                :$!ncol,
+                :$!implicit-value
+                );
+    }
+
+    method column-at(Int:D $col --> Math::SparseMatrix::CSR) {
+        # Not effective, but very quick to implement.
+        return self.transpose.row-at($col).transpose;
     }
 
     #=================================================================
@@ -99,6 +138,41 @@ class Math::SparseMatrix::CSR does Positional {
             }
         }
         return @rules;
+    }
+
+    #=================================================================
+    # Row-bind
+    #=================================================================
+    method row-bind(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
+        die 'The number of columns of the argument is expected to be equal to the number of columns of the object.'
+        unless $!ncol == $other.ncol;
+
+        die 'The the implicit value of the argument is expected to be same as the explicit value of the object.'
+        unless $!implicit-value == $other.implicit-value;
+
+        my @values = @!values.clone.append($other.values);
+        my @col-index = @!col-index.clone.append($other.col-index);
+        my @row-ptr = @!row-ptr.clone.Array.append($other.row-ptr.tail(*-1).map({ $_ + @!row-ptr[*-1] }));
+
+        return Math::SparseMatrix::CSR.new(
+                :@values,
+                :@col-index,
+                :@row-ptr,
+                nrow => $!nrow + $other.nrow,
+                :$!ncol,
+                :$!implicit-value
+                );
+    }
+
+    #=================================================================
+    # Column-bind
+    #=================================================================
+    method column-bind(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
+        die 'The number of rows of the argument is expected to be equal to the number of rows of the object.'
+        unless $!nrow == $other.nrow;
+
+        # Not very effective, but quick to implement
+        return self.transpose.row-bind($other.transpose).transpose;
     }
 
     #=================================================================
@@ -122,13 +196,14 @@ class Math::SparseMatrix::CSR does Positional {
                 :col-index(@col-index-slice),
                 :row-ptr(@row-ptr-slice),
                 :nrow($end),
-                :ncol($.ncol)
+                :ncol($.ncol),
+                :$!implicit-value
                 );
     }
 
-    method postcircumfix:<[ ]>(Range $range) {
-        my $start = $range.min;
-        my $end = min($range.max + 1, $.nrow);
+    method postcircumfix:<[ ]>(**@index) {
+        my $start = @index.min;
+        my $end = min(@index.max + 1, $.nrow);
         my @values-slice;
         my @col-index-slice;
         my @row-ptr-slice = @.row-ptr[$start .. $end];
@@ -147,7 +222,8 @@ class Math::SparseMatrix::CSR does Positional {
                 :col-index(@col-index-slice),
                 :row-ptr(@row-ptr-slice),
                 :nrow($end - $start),
-                :ncol($.ncol)
+                :ncol($.ncol),
+                :$!implicit-value
                 );
     }
 
@@ -175,11 +251,11 @@ class Math::SparseMatrix::CSR does Positional {
             @IAT[$i] = 0;
         }
 
-        my $IAB = @!row-ptr[$NH - 1] - 1;
+        my $IAB = @!row-ptr[$NH - 1];
 
-        for 0 .. $IAB -> $i {
+        for ^$IAB -> $i {
             my $J = @!col-index[$i] + 2;
-            if $J <= $MH {
+            if $J < $MH {
                 @IAT[$J] += 1;
             }
         }
@@ -195,11 +271,9 @@ class Math::SparseMatrix::CSR does Positional {
 
         for ^$!nrow -> $i {
             my $IAA = @!row-ptr[$i];
-            my $IAB = @!row-ptr[$i + 1] - 1;
-            if $IAB < $IAA {
-                next;
-            }
-            for $IAA .. $IAB -> $jp {
+            my $IAB = @!row-ptr[$i + 1];
+            next if $IAB < $IAA;
+            for $IAA ..^ $IAB -> $jp {
                 my $J = @!col-index[$jp] + 1;
                 my $K = @IAT[$J];
                 @JAT[$K] = $i;
