@@ -144,7 +144,7 @@ class Math::SparseMatrix::CSR {
     }
 
     #=================================================================
-    # Rules
+    # Rules and tuples
     #=================================================================
     method rules() {
         my @rules;
@@ -157,6 +157,10 @@ class Math::SparseMatrix::CSR {
             }
         }
         return @rules;
+    }
+
+    method tuples() {
+        return self.rules.map({ [|$_.key, $_.value].List }).Array;
     }
 
     #=================================================================
