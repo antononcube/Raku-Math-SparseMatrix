@@ -327,11 +327,63 @@ class Math::SparseMatrix::CSR {
                 );
     }
 
+    method dot-numeric(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
+        die 'The number of rows of the argument is expected to be equal to the number of columns of the object.'
+        unless $!ncol == $other.nrow;
+
+        my $pattern = self.dot-pattern($other);
+        my @IC = $pattern.row-ptr;
+        my @JC = $pattern.col-index;
+        #my @CN = self.values;
+        my @IB = $other.row-ptr;
+        my @JB = $other.col-index;
+        my @BN = $other.values;
+        my @X = 0 xx $other.ncol;
+        my @result-values;
+
+        for ^$.nrow -> $i {
+            my $ICA = @IC[$i];
+            my $ICB = @IC[$i + 1];
+
+            next if $ICB ≤ $ICA;
+
+            for $ICA ..^ $ICB -> $j {
+                @X[@JC[$j]] = 0;
+            }
+
+            my $IAA = self.row-ptr[$i];
+            my $IAB = self.row-ptr[$i + 1];
+            for $IAA ..^ $IAB -> $jp {
+                my $j = self.col-index[$jp];
+                my $a = self.values[$jp];
+                my $IBA = @IB[$j];
+                my $IBB = @IB[$j + 1];
+
+                next if $IBB ≤ $IBA;
+
+                for $IBA ..^ $IBB -> $kp {
+                    my $k = @JB[$kp];
+                    @X[$k] += $a * @BN[$kp];
+                }
+            }
+
+            for $ICA ..^ $ICB -> $j {
+                @result-values.push: @X[@JC[$j]];
+            }
+        }
+
+        Math::SparseMatrix::CSR.new(
+                :values(@result-values),
+                :col-index(@JC),
+                :row-ptr(@IC),
+                :nrow($.nrow),
+                :ncol($other.ncol)
+                );
+    }
+
     multi method dot(Math::SparseMatrix::CSR:D $B --> Math::SparseMatrix::CSR:D) {
         die 'The number of rows of the argument is expected to be equal to the number of columns of the object.'
         unless $!ncol == $B.nrow;
-
-        # my $pattern = self.dot-pattern($B);
 
         my @values;
         my @col-index;
