@@ -22,3 +22,15 @@ multi sub generate-random-sparse-matrix(
     my @rules = ((^$nrow) X (^$ncol)).pick($n) Z=> (round(rand, $tol) xx $n);
     return Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol);
 }
+
+#multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, **@indexes) {
+#    die 'The indexes are expected to be non-negative integers.'
+#    unless @indexes.all ~~ Int:D && min(@indexes) ≥ 0;
+#
+#    my @mats = @indexes.map({ $mat.row-at($_) });
+#    my $res = @mats.head;
+#    for @mats.tail(*-1) -> $m {
+#        $res = $res.row-bind($m)
+#    }
+#    return $res;
+#}

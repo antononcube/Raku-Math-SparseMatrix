@@ -89,7 +89,7 @@ class Math::SparseMatrix::CSR does Positional {
     # Access
     #=================================================================
     method elems(::?CLASS:D:) {
-        $!nrow * $!ncol
+        return $!nrow;
     }
 
     method value-at(Int:D $row, Int:D $col) {
@@ -123,6 +123,14 @@ class Math::SparseMatrix::CSR does Positional {
         # Not effective, but very quick to implement.
         return self.transpose.row-at($col).transpose;
     }
+
+    multi method AT-POS(::?CLASS:D: $index) {
+        return self.row-at($index);
+    }
+
+#    multi method AT-POS(::?CLASS:D: **@indexes) {
+#        return self.row-at(1);
+#    }
 
     #=================================================================
     # Rules
@@ -196,32 +204,6 @@ class Math::SparseMatrix::CSR does Positional {
                 :col-index(@col-index-slice),
                 :row-ptr(@row-ptr-slice),
                 :nrow($end),
-                :ncol($.ncol),
-                :$!implicit-value
-                );
-    }
-
-    method postcircumfix:<[ ]>(**@index) {
-        my $start = @index.min;
-        my $end = min(@index.max + 1, $.nrow);
-        my @values-slice;
-        my @col-index-slice;
-        my @row-ptr-slice = @.row-ptr[$start .. $end];
-
-        for $start ..^ $end -> $i {
-            my $start-idx = @.row-ptr[$i];
-            my $stop-idx = @.row-ptr[$i + 1];
-            @values-slice.append(@.values[$start-idx ..^ $stop-idx]);
-            @col-index-slice.append(@.col-index[$start-idx ..^ $stop-idx]);
-        }
-
-        @row-ptr-slice .= map(*- @.row-ptr[$start]);
-
-        return Math::SparseMatrix::CSR.new(
-                :values(@values-slice),
-                :col-index(@col-index-slice),
-                :row-ptr(@row-ptr-slice),
-                :nrow($end - $start),
                 :ncol($.ncol),
                 :$!implicit-value
                 );
