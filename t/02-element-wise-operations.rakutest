@@ -1,8 +1,8 @@
 use v6.d;
 
 use lib <. lib>;
-use Math::SparseMatrix;
 use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
 use Test;
 
 my $nrow = 5;

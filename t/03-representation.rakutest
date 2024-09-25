@@ -1,7 +1,7 @@
 use v6.d;
 
 use lib <. lib>;
-use Math::SparseMatrix;
+use Math::SparseMatrix::Utilities;
 use Math::SparseMatrix::CSR;
 use Test;
 
