@@ -1,9 +1,11 @@
 # Math::SparseMatrix
 
-Raku package for sparse matrix algorithms.
+Raku package for sparse matrix algorithms:
 
-Implements many of the algorithms described (and spelled-out in FORTRAN) in the book 
+- Implements (some of) the algorithms described (and spelled-out in FORTRAN) in the book 
 "Sparse Matrix Technology" by S. Pissanetzky, [SP1].
+
+- Provides convenient interface to accessing sparse matrix elements, rows, column, and sub-matrices. 
 
 -----
 
@@ -30,6 +32,25 @@ Here is a (non-exhaustive) list given in the order of _my_ preferences:
     - So far (2024-09-25) the algorithms in "Graph", [AAp2], do not use SMA and that is feature- and speed limiting.
 - Optimization
 - Partial Differential Equations (PDE) solving
+
+-----
+
+## Implementation notes
+
+- The most important operation is matrix-vector multiplication.
+    - It has to be as fast as possible.
+    - There are two Dot Product implementations:
+        - Direct
+        - Symbolic-&-numeric
+    - The direct one is 20-50% faster.
+- It seems it a good idea to provide for some operations a _symbolic_ (or sparse matrix elements pattern) method.
+    - For example:
+        - `add-pattern` / `add`
+        - `dot-pattern` / `dot-numeric`
+- It is important to have access methods / operators.
+    - All three are used in the accessor implementation: `AT-POS`, `postcircumfix:<[ ]>`, `postcircumfix:<[; ]>` .
+- The core sparse matrix classes do not have named rows, columns, and dimensions. 
+- That is done via suitable role. (Not implemented yest.) 
 
 -----
 
