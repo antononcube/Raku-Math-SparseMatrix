@@ -25,7 +25,7 @@ subtest {
     isa-ok $matrix1.Array, Array;
     is $matrix1.Array.all ~~ Array, True;
     is min($matrix1.Array>>.elems), max($matrix1.Array>>.elems);
-}, "All arrays of same length";
+}, "All arrays of .Array have the same length";
 
 ## 3
 subtest {
@@ -34,5 +34,21 @@ subtest {
     my @v2 = ((^@arr.elems) X (^@arr.head.elems)).map({ $matrix1.value-at(|$_) });
     is-deeply @v1, @v2;
 }, "All elements are the same";
+
+## 4
+subtest {
+    isa-ok $matrix1.Hash, Map:D;
+    my @expectedKeys = <specified-elements dimensions default density elements>;
+    is ($matrix1.Hash.keys (&) @expectedKeys).elems, @expectedKeys.elems;
+}, 'Hash representation';
+
+## 5
+say $matrix1;
+subtest {
+    ok $matrix1.gist;
+    isa-ok $matrix1.Str, Str:D;
+    is $matrix1.Str.starts-with('Math::SparseMatrix::CSR('), True;
+
+}, "Gist and Str";
 
 done-testing;
