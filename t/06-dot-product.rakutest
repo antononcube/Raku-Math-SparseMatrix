@@ -1,0 +1,37 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
+my $matrix2 = generate-random-sparse-matrix($ncol, $nrow, :$density, :$tol);
+
+## 1
+isa-ok $matrix1, Math::SparseMatrix::CSR:D;
+
+## 2
+isa-ok $matrix2, Math::SparseMatrix::CSR:D;
+
+## 3
+my @vec3 = rand xx $ncol;
+isa-ok $matrix1.dot(@vec3), Array:D;
+
+## 4
+my $res4 = $matrix1.dot(@vec3);
+isa-ok $res4.elems, $ncol;
+
+## 5
+isa-ok $matrix1.dot($matrix2), Math::SparseMatrix::CSR:D;
+
+## 6
+my $res6 = $matrix1.dot($matrix2);
+isa-ok $res6.dimensions, ($nrow, $ncol);
+
+done-testing;
