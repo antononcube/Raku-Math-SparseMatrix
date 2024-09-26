@@ -50,4 +50,14 @@ subtest {
 
 }, "Gist and Str";
 
+## 6
+subtest {
+    ok $matrix1.tuples;
+    isa-ok $matrix1.tuples, Array;
+    is $matrix1.tuples.all ~~ List:D, True;
+    is min($matrix1.tuples>>.elems) == max($matrix1.tuples>>.elems) == 3, True;
+    is $matrix1.tuples(:dataset).all ~~ Map:D, True;
+}, "To tuples";
+
+
 done-testing;
