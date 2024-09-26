@@ -221,6 +221,10 @@ class Math::SparseMatrix::CSR {
         return @!values.elems / ($!nrow * $!ncol);
     }
 
+    method dimensions() {
+        return ($!nrow, $!ncol);
+    }
+
     method explicit-length() {
         return @!values.elems;
     }
@@ -603,6 +607,7 @@ class Math::SparseMatrix::CSR {
         my $pattern = self.add-pattern($other);
 
         my @CN = 0 xx $pattern.values.elems;
+        # !! This should be filled-in with the implicit value
         my @X = 0 xx $pattern.ncol;
 
         for ^$!nrow -> $i {
@@ -679,6 +684,14 @@ class Math::SparseMatrix::CSR {
         die 'The dimensions of the argument must match the dimensions of the object.'
         unless $!nrow == $other.nrow && $!ncol == $other.ncol;
 
+        if $!implicit-value == 0 || $other.implicit-value == 0 {
+            return self!multiply0($other)
+        } else {
+            return self!multiply-iv($other)
+        }
+    }
+
+    method !multiply0(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
         my @result-values;
         my @result-col-index;
         my @result-row-ptr = 0;
@@ -707,8 +720,15 @@ class Math::SparseMatrix::CSR {
                 col-index => @result-col-index,
                 row-ptr   => @result-row-ptr,
                 :$!nrow,
-                :$!ncol
+                :$!ncol,
+                implicit-value => 0 # This method assumes $!implicit-value * $other.implicit-value == 0
                 );
+    }
+
+    method !multiply-iv(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
+        # Essentially we get the addition pattern and we fill it in using multiplication
+        # taking into account the implicit value.
+        die "Multiplication with implicit values different from 0 is not implemented yet."
     }
 
     #=================================================================
