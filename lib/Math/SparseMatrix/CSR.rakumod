@@ -157,6 +157,14 @@ class Math::SparseMatrix::CSR {
         die "Only one index is expected.";
     }
 
+    method !row-map(UInt $i) returns Hash {
+        my %row;
+        for @!row-ptr[$i] ..^ @!row-ptr[$i + 1] -> $j {
+            %row{@!col-index[$j]} = @!values[$j];
+        }
+        return %row;
+    }
+
     #=================================================================
     # Rules and tuples
     #=================================================================
@@ -305,10 +313,13 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Dense array
     #=================================================================
-    method Array() {
+    #| (Dense) array of arrays representation.
+    #| C<:$implicit-value> -- Implicit value to use.
+    method Array(:i(:iv(:$implicit-value)) is copy = Whatever) {
+        if $implicit-value.isa(Whatever) { $implicit-value = $!implicit-value }
         my @result;
         for ^$!nrow -> $i {
-            my @row = (0 xx $!ncol);
+            my @row = ($implicit-value xx $!ncol);
             for @!row-ptr[$i] ..^ @!row-ptr[$i + 1] -> $j {
                 @row[@!col-index[$j]] = @!values[$j];
             }
@@ -604,10 +615,20 @@ class Math::SparseMatrix::CSR {
 
     #| Numeric addition of two matrices
     multi method add(Math::SparseMatrix::CSR $other --> Math::SparseMatrix::CSR:D) {
+        die 'The dimensions of the argument must match the dimensions of the object.'
+        unless $!nrow == $other.nrow && $!ncol == $other.ncol;
+        if $!implicit-value == 0 && $other.implicit-value == 0 {
+            return self!add0($other);
+        } else {
+            return self!add-iv($other);
+        }
+    }
+
+    method !add0(Math::SparseMatrix::CSR $other --> Math::SparseMatrix::CSR:D) {
         my $pattern = self.add-pattern($other);
 
         my @CN = 0 xx $pattern.values.elems;
-        # !! This should be filled-in with the implicit value
+        # Should be filled-in with the implicit value?
         my @X = 0 xx $pattern.ncol;
 
         for ^$!nrow -> $i {
@@ -655,6 +676,46 @@ class Math::SparseMatrix::CSR {
                 );
     }
 
+    method !add-iv(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
+        my @result-values;
+        my @result-col-index;
+        my @result-row-ptr = 0;
+
+        for ^$!nrow -> $i {
+            my %row-a = self!row-map($i);
+            my %row-b = $other!row-map($i);
+            my @all-columns = [|%row-a.keys, |%row-b.keys].unique;
+            my %row-result;
+
+            # This can be optimized, without using so many lookups.
+            for @all-columns -> $col {
+                if (%row-a{$col}:exists) && (%row-b{$col}:exists) {
+                    %row-result{$col} = %row-a{$col} + %row-b{$col};
+                } elsif %row-b{$col}:exists {
+                    %row-result{$col} = $!implicit-value + %row-b{$col};
+                } elsif %row-a{$col}:exists {
+                    %row-result{$col} = %row-a{$col} + $other.implicit-value;
+                }
+            }
+
+            for %row-result.kv -> $col, $val {
+                @result-values.push: $val;
+                @result-col-index.push: $col;
+            }
+
+            @result-row-ptr.push: @result-values.elems;
+        }
+
+        return Math::SparseMatrix::CSR.new(
+                values    => @result-values,
+                col-index => @result-col-index,
+                row-ptr   => @result-row-ptr,
+                :$!nrow,
+                :$!ncol,
+                implicit-value => $!implicit-value + $other.implicit-value
+                );
+    }
+
     #=================================================================
     # Multiply
     #=================================================================
@@ -669,14 +730,6 @@ class Math::SparseMatrix::CSR {
                 :$!ncol,
                 implicit-value => $!implicit-value * $a
                 );
-    }
-
-    method !row-map(UInt $i) returns Hash {
-        my %row;
-        for @!row-ptr[$i] ..^ @!row-ptr[$i + 1] -> $j {
-            %row{@!col-index[$j]} = @!values[$j];
-        }
-        return %row;
     }
 
     #| Matrix-matrix element-wise multiplication
@@ -726,9 +779,43 @@ class Math::SparseMatrix::CSR {
     }
 
     method !multiply-iv(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
-        # Essentially we get the addition pattern and we fill it in using multiplication
-        # taking into account the implicit value.
-        die "Multiplication with implicit values different from 0 is not implemented yet."
+        my @result-values;
+        my @result-col-index;
+        my @result-row-ptr = 0;
+
+        for ^$!nrow -> $i {
+            my %row-a = self!row-map($i);
+            my %row-b = $other!row-map($i);
+            my @all-columns = [|%row-a.keys, |%row-b.keys].unique;
+            my %row-result;
+
+            # This can be optimized, without using so many lookups.
+            for @all-columns -> $col {
+                if (%row-a{$col}:exists) && (%row-b{$col}:exists) {
+                    %row-result{$col} = %row-a{$col} * %row-b{$col};
+                } elsif %row-b{$col}:exists {
+                    %row-result{$col} = $!implicit-value * %row-b{$col};
+                } elsif %row-a{$col}:exists {
+                    %row-result{$col} = %row-a{$col} * $other.implicit-value;
+                }
+            }
+
+            for %row-result.kv -> $col, $val {
+                @result-values.push: $val;
+                @result-col-index.push: $col;
+            }
+
+            @result-row-ptr.push: @result-values.elems;
+        }
+
+        return Math::SparseMatrix::CSR.new(
+                values    => @result-values,
+                col-index => @result-col-index,
+                row-ptr   => @result-row-ptr,
+                :$!nrow,
+                :$!ncol,
+                implicit-value => $!implicit-value * $other.implicit-value
+                );
     }
 
     #=================================================================
