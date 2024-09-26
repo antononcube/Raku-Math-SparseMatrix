@@ -74,6 +74,20 @@ class Math::SparseMatrix::CSR {
     }
 
     #=================================================================
+    # Clone
+    #=================================================================
+    method clone() {
+        return Math::SparseMatrix::CSR.new(
+                values => @!values.clone,
+                col-index => @!col-index.clone,
+                row-ptr => @!row-ptr.clone,
+                :$!nrow,
+                :$!ncol,
+                :$!implicit-value
+                );
+    }
+
+    #=================================================================
     # Verify
     #=================================================================
     method verify(Bool:D :$pairs = False) {
@@ -146,6 +160,7 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Rules and tuples
     #=================================================================
+    #| Rules in the for C<(row, column) => value>.
     method rules() {
         my @rules;
         for @.row-ptr.kv -> $i, $ptr {
@@ -159,8 +174,13 @@ class Math::SparseMatrix::CSR {
         return @rules;
     }
 
-    method tuples() {
-        return self.rules.map({ [|$_.key, $_.value].List }).Array;
+    #| Tuples (or triplets)
+    method tuples(Bool:D :d(:$dataset) = False) {
+        my @res = self.rules.map({ [|$_.key, $_.value].List }).Array;
+        if $dataset {
+            @res = @res.map({ <i j x>.Array Z=> $_.Array })>>.Hash.Array
+        }
+        return @res;
     }
 
     #=================================================================
