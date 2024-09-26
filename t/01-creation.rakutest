@@ -1,0 +1,35 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+plan *;
+
+## 1
+ok generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+
+## 2
+subtest {
+        my @rules = (1, 1) => 1, (0, 1) => 3, (3, 4) => -1;
+        ok Math::SparseMatrix::CSR.new(:@rules);
+        my $matrix =  Math::SparseMatrix::CSR.new(:@rules);
+        is-deeply $matrix.dimensions, (4, 5);
+}, "Cretion from rules";
+
+## 3
+my $matrix3 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+isa-ok
+        $matrix3,
+        Math::SparseMatrix::CSR,
+        "Expected type after creation";
+
+
+done-testing;
