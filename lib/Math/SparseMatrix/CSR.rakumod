@@ -62,7 +62,7 @@ class Math::SparseMatrix::CSR {
 
         for @dense-matrix.kv -> $row, @cols {
             for @cols.kv -> $col, $val {
-                if $val != 0 {
+                if $val != $implicit-value && $row < $nrow && $col < $ncol {
                     @values.push: $val;
                     @col-index.push: $col;
                 }
@@ -70,6 +70,9 @@ class Math::SparseMatrix::CSR {
             @row-ptr.push: @values.elems;
         }
 
+        if $nrow > @dense-matrix.elems {
+            @row-ptr.append( @row-ptr.tail xx ($nrow - @dense-matrix.elems))
+        }
         self.bless(:@values, :@col-index, :@row-ptr, :$nrow, :$ncol, :$implicit-value);
     }
 
