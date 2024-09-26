@@ -59,5 +59,11 @@ subtest {
     is $matrix1.tuples(:dataset).all ~~ Map:D, True;
 }, "To tuples";
 
+## 7
+# I put this test here because .eqv() uses .rules().
+is
+        $matrix1.eqv($matrix1.transpose.transpose),
+        True,
+        "Same matrix after transposing twice";
 
 done-testing;

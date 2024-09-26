@@ -4,7 +4,7 @@ class Math::SparseMatrix::CSR {
     has @.row-ptr;
     has UInt:D $.nrow is required;
     has UInt:D $.ncol is required;
-    has Numeric:D $.implicit-value = 0;
+    has Numeric:D $.implicit-value is rw = 0;
 
     #=================================================================
     # Creators
@@ -181,6 +181,20 @@ class Math::SparseMatrix::CSR {
             @res = @res.map({ <i j x>.Array Z=> $_.Array })>>.Hash.Array
         }
         return @res;
+    }
+
+    #=================================================================
+    # Equivalence
+    #=================================================================
+    method eqv(Math::SparseMatrix::CSR:D $other --> Bool:D) {
+        if $!nrow != $other.nrow || $!ncol != $other.ncol ||
+                @!values.elems != $other.values.elems ||
+                $!implicit-value != $other.implicit-value {
+            return False;
+        }
+
+        # Ineffective, but quick to implement
+        return self.rules.Hash eqv $other.rules.Hash;
     }
 
     #=================================================================
