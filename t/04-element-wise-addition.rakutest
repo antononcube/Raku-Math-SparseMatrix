@@ -33,7 +33,7 @@ sub add-by-rules($matrix1, $matrix2) {
 isa-ok $matrix1, Math::SparseMatrix::CSR;
 
 ## 2
-isa-ok $matrix1, Math::SparseMatrix::CSR;
+isa-ok $matrix2, Math::SparseMatrix::CSR;
 
 ## 3
 isa-ok $matrix1.add(4.3), Math::SparseMatrix::CSR;
