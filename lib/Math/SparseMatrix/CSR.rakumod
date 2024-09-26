@@ -556,6 +556,9 @@ class Math::SparseMatrix::CSR {
 
     #| Symbolic addition of two matrices
     method add-pattern(Math::SparseMatrix::CSR $other) {
+        die 'The dimensions of the argument must match the dimensions of the object.'
+        unless $!nrow == $other.nrow && $!ncol == $other.ncol;
+
         my @IC = 0 xx ($!nrow + 1);
         my @JC;
         my @IX = 0 xx $!ncol;
@@ -648,9 +651,10 @@ class Math::SparseMatrix::CSR {
     }
 
     #=================================================================
-    # Mult
+    # Multiply
     #=================================================================
-    multi method mult(Numeric:D $a --> Math::SparseMatrix::CSR:D) {
+    #| Element-wise multiplication
+    multi method multiply(Numeric:D $a --> Math::SparseMatrix::CSR:D) {
         my @values = @!values >>*>> $a;
         return Math::SparseMatrix::CSR.bless(
                 :@values,
@@ -659,6 +663,51 @@ class Math::SparseMatrix::CSR {
                 :$!nrow,
                 :$!ncol,
                 implicit-value => $!implicit-value * $a
+                );
+    }
+
+    method !row-map(UInt $i) returns Hash {
+        my %row;
+        for @!row-ptr[$i] ..^ @!row-ptr[$i + 1] -> $j {
+            %row{@!col-index[$j]} = @!values[$j];
+        }
+        return %row;
+    }
+
+    #| Matrix-matrix element-wise multiplication
+    multi method multiply(Math::SparseMatrix::CSR:D $other --> Math::SparseMatrix::CSR:D) {
+        die 'The dimensions of the argument must match the dimensions of the object.'
+        unless $!nrow == $other.nrow && $!ncol == $other.ncol;
+
+        my @result-values;
+        my @result-col-index;
+        my @result-row-ptr = 0;
+
+        for ^$!nrow -> $i {
+            my %row-a = self!row-map($i);
+            my %row-b = $other!row-map($i);
+            my %row-result;
+
+            for %row-a.kv -> $col, $val-a {
+                if %row-b{$col}:exists {
+                    %row-result{$col} = $val-a * %row-b{$col};
+                }
+            }
+
+            for %row-result.kv -> $col, $val {
+                @result-values.push: $val;
+                @result-col-index.push: $col;
+            }
+
+            @result-row-ptr.push: @result-values.elems;
+        }
+
+        return Math::SparseMatrix::CSR.new(
+                values    => @result-values,
+                col-index => @result-col-index,
+                row-ptr   => @result-row-ptr,
+                :$!nrow,
+                :$!ncol
                 );
     }
 
