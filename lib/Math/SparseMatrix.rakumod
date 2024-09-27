@@ -6,11 +6,22 @@ use Math::SparseMatrix::CSR;
 # Math::SparseMatrix
 #=====================================================================
 my class Math::SparseMatrix {
-    has Math::SparseMatrix::CSR:D $.sparse-matrix is required;
+    has Math::SparseMatrix::CSR:D $.sparse-matrix is required is rw;
     has %.row-names is rw = %();
     has %.column-names is rw = %();
     has %.dim-names is rw = %();
 
+    #=================================================================
+    # Clone
+    #=================================================================
+    method clone() {
+        return Math::SparseMatrix.new(
+                sparse-matrix => $!sparse-matrix.clone,
+                row-names => %!row-names.clone,
+                column-names => %!column-names.clone,
+                dim-names => %!dim-names.clone,
+                );
+    }
     #=================================================================
     # Access
     #=================================================================
@@ -81,6 +92,47 @@ my class Math::SparseMatrix {
         return Math::SparseMatrix.new(sparse-matrix => $smat, row-names => %!column-names, column-names => %!row-names);
     }
 
+    #=================================================================
+    # Add
+    #=================================================================
+    #| Element-wise addition with another Math:SparseMatrix object,
+    #| a Math::SparseMatrix::CSR object, or a scalar.
+    method add($other, Bool:D $clone = True -->Math::SparseMatrix:D) {
+        my $obj = $clone ?? self.clone !! self;
+        if ($other ~~ Math::SparseMatrix:D)
+                && %!row-names eqv $other.row-names
+                && %!column-names eqv $other.column-names {
+            $obj.sparse-matrix = $obj.sparse-matrix.add($other.sparse-matrix);
+        }
+        elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
+            $obj.sparse-matrix = $obj.sparse-matrix.add($other);
+        }
+        else {
+            die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
+        }
+        return $obj;
+    }
+
+    #=================================================================
+    # Multiply
+    #=================================================================
+    #| Element-wise multiplication with another Math:SparseMatrix object,
+    #| a Math::SparseMatrix::CSR object, or a scalar.
+    method multiply($other, Bool:D $clone = True -->Math::SparseMatrix:D) {
+        my $obj = $clone ?? self.clone !! self;
+        if ($other ~~ Math::SparseMatrix:D)
+                && %!row-names eqv $other.row-names
+                && %!column-names eqv $other.column-names {
+            $obj.sparse-matrix = $obj.sparse-matrix.multiply($other.sparse-matrix);
+        }
+        elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
+            $obj.sparse-matrix = $obj.sparse-matrix.multiply($other);
+        }
+        else {
+            die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
+        }
+        return $obj;
+    }
 
     #=================================================================
     # Print
@@ -100,8 +152,9 @@ my class Math::SparseMatrix {
             my @row = ('.' xx self.sparse-matrix.ncol);
             for self.sparse-matrix.row-ptr[$i] ..^ self.sparse-matrix.row-ptr[$i + 1] -> $j {
                 @row[self.sparse-matrix.col-index[$j]] = self.sparse-matrix.values[$j].Str;
-                $max-len = @row[self.sparse-matrix.col-index[$j]].chars if @row[self.sparse-matrix.col-index[$j]]
-                        .chars > $max-len;
+                if @row[self.sparse-matrix.col-index[$j]].chars > $max-len {
+                    $max-len = @row[self.sparse-matrix.col-index[$j]].chars
+                }
             }
             @rows.push(@row);
         }
@@ -117,7 +170,8 @@ my class Math::SparseMatrix {
         say $header-line2;
 
         for ^@rows.elems -> $i {
-            say [sprintf("%-*s", $row-width, @row-names[$i]), '|', |@rows[$i].map({ sprintf("%-*s", $max-len, $_) })].join(' ');
+            say [sprintf("%-*s", $row-width, @row-names[$i]), '|', |@rows[$i].map({ sprintf("%-*s", $max-len, $_) })]
+                    .join(' ');
         }
     }
 }
