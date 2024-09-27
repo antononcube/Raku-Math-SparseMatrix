@@ -67,19 +67,15 @@ say $matrix1;
 Here it is "pretty printed": 
 
 ```perl6
-say "-" x 50;
 $matrix1.print;
-say "-" x 50;
 ```
 
-Here `10` is added to all elements:
+Here `10` is multiplied with all elements:
 
 ```perl6
-my $matrix2 = $matrix1.add(10); 
+my $matrix2 = $matrix1.multiply(10); 
 
-say "-" x 50;
 $matrix2.print;
-say "-" x 50;
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -87,9 +83,7 @@ Here is the dot-product of the original matrix with its transpose:
 ```perl6
 my $matrix3 = $matrix1.dot($matrix1.transpose); 
 
-say "-" x 50;
 $matrix3.print;
-say "-" x 50;
 ```
 
 -----
@@ -108,12 +102,39 @@ Here is an example:
 ```perl6
 my $smat = Math::SparseMatrix.new(sparse-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H'); 
 
-say "-" x 50;
 $smat.print;
-say "-" x 50;
+```
+
+
+Here is the dot-product of that matrix with its transpose:
+
+```perl6
+my $smat2 = $smat.dot($smat.transpose); 
+
+$smat2.print;
 ```
 
 ### Implicit value
+
+The sparse matrices can have an _implicit value_ that is different from 0.
+For example, adding a number to a sparse matrix (object) produces a sparse matrix object, 
+but with different implicit value:
+
+```perl6
+my $matrix3 = $matrix1.add(10);
+```
+
+```perl6
+$matrix3.implicit-value
+```
+
+Here is the pretty print:
+
+```perl6
+$matrix3.print(:iv)
+```
+
+**Remark:** Currently, the implicit values are ignored in `dot`.
 
 -----
 

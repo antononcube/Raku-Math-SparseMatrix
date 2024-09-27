@@ -70,37 +70,29 @@ say $matrix1;
 Here it is "pretty printed": 
 
 ```perl6
-say "-" x 50;
 $matrix1.print;
-say "-" x 50;
 ```
 ```
-# --------------------------------------------------
-# .    .    .    0.88 0.67 0.52 .    0.99
-# .    .    .    .    .    0.67 .    .   
-# .    .    .    .    .    .    .    0.1 
-# .    .    .    0.64 0.61 .    .    .   
 # .    .    .    .    .    .    .    .   
-# --------------------------------------------------
+# 0.58 .    .    0.35 .    .    0.49 .   
+# .    .    .    .    .    .    .    .   
+# .    0.53 .    .    .    0.48 .    .   
+# 0.47 .    0.4  .    .    0.78 .    .
 ```
 
-Here `10` is added to all elements:
+Here `10` is multiplied with all elements:
 
 ```perl6
-my $matrix2 = $matrix1.add(10); 
+my $matrix2 = $matrix1.multiply(10); 
 
-say "-" x 50;
 $matrix2.print;
-say "-" x 50;
 ```
 ```
-# --------------------------------------------------
-# .     .     .     10.88 10.67 10.52 .     10.99
-# .     .     .     .     .     10.67 .     .    
-# .     .     .     .     .     .     .     10.1 
-# .     .     .     10.64 10.61 .     .     .    
-# .     .     .     .     .     .     .     .    
-# --------------------------------------------------
+# .   .   .   .   .   .   .   .  
+# 5.8 .   .   3.5 .   .   4.9 .  
+# .   .   .   .   .   .   .   .  
+# .   5.3 .   .   .   4.8 .   .  
+# 4.7 .   4   .   .   7.8 .   .
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -108,18 +100,14 @@ Here is the dot-product of the original matrix with its transpose:
 ```perl6
 my $matrix3 = $matrix1.dot($matrix1.transpose); 
 
-say "-" x 50;
 $matrix3.print;
-say "-" x 50;
 ```
 ```
-# --------------------------------------------------
-# 2.4738 0.3484 0.099  0.9719 .     
-# 0.3484 0.4489 .      .      .     
-# 0.099  .      0.01   .      .     
-# 0.9719 .      .      0.7817 .     
 # .      .      .      .      .     
-# --------------------------------------------------
+# .      0.699  .      .      0.2726
+# .      .      .      .      .     
+# .      .      .      0.5113 0.3744
+# .      0.2726 .      0.3744 0.9893
 ```
 
 -----
@@ -138,12 +126,72 @@ Here is an example:
 ```perl6
 my $smat = Math::SparseMatrix.new(sparse-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H'); 
 
-say "-" x 50;
 $smat.print;
-say "-" x 50;
+```
+```
+# –––––––––––––––––––––––––––––––––––––––––––
+#     A    B    C    D    E    F    G    H   
+# ––┼––––––––––––––––––––––––––––––––––––––––
+# a │ .    .    .    .    .    .    .    .   
+# b │ 0.58 .    .    0.35 .    .    0.49 .   
+# c │ .    .    .    .    .    .    .    .   
+# d │ .    0.53 .    .    .    0.48 .    .   
+# e │ 0.47 .    0.4  .    .    0.78 .    .
+```
+
+
+Here is the dot-product of that matrix with its transpose:
+
+```perl6
+my $smat2 = $smat.dot($smat.transpose); 
+
+$smat2.print;
+```
+```
+# ––––––––––––––––––––––––––––––––––––––
+#     a      b      c      d      e     
+# ––┼–––––––––––––––––––––––––––––––––––
+# a │ .      .      .      .      .     
+# b │ .      0.699  .      .      0.2726
+# c │ .      .      .      .      .     
+# d │ .      .      .      0.5113 0.3744
+# e │ .      0.2726 .      0.3744 0.9893
 ```
 
 ### Implicit value
+
+The sparse matrices can have an _implicit value_ that is different from 0.
+For example, adding a number to a sparse matrix (object) produces a sparse matrix object, 
+but with different implicit value:
+
+```perl6
+my $matrix3 = $matrix1.add(10);
+```
+```
+# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+```
+
+```perl6
+$matrix3.implicit-value
+```
+```
+# 10
+```
+
+Here is the pretty print:
+
+```perl6
+$matrix3.print(:iv)
+```
+```
+# 10    10    10    10    10    10    10    10   
+# 10.58 10    10    10.35 10    10    10.49 10   
+# 10    10    10    10    10    10    10    10   
+# 10    10.53 10    10    10    10.48 10    10   
+# 10.47 10    10.4  10    10    10.78 10    10
+```
+
+**Remark:** Currently, the implicit values are ignored in `dot`.
 
 -----
 
