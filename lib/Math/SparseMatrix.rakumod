@@ -212,13 +212,13 @@ my class Math::SparseMatrix {
     #=================================================================
     #| Wolfram Language (WL) representation
     method wl() {
-        my $rules = self.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
+        my $rules = $!sparse-matrix.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
         my $sp = "SparseArray[\{$rules\}, \{{$!sparse-matrix.nrow}, {$!sparse-matrix.ncol}\}, {$!sparse-matrix.implicit-value}]";
         my @row-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
         my @column-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
-        my $rowNames = @row-names-list>>.Str.join(',');
-        my $colNames = @column-names-list>>.Str.join(',');
-        return "SSparseMatrix[$sp, \"RowNames\" -> \{$rowNames\}, \"ColumnNames\" -> \{$colNames\}]";
+        my $rowNames = @row-names-list.raku.trans('[]'=>'{}');
+        my $colNames = @column-names-list.raku.trans('[]'=>'{}');
+        return "ToSSparseMatrix[$sp, \"RowNames\" -> $rowNames, \"ColumnNames\" -> $colNames]";
     }
 
 
