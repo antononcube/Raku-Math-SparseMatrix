@@ -37,18 +37,27 @@ isa-ok $matrix1.dot(@vec3), Array:D;
 
 ## 4
 my $res4 = $matrix1.dot(@vec3);
-isa-ok $res4.elems, $ncol;
+is $res4.elems, $nrow, "Expected number of columns";
 
 ## 5
-isa-ok $matrix1.dot($matrix2), Math::SparseMatrix::CSR:D;
+is
+        $res4,
+        dot-product($matrix1.Array, @vec3.map({[$_,]})),
+        "Same vector";
 
 ## 6
-my $res6 = $matrix1.dot($matrix2);
-isa-ok $res6.dimensions, ($nrow, $ncol);
+isa-ok $matrix1.dot($matrix2), Math::SparseMatrix::CSR:D;
 
 ## 7
+my $res7 = $matrix1.dot($matrix2);
+is-deeply
+        $res7.dimensions,
+        ($nrow, $nrow),
+        "Dimensions of matrix-matrix product";
+
+## 8
 #$res6.print;
 #say dot-product($matrix1.Array, $matrix2.Array);
-is-deeply $res6.Array(iv => 0.0), dot-product($matrix1.Array, $matrix2.Array);
+is-deeply $res7.Array(iv => 0.0), dot-product($matrix1.Array, $matrix2.Array);
 
 done-testing;
