@@ -100,7 +100,7 @@ in the typical SMA operations.
 Here is an example:
 
 ```perl6
-my $smat = Math::SparseMatrix.new(sparse-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H'); 
+my $smat = Math::SparseMatrix.new($matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H'); 
 
 $smat.print;
 ```
