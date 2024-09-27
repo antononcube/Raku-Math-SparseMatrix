@@ -6,10 +6,13 @@ use Math::SparseMatrix::CSR;
 # Math::SparseMatrix
 #=====================================================================
 my class Math::SparseMatrix {
-    has Math::SparseMatrix::CSR:D $.sparse-matrix is required is rw;
+    has Math::SparseMatrix::CSR:D $.sparse-matrix
+            is rw
+            handles <columns-count explicit-length density dimensions rows-count>
+            = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names is rw = %();
     has %.column-names is rw = %();
-    has %.dim-names is rw = %();
+    has %.dimension-names is rw = %();
 
     #=================================================================
     # Clone
@@ -19,7 +22,7 @@ my class Math::SparseMatrix {
                 sparse-matrix => $!sparse-matrix.clone,
                 row-names => %!row-names.clone,
                 column-names => %!column-names.clone,
-                dim-names => %!dim-names.clone,
+                dimension-names => %!dimension-names.clone,
                 );
     }
     #=================================================================
@@ -135,6 +138,34 @@ my class Math::SparseMatrix {
     }
 
     #=================================================================
+    # Dot product
+    #=================================================================
+    method dot($other, Bool :$copy = True) {
+        my $obj = $copy ?? Math::SparseMatrix.new() !! self;
+        if $other ~~ Math::SparseMatrix:D {
+            $obj.sparse-matrix = self.sparse-matrix.dot($other.sparse-matrix);
+            #$obj.sparse-matrix.eliminate-zeros();
+            $obj.column-names = $other.column-names;
+            $obj.row-names = self.row-names;
+        } elsif $other ~~ Math::SparseMatrix::CSR:D {
+            $obj.sparse-matrix = self.sparse-matrix.dot($other);
+            #$obj.sparse-matrix.eliminate-zeros();
+            $obj.row-names = self.row-names;
+        } elsif $other ~~ Seq:D {
+            return self.dot($other.Array);
+        } elsif $other ~~ Array:D | List:D {
+            my @vec = self.sparse-matrix.dot($other);
+            my $res = Math::SparseMatrix::CSR.new(dense-matrix => @vec.map({[$_,]}));
+            #$res.eliminate-zeros();
+            $obj.sparse-matrix = $res;
+            $obj.row-names = self.row-names;
+        } else {
+            die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
+        }
+        return $obj;
+    }
+
+    #=================================================================
     # Print
     #=================================================================
     method print() {
@@ -173,6 +204,51 @@ my class Math::SparseMatrix {
             say [sprintf("%-*s", $row-width, @row-names[$i]), '|', |@rows[$i].map({ sprintf("%-*s", $max-len, $_) })]
                     .join(' ');
         }
+    }
+
+
+    #=================================================================
+    # Representation
+    #=================================================================
+    #| Wolfram Language (WL) representation
+    method wl() {
+        my $rules = self.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
+        my $sp = "SparseArray[\{$rules\}, \{{$!sparse-matrix.nrow}, {$!sparse-matrix.ncol}\}, {$!sparse-matrix.implicit-value}]";
+        my @row-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
+        my @column-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
+        my $rowNames = @row-names-list>>.Str.join(',');
+        my $colNames = @column-names-list>>.Str.join(',');
+        return "SSparseMatrix[$sp, \"RowNames\" -> \{$rowNames\}, \"ColumnNames\" -> \{$colNames\}]";
+    }
+
+
+    #| To Hash
+    multi method Hash(::?CLASS:D:-->Hash) {
+        return
+                {
+                    specified-elements => self.explicit-length,
+                    dimensions => ($!sparse-matrix.nrow, $!sparse-matrix.ncol),
+                    default => $!sparse-matrix.implicit-value,
+                    :%!row-names,
+                    :%!column-names,
+                    :%!dimension-names,
+                    density => self.density,
+                    elements => self.rules,
+                    #                    column-indices => self.column-indices,
+                    #                    row-pointers => self.row-pointers,
+                    #                    explicit-values => self.explicit-values,
+                };
+    }
+
+    #| To string
+    multi method Str(::?CLASS:D:-->Str) {
+        return self.gist;
+    }
+
+    #| To gist
+    multi method gist(::?CLASS:D:-->Str) {
+        return 'Math::SparseMatrix' ~ (specified-elements => self.explicit-length, dimensions => ($!sparse-matrix.nrow, $!sparse-matrix.ncol),
+                                            density => self.density).List.raku;
     }
 }
 
