@@ -19,11 +19,11 @@ class Math::SparseMatrix {
     #=================================================================
     method !process-names($names, $n, $arg-name) {
         return do given $names {
-            when ($_ ~~ Seq:D) {
+            when ($_ ~~ Seq:D | Range:D) {
                 self!process-names($names.Array, $n, $arg-name)
             }
-            when ($_ ~~ List:D | Array:D | Seq:D) && $_.unique.elems == $n {
-                $_.kv.rotor(2)>>.reverse.Hash
+            when ($_ ~~ List:D | Array:D) && $_.unique.elems == $n {
+                $_.kv.rotor(2)>>.reverse.flat.Hash
             }
             when ($_ ~~ Map:D) && $_.elems == $n {
                 $_
@@ -32,7 +32,7 @@ class Math::SparseMatrix {
                 ((^$n) Z=> (^$n)).Hash
             }
             default {
-                die "The argument $arg-name is expected to be a Positional or Map of length $n, or Whatever."
+                die "The argument $arg-name is expected to be a Positional or a Map of length $n, or Whatever."
             }
         }
     }
