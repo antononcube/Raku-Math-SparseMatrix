@@ -864,13 +864,14 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Pretty print
     #=================================================================
-    method print() {
+    method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False) {
+        my $default = $show-implicit-value ?? $!implicit-value.Str !! '.';
         my @rows;
-        my $max-len = 1;
-        # Minimum length for '.'
+        my $max-len = $default.chars;
+        # Minimum length for default / '.'
 
         for ^self.nrow -> $i {
-            my @row = ('.' xx self.ncol);
+            my @row = ($default xx self.ncol);
             for self.row-ptr[$i] ..^ self.row-ptr[$i + 1] -> $j {
                 @row[self.col-index[$j]] = self.values[$j].Str;
                 $max-len = @row[self.col-index[$j]].chars if @row[self.col-index[$j]].chars > $max-len;
