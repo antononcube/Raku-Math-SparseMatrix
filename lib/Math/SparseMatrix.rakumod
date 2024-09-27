@@ -1,11 +1,11 @@
-unit module Math::SparseMatrix;
+#unit module Math::SparseMatrix;
 
 use Math::SparseMatrix::CSR;
 
 #=====================================================================
 # Math::SparseMatrix
 #=====================================================================
-my class Math::SparseMatrix {
+class Math::SparseMatrix {
     has Math::SparseMatrix::CSR:D $.sparse-matrix
             is rw
             handles <columns-count explicit-length density dimensions rows-count>
@@ -13,6 +13,47 @@ my class Math::SparseMatrix {
     has %.row-names is rw = %();
     has %.column-names is rw = %();
     has %.dimension-names is rw = %();
+
+    #=================================================================
+    # Creators
+    #=================================================================
+    method !process-names($names, $n, $arg-name) {
+        return do given $names {
+            when ($_ ~~ Seq:D) {
+                self!process-names($names.Array, $n, $arg-name)
+            }
+            when ($_ ~~ List:D | Array:D | Seq:D) && $_.unique.elems == $n {
+                $_.kv.rotor(2)>>.reverse.Hash
+            }
+            when ($_ ~~ Map:D) && $_.elems == $n {
+                $_
+            }
+            when Whatever {
+                ((^$n) Z=> (^$n)).Hash
+            }
+            default {
+                die "The argument $arg-name is expected to be a Positional or Map of length $n, or Whatever."
+            }
+        }
+    }
+
+    multi method new(Math::SparseMatrix::CSR:D :m(:matrix(:$sparse-matrix)),
+                     :$row-names = Whatever,
+                     :$column-names = Whatever,
+                     :$dimension-names = Whatever) {
+        self.bless(:$sparse-matrix,
+                row-names => self!process-names($row-names, $sparse-matrix.nrow, 'row-names'),
+                column-names => self!process-names($column-names, $sparse-matrix.ncol, 'column-names'),
+                dimension-names => self!process-names($dimension-names, 2, 'dimension-names')
+                );
+    }
+
+    multi method new(Math::SparseMatrix::CSR:D $sparse-matrix,
+                     :$row-names = Whatever,
+                     :$column-names = Whatever,
+                     :$dimension-names = Whatever) {
+        self.new(:$sparse-matrix, :$row-names, :$column-names, :$dimension-names);
+    }
 
     #=================================================================
     # Clone
