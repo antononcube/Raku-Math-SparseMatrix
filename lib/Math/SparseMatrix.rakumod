@@ -36,14 +36,32 @@ my class Math::SparseMatrix {
 
     method row-slice(*@indexes) {
         die 'The indexes are expected to be non-negative integers or strings.'
-        unless (@indexes.all ~~ Int:D | Str:D) && min(@indexes.grep(* ~~ Int)) ≥ 0;
+        unless (@indexes.all ~~ Int:D | Str:D) && min(@indexes.grep(*~~ Int)) ≥ 0;
 
         my @indexes2 = @indexes.map({ %!row-names{$_} // $_ });
         return Math::SparseMatrix.new(
                 sparse-matrix => $!sparse-matrix.row-slice(@indexes2),
                 row-names => %!row-names.grep({ $_.key ∈ @indexes }).Hash,
                 :%!column-names
-            );
+                );
+    }
+
+    multi method column-at(Int:D $col --> Math::SparseMatrix) {
+        my %columnInds = %!column-names.invert;
+        return Math::SparseMatrix.new(
+                sparse-matrix => $!sparse-matrix.column-at($col),
+                :%!row-names,
+                column-names => %(%columnInds{$col} => $col)
+                );
+    }
+
+    multi method column-at(Str:D $col --> Math::SparseMatrix) {
+        die 'Unknown column name.' if %!column-names{$col}:!exists;
+        return Math::SparseMatrix.new(
+                sparse-matrix => $!sparse-matrix.column-at(%!column-names{$col}),
+                :%!row-names,
+                column-names => %($col => %!column-names{$col})
+                );
     }
 
     method AT-POS(*@index) {
@@ -90,7 +108,7 @@ my class Math::SparseMatrix {
 
         $col-width = max($col-width, $max-len);
 
-        my $header = (' ' x ($row-width + 3) ) ~ @col-names.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
+        my $header = (' ' x ($row-width + 3)) ~ @col-names.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
         my $header-line1 = '=' x $header.chars;
         my $header-line2 = '-' x $header.chars;
 
@@ -112,13 +130,13 @@ multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is expo
 
 multi sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, @indexes) is export {
     return do given (@indexes[0], @indexes[1]) {
-        when $_.head ~~ Int && $_.tail ~~ Int {
+        when ($_.head ~~ Int || $_.tail ~~ Str) && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.value-at(@indexes[0], @indexes[1]);
         }
-        when $_.head ~~ Range && $_.tail ~~ Int {
+        when $_.head ~~ Range && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.row-slice($_.head).column-at($_.tail)
         }
-        when $_.head.isa(Whatever) && $_.tail ~~ Int {
+        when $_.head.isa(Whatever) && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.column-at($_.tail)
         }
         when $_.head.isa(Whatever) && $_.tail ~~ Range {
@@ -144,10 +162,10 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
         when $_.head ~~ Int && $_.tail ~~ Int {
             $mat.value-at(@indexes[0], @indexes[1]);
         }
-        when $_.head ~~ Range && $_.tail ~~ Int {
+        when $_.head ~~ Range && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.row-slice($_.head).column-at($_.tail)
         }
-        when $_.head.isa(Whatever) && $_.tail ~~ Int {
+        when $_.head.isa(Whatever) && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.column-at($_.tail)
         }
         when $_.head.isa(Whatever) && $_.tail ~~ Range {
