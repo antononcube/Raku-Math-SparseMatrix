@@ -53,8 +53,10 @@ subtest {
     my $matrix = Math::SparseMatrix::CSR.new(dense-matrix => @mat);
     is-deeply $matrix.Array, @mat;
     my $matrix2 = Math::SparseMatrix::CSR.new(dense-matrix => @mat, nrow => 6, ncol => 5);
-    is-deeply $matrix2.Array, @mat.map({ $_.append([0, 0]) }).Array.append(((0 xx 5).Array xx 2).Array);
-    say $matrix2.verify;
+    is-deeply
+            $matrix2.Array,
+            @mat.map({ $_.append([0, 0]) }).Array.append(((0 xx 5).Array xx 2).Array);
+    is $matrix2.verify, True;
 }, "Creation from matrix";
 
 
