@@ -1,5 +1,5 @@
 {
-  "name": "SparseMatrix",
+  "name": "Math::SparseMatrix",
   "description": "Sparse matrix algorithms.",
   "version": "0.0.1",
   "perl": "6.d",
