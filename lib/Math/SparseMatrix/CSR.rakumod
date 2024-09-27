@@ -228,6 +228,10 @@ class Math::SparseMatrix::CSR {
         return @!col-index.clone;
     }
 
+    method columns-count() {
+        return $!ncol;
+    }
+
     method density() {
         return @!values.elems / ($!nrow * $!ncol);
     }
@@ -250,6 +254,10 @@ class Math::SparseMatrix::CSR {
 
     method row-pointers() {
         return @!row-ptr.clone;
+    }
+
+    method rows-count() {
+        return $!nrow;
     }
 
     #=================================================================
@@ -822,6 +830,38 @@ class Math::SparseMatrix::CSR {
     }
 
     #=================================================================
+    # Unitize
+    #=================================================================
+    #| Unitize the sparse matrix
+    #| C<:$clone> -- Whether to operate in-place.
+    method unitize(Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.unitize(:!clone);
+        }
+        @!values = 1 xx (@!values.elems);
+        return self;
+    }
+
+    #=================================================================
+    # Clip
+    #=================================================================
+    #| Clip the sparse matrix
+    #| C<:$v-min> -- The new min value.
+    #| C<:$v-max> -- The new max value.
+    #| C<:$clone> -- Whether to operate in-place.
+    method clip(Numeric:D :min(:$v-min)!, Numeric:D :max(:$v-max)!, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.clip(:$v-min, :$v-max, :!clone);
+        }
+        @!values = @!values.map({
+            if $_ < $v-min { $v-min }
+            elsif $v-max < $ { $v-max }
+            else {$_}
+        });
+        return self;
+    }
+
+    #=================================================================
     # Pretty print
     #=================================================================
     method print() {
@@ -846,6 +886,13 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Representation
     #=================================================================
+    #| Wolfram Language (WL) representation
+    method wl() {
+        my $rules = self.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
+        return "SparseArray[\{$rules\}, \{{$!nrow}, {$!ncol}\}, {$!implicit-value}]"
+    }
+
+
     #| To Hash
     multi method Hash(::?CLASS:D:-->Hash) {
         return
