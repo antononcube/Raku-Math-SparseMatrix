@@ -210,6 +210,9 @@ class Math::SparseMatrix {
     # Print
     #=================================================================
     method print() {
+        my $connector = '┼'; # '+'; # '┼';
+        my $v-sep = '│'; #'|'; #'│';
+        my $h-sep = '–'; # '-''–'
         my @col-names = self.column-names.keys.sort;
         my @row-names = self.row-names.keys.sort;
 
@@ -235,15 +238,14 @@ class Math::SparseMatrix {
 
         my $header = (' ' x ($row-width + 3)) ~ @col-names.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
         my $header-line1 = '=' x $header.chars;
-        my $header-line2 = '-' x $header.chars;
+        my $header-line2 = ($h-sep x ($row-width + 1)) ~ $connector ~ ($h-sep x ($header.chars - $row-width - 2));
 
-        say $header-line1;
+        #say $header-line1;
         say $header;
         say $header-line2;
 
         for ^@rows.elems -> $i {
-            say [sprintf("%-*s", $row-width, @row-names[$i]), '|', |@rows[$i].map({ sprintf("%-*s", $max-len, $_) })]
-                    .join(' ');
+            say [sprintf("%-*s", $row-width, @row-names[$i]), $v-sep, |@rows[$i].map({ sprintf("%-*s", $max-len, $_) })].join(' ');
         }
     }
 
