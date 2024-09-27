@@ -237,10 +237,10 @@ class Math::SparseMatrix {
         $col-width = max($col-width, $max-len);
 
         my $header = (' ' x ($row-width + 3)) ~ @col-names.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
-        my $header-line1 = '=' x $header.chars;
+        my $header-line1 = $h-sep x $header.chars;
         my $header-line2 = ($h-sep x ($row-width + 1)) ~ $connector ~ ($h-sep x ($header.chars - $row-width - 2));
 
-        #say $header-line1;
+        say $header-line1;
         say $header;
         say $header-line2;
 
