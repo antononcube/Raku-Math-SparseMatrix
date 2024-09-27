@@ -233,7 +233,7 @@ my class Math::SparseMatrix {
                     :%!column-names,
                     :%!dimension-names,
                     density => self.density,
-                    elements => self.rules,
+                    elements => self.sparse-matrix.rules,
                     #                    column-indices => self.column-indices,
                     #                    row-pointers => self.row-pointers,
                     #                    explicit-values => self.explicit-values,
