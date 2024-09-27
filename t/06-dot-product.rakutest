@@ -5,6 +5,17 @@ use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::Utilities;
 use Test;
 
+sub dot-product(@matrix1, @matrix2) {
+    die "Incompatible matrices" unless @matrix1[0].elems == @matrix2.elems;
+    my @result;
+    for @matrix1.kv -> $i, @row {
+        for @matrix2[0].keys -> $j {
+            @result[$i][$j] = [+] @row Z* @matrix2.map({ $_[$j] });
+        }
+    }
+    return @result;
+}
+
 my $nrow = 5;
 my $ncol = 8;
 my $density = 0.25;
@@ -12,6 +23,7 @@ my $tol = 0.01;
 
 my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
 my $matrix2 = generate-random-sparse-matrix($ncol, $nrow, :$density, :$tol);
+
 
 ## 1
 isa-ok $matrix1, Math::SparseMatrix::CSR:D;
@@ -33,5 +45,10 @@ isa-ok $matrix1.dot($matrix2), Math::SparseMatrix::CSR:D;
 ## 6
 my $res6 = $matrix1.dot($matrix2);
 isa-ok $res6.dimensions, ($nrow, $ncol);
+
+## 7
+#$res6.print;
+#say dot-product($matrix1.Array, $matrix2.Array);
+is-deeply $res6.Array(iv => 0.0), dot-product($matrix1.Array, $matrix2.Array);
 
 done-testing;
