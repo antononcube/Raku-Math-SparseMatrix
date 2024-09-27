@@ -29,6 +29,8 @@ sub add-by-rules($matrix1, $matrix2) {
     return %rules;
 }
 
+plan *;
+
 ## 1
 isa-ok $matrix1, Math::SparseMatrix::CSR;
 

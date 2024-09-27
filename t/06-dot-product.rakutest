@@ -35,6 +35,7 @@ my $tol = 0.01;
 my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
 my $matrix2 = generate-random-sparse-matrix($ncol, $nrow, :$density, :$tol);
 
+plan *;
 
 ## 1
 isa-ok $matrix1, Math::SparseMatrix::CSR:D;
