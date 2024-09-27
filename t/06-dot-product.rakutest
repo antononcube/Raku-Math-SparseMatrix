@@ -16,6 +16,17 @@ sub dot-product(@matrix1, @matrix2) {
     return @result;
 }
 
+sub elementwise-difference(@matrix1, @matrix2) {
+    die "Incompatible matrices" unless @matrix1.elems == @matrix2.elems && @matrix1[0].elems == @matrix2[0].elems;
+    my @result;
+    for @matrix1.kv -> $i, @row {
+        for @row.kv -> $j, $elem {
+            @result[$i][$j] = $elem - @matrix2[$i][$j];
+        }
+    }
+    return @result;
+}
+
 my $nrow = 5;
 my $ncol = 8;
 my $density = 0.25;
@@ -33,20 +44,29 @@ isa-ok $matrix2, Math::SparseMatrix::CSR:D;
 
 ## 3
 my @vec3 = rand xx $ncol;
-isa-ok $matrix1.dot(@vec3), Array:D;
+isa-ok
+        $matrix1.dot(@vec3),
+        Array:D,
+        "Expected type of matrix-vector dot product";
 
 ## 4
 my $res4 = $matrix1.dot(@vec3);
-is $res4.elems, $nrow, "Expected number of columns";
+is
+        $res4.elems,
+        $nrow,
+        "Expected number of columns";
 
 ## 5
 is
         $res4,
-        dot-product($matrix1.Array, @vec3.map({[$_,]})),
+        dot-product($matrix1.Array, @vec3.map({ [$_,] })),
         "Same vector";
 
 ## 6
-isa-ok $matrix1.dot($matrix2), Math::SparseMatrix::CSR:D;
+isa-ok
+        $matrix1.dot($matrix2),
+        Math::SparseMatrix::CSR:D,
+        "Expected matrix-matrx dot product type";
 
 ## 7
 my $res7 = $matrix1.dot($matrix2);
@@ -58,6 +78,23 @@ is-deeply
 ## 8
 #$res6.print;
 #say dot-product($matrix1.Array, $matrix2.Array);
-is-deeply $res7.Array(iv => 0.0), dot-product($matrix1.Array, $matrix2.Array);
+my $dp8 = dot-product($matrix1.Array, $matrix2.Array);
+is
+        elementwise-difference($res7.Array, $dp8).map(*.Slip)>>.abs.max,
+        0.0,
+        "Same matrix";
+
+## 9
+## Equivalent to the test above, but using SparseMatrix::CSR operations.
+is
+        $res7.add(Math::SparseMatrix::CSR.new(dense-matrix => $dp8).multiply(-1)).Array.map(*.Slip)>>.abs.max,
+        0.0,
+        "Same matrix";
+
+## 10
+is
+        $res7.eqv(Math::SparseMatrix::CSR.new(dense-matrix => $dp8)),
+        True,
+        "Matrix-matrix producs equivalence";
 
 done-testing;
