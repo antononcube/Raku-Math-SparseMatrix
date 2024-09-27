@@ -2,9 +2,8 @@
 use v6.d;
 
 use lib <. lib>;
-use Math::SparseMatrix;
 use Math::SparseMatrix::CSR;
-
+use Math::SparseMatrix::Utilities;
 
 my $nrow = 5;
 my $ncol = 8;
@@ -19,6 +18,8 @@ say "-" x 100;
 $matrix1.print;
 say "-" x 100;
 
+say $matrix1.wl();
+say "-" x 100;
 
 say "-" x 100;
 say "Matrix 2:";
