@@ -39,7 +39,11 @@ my class Math::SparseMatrix {
         unless (@indexes.all ~~ Int:D | Str:D) && min(@indexes.grep(* ~~ Int)) ≥ 0;
 
         my @indexes2 = @indexes.map({ %!row-names{$_} // $_ });
-        return $!sparse-matrix.row-slice(@indexes2);
+        return Math::SparseMatrix.new(
+                sparse-matrix => $!sparse-matrix.row-slice(@indexes2),
+                row-names => %!row-names.grep({ $_.key ∈ @indexes }).Hash,
+                :%!column-names
+            );
     }
 
     method AT-POS(*@index) {
