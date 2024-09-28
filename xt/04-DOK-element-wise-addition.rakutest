@@ -1,0 +1,51 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix::DOK;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+my $type = 'DOK';
+
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type);
+my $matrix2 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type);
+
+
+plan *;
+
+## 1
+isa-ok $matrix1, Math::SparseMatrix::DOK;
+
+## 2
+isa-ok $matrix2, Math::SparseMatrix::DOK;
+
+## 3
+isa-ok $matrix1.add(4.3), Math::SparseMatrix::DOK;
+
+## 4
+isa-ok $matrix1.add($matrix2), Math::SparseMatrix::DOK;
+
+
+## 5
+is-deeply
+        $matrix1.add($matrix2).Array,
+        elementwise-operation($matrix1.Array, $matrix2.Array, &infix:<+>),
+        "Same dense matrix";
+
+## 6
+subtest {
+    my $matrix1iv = $matrix1.clone;
+    $matrix1iv.implicit-value = 1.5;
+    my $matrix2iv = $matrix2.clone;
+    $matrix2iv.implicit-value = 2.2;
+    is-deeply
+            $matrix1.add($matrix2).Array,
+            elementwise-operation($matrix1.Array, $matrix2.Array, &infix:<+>),
+            "Same dense matrix";
+}, "Addition with implicit values";
+
+done-testing;
