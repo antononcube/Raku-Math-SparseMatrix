@@ -857,7 +857,7 @@ class Math::SparseMatrix::CSR {
         }
         @!values = @!values.map({
             if $_ < $v-min { $v-min }
-            elsif $v-max < $ { $v-max }
+            elsif $v-max < $_ { $v-max }
             else {$_}
         });
         return self;
