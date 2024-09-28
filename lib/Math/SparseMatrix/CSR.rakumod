@@ -547,6 +547,8 @@ class Math::SparseMatrix::CSR {
                 }
             }
 
+            # Having sorted keys is not essential.
+            # It makes the execution of the algorithm 50% slower.
             for %accumulator.keys.sort -> $j {
                 @values.push(%accumulator{$j});
                 @col-index.push($j.Int);
