@@ -31,7 +31,6 @@ sub mult-by-rules($matrix1, $matrix2) {
             %rules{$pos} = %r1{$pos} * $matrix2.implicit-value;
         }
     }
-            ;
     return %rules;
 }
 
