@@ -12,7 +12,9 @@
   "test-depends": [],
   "provides": {
     "Math::SparseMatrix": "lib/Math/SparseMatrix.rakumod",
+    "Math::SparseMatrix::Abstract": "lib/Math/SparseMatrix/Abstract.rakumod",
     "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod",
+    "Math::SparseMatrix::DOK": "lib/Math/SparseMatrix/DOK.rakumod",
     "Math::SparseMatrix::Utilities": "lib/Math/SparseMatrix/Utilities.rakumod"
   },
   "resources": [],

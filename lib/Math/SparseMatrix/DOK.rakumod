@@ -1,4 +1,6 @@
-class Math::SparseMatrix::DOK {
+use Math::SparseMatrix::Abstract;
+
+class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     has %.rules;
     has UInt:D $.nrow is required;
     has UInt:D $.ncol is required;
@@ -7,16 +9,6 @@ class Math::SparseMatrix::DOK {
     #=================================================================
     # Creators
     #=================================================================
-    #    submethod BUILD(
-    #            :@!values,
-    #            :@!col-index,
-    #            :@!row-ptr,
-    #            UInt:D :$!nrow,
-    #            UInt:D :$!ncol
-    #                    ) {
-    #    }
-    #
-
     multi method new(:@rules! where @rules.all ~~ Pair:D,
                      :$nrow is copy = @rules.map(*.key[0]).max + 1,
                      :$ncol is copy = @rules.map(*.key[1]).max + 1,
@@ -420,10 +412,11 @@ class Math::SparseMatrix::DOK {
     #=================================================================
     # Pretty print
     #=================================================================
-    method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False) {
+    method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {
         my $max-length = %.rules.values.map(*.Str.chars).max // 1;
         my $default = $show-implicit-value ?? $!implicit-value !! '.';
         $max-length = max($max-length, $default.Str.chars);
+
         my @rows;
         for ^$!nrow -> $i {
             my @row = do for ^$!ncol -> $j {
@@ -436,9 +429,14 @@ class Math::SparseMatrix::DOK {
             }
             @rows.push: @row
         }
-        for @rows -> @row {
-            say @row.join(' ');
+
+        if $echo {
+            for @rows -> @row {
+                say @row.join(' ');
+            }
         }
+
+        return @rows>>.Array.Array;
     }
 
     #=================================================================
@@ -447,7 +445,7 @@ class Math::SparseMatrix::DOK {
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
     method wl() {
-        my $rules = self.rules.map({ "\{{ $_.key.head + 1 },{ $_.key.tail + 1 }\}->{ $_.value }" }).join(',');
+        my $rules = self.rules.map({ "\{{ $_.key.words.head + 1 },{ $_.key.words.tail + 1 }\}->{ $_.value }" }).join(',');
         return "SparseArray[\{$rules\}, \{{ $!nrow }, { $!ncol }\}, { $!implicit-value }]"
     }
 

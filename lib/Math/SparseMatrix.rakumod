@@ -1,5 +1,6 @@
 #unit module Math::SparseMatrix;
 
+use Math::SparseMatrix::Abstract;
 use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::DOK;
 
@@ -7,7 +8,7 @@ use Math::SparseMatrix::DOK;
 # Math::SparseMatrix
 #=====================================================================
 class Math::SparseMatrix {
-    has Math::SparseMatrix::CSR:D $.core-matrix
+    has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
             handles <columns-count explicit-length density dimensions rows-count>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
@@ -224,17 +225,8 @@ class Math::SparseMatrix {
         my $max-len = 1;
         # Minimum length for '.'
 
-        for ^self.core-matrix.nrow -> $i {
-            my @row = ('.' xx self.core-matrix.ncol);
-            for self.core-matrix.row-ptr[$i] ..^ self.core-matrix.row-ptr[$i + 1] -> $j {
-                @row[self.core-matrix.col-index[$j]] = self.core-matrix.values[$j].Str;
-                if @row[self.core-matrix.col-index[$j]].chars > $max-len {
-                    $max-len = @row[self.core-matrix.col-index[$j]].chars
-                }
-            }
-            @rows.push(@row);
-        }
-
+        @rows = $!core-matrix.print(:!echo);
+        $max-len = @rows.map(*.Slip).map(*.chars).max;
         $col-width = max($col-width, $max-len);
 
         my $header = (' ' x ($row-width + 3)) ~ @col-names.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
@@ -256,8 +248,7 @@ class Math::SparseMatrix {
     #=================================================================
     #| Wolfram Language (WL) representation
     method wl() {
-        my $rules = $!core-matrix.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
-        my $sp = "SparseArray[\{$rules\}, \{{ $!core-matrix.nrow}, { $!core-matrix.ncol}\}, { $!core-matrix.implicit-value}]";
+        my $sp = $!core-matrix.wl;
         my @row-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
         my @column-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
         my $rowNames = @row-names-list.raku.trans('[]'=>'{}');
@@ -298,14 +289,13 @@ class Math::SparseMatrix {
 }
 
 #=====================================================================
-# CSR
+# Abstract
 #=====================================================================
-#proto sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {*}
-multi sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {
+multi sub postcircumfix:<[ ]>(Math::SparseMatrix::Abstract:D $mat, *@indexes) is export {
     return $mat.row-slice(@indexes);
 }
 
-multi sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, @indexes) is export {
+multi sub postcircumfix:<[; ]>(Math::SparseMatrix::Abstract:D $mat, @indexes) is export {
     return do given (@indexes[0], @indexes[1]) {
         when ($_.head ~~ Int || $_.tail ~~ Str) && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.value-at(@indexes[0], @indexes[1]);
@@ -323,37 +313,7 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix::CSR:D $mat, @indexes) is expo
             $mat.row-slice($_.head).transpose.row-slice($_.tail).transpose
         }
         default {
-            die "Cannot process the given range"
-        }
-    }
-}
-
-#=====================================================================
-# DOK
-#=====================================================================
-multi sub postcircumfix:<[ ]>(Math::SparseMatrix::DOK:D $mat, *@indexes) is export {
-    return $mat.row-slice(@indexes);
-}
-
-multi sub postcircumfix:<[; ]>(Math::SparseMatrix::DOK:D $mat, @indexes) is export {
-    return do given (@indexes[0], @indexes[1]) {
-        when ($_.head ~~ Int || $_.tail ~~ Str) && ($_.tail ~~ Int || $_.tail ~~ Str) {
-            $mat.value-at(@indexes[0], @indexes[1]);
-        }
-        when $_.head ~~ Range && ($_.tail ~~ Int || $_.tail ~~ Str) {
-            $mat.row-slice($_.head).column-at($_.tail)
-        }
-        when $_.head.isa(Whatever) && ($_.tail ~~ Int || $_.tail ~~ Str) {
-            $mat.column-at($_.tail)
-        }
-        when $_.head.isa(Whatever) && $_.tail ~~ Range {
-            $mat.transpose.row-slice($_.tail).transpose
-        }
-        when $_.head ~~ Range && $_.tail ~~ Range {
-            $mat.row-slice($_.head).transpose.row-slice($_.tail).transpose
-        }
-        default {
-            die "Cannot process the given range"
+            die "Cannot process the given range."
         }
     }
 }
@@ -382,7 +342,7 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
             $mat.row-slice($_.head).transpose.row-slice($_.tail).transpose
         }
         default {
-            die "Cannot process the given range"
+            die "Cannot process the given range."
         }
     }
 }

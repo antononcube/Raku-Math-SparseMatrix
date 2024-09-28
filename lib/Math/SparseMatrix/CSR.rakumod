@@ -1,4 +1,6 @@
-class Math::SparseMatrix::CSR {
+use Math::SparseMatrix::Abstract;
+
+class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     has @.values;
     has @.col-index;
     has @.row-ptr;
@@ -866,7 +868,7 @@ class Math::SparseMatrix::CSR {
     #=================================================================
     # Pretty print
     #=================================================================
-    method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False) {
+    method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {
         my $default = $show-implicit-value ?? $!implicit-value.Str !! '.';
         my @rows;
         my $max-len = $default.chars;
@@ -881,9 +883,15 @@ class Math::SparseMatrix::CSR {
             @rows.push(@row);
         }
 
-        for @rows -> @row {
-            say @row.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
+        @rows = @rows.map({ $_.map({ sprintf("%-*s", $max-len, $_) }) });
+
+        if $echo {
+            for @rows -> @row {
+                say @row.join(' ');
+            }
         }
+
+        return @rows>>.Array.Array;
     }
 
     #=================================================================
