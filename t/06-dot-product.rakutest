@@ -5,28 +5,6 @@ use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::Utilities;
 use Test;
 
-sub dot-product(@matrix1, @matrix2) {
-    die "Incompatible matrices" unless @matrix1[0].elems == @matrix2.elems;
-    my @result;
-    for @matrix1.kv -> $i, @row {
-        for @matrix2[0].keys -> $j {
-            @result[$i][$j] = [+] @row Z* @matrix2.map({ $_[$j] });
-        }
-    }
-    return @result;
-}
-
-sub elementwise-difference(@matrix1, @matrix2) {
-    die "Incompatible matrices" unless @matrix1.elems == @matrix2.elems && @matrix1[0].elems == @matrix2[0].elems;
-    my @result;
-    for @matrix1.kv -> $i, @row {
-        for @row.kv -> $j, $elem {
-            @result[$i][$j] = $elem - @matrix2[$i][$j];
-        }
-    }
-    return @result;
-}
-
 my $nrow = 5;
 my $ncol = 8;
 my $density = 0.25;
@@ -60,14 +38,14 @@ is
 ## 5
 is
         $res4,
-        dot-product($matrix1.Array, @vec3.map({ [$_,] })),
+        dense-dot-product($matrix1.Array, @vec3.map({ [$_,] })),
         "Same vector";
 
 ## 6
 isa-ok
         $matrix1.dot($matrix2),
         Math::SparseMatrix::CSR:D,
-        "Expected matrix-matrx dot product type";
+        "Expected matrix-matrix dot product type";
 
 ## 7
 my $res7 = $matrix1.dot($matrix2);
@@ -79,9 +57,9 @@ is-deeply
 ## 8
 #$res6.print;
 #say dot-product($matrix1.Array, $matrix2.Array);
-my $dp8 = dot-product($matrix1.Array, $matrix2.Array);
+my $dp8 = dense-dot-product($matrix1.Array, $matrix2.Array);
 is
-        elementwise-difference($res7.Array, $dp8).map(*.Slip)>>.abs.max,
+        elementwise-operation($res7.Array, $dp8, &infix:<->).map(*.Slip)>>.abs.max,
         0.0,
         "Same matrix";
 
