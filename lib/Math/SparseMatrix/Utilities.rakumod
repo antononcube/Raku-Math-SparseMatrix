@@ -20,6 +20,10 @@ multi sub generate-random-sparse-matrix(
         Numeric:D :$tol = 0.001)
 {
     my $n = ($nrow * $ncol * $density).Int;
-    my @rules = ((^$nrow) X (^$ncol)).pick($n) Z=> (round(rand, $tol) xx $n);
+    my @rules = do if $tol {
+        (($nrow.rand.floor, $ncol.rand.floor) => round(rand, $tol)) xx $n
+    } else {
+        (($nrow.rand.floor, $ncol.rand.floor) => rand) xx $n
+    }
     return Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol);
 }
