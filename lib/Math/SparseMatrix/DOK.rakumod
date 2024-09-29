@@ -1,4 +1,5 @@
 use Math::SparseMatrix::Abstract;
+use Math::SparseMatrix::CSR;
 
 class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     has %.adjacency-map;
@@ -256,7 +257,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
                 %transposed{$col}{$row} = $value;
             }
         }
-        self.bless(:%transposed, :nrow($!ncol), :ncol($!nrow), :$!implicit-value);
+        self.new(adjacency-map => %transposed, :nrow($!ncol), :ncol($!nrow), :$!implicit-value);
     }
 
     #=================================================================
@@ -461,6 +462,32 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     # Representation
     #=================================================================
+    #| To CSR sparse matrix.
+    method to-csr() {
+        my @values;
+        my @col-index;
+        my @row-ptr = 0;
+        my $nnz = 0;
+
+        for ^$!nrow -> $row {
+            for %.adjacency-map{$row}.kv -> $col, $value {
+                @values.push($value);
+                @col-index.push($col);
+                $nnz++;
+            }
+            @row-ptr.push($nnz);
+        }
+
+        return Math::SparseMatrix::CSR.new(
+                :@values,
+                :@col-index,
+                :@row-ptr,
+                :$!nrow,
+                :$!ncol,
+                :$!implicit-value
+                );
+    }
+
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
     method wl() {
