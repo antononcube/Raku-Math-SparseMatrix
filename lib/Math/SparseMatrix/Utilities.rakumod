@@ -1,5 +1,6 @@
 unit module Math::SparseMatrix::Utilities;
 
+use Math::SparseMatrix;
 use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::DOK;
 
@@ -9,10 +10,11 @@ proto sub generate-random-sparse-matrix(|) is export {*}
 multi sub generate-random-sparse-matrix(
         UInt:D $nrow,
         UInt:D $ncol,
-        Numeric:D :d(:$density) = 0.01,
+        Numeric:D :$density = 0.01,
         Numeric:D :$tol = 0.001,
-        :$type = Whatever) {
-    return generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type);
+        :$type = Whatever,
+        Bool:D :d(:$decorated) = True) {
+    return generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type, :$decorated);
 }
 
 #=====================================================================
@@ -21,9 +23,10 @@ multi sub generate-random-sparse-matrix(
 multi sub generate-random-sparse-matrix(
         UInt:D :$nrow,
         UInt:D :$ncol,
-        Numeric:D :d(:$density) = 0.01,
+        Numeric:D :$density = 0.01,
         Numeric:D :$tol = 0.001,
-        :$type is copy = Whatever) {
+        :$type is copy = Whatever,
+        Bool:D :d(:$decorated) = True) {
 
     my $n = ($nrow * $ncol * $density).Int;
     my @rules = do if $tol {
@@ -32,7 +35,7 @@ multi sub generate-random-sparse-matrix(
         (($nrow.rand.floor, $ncol.rand.floor) => rand) xx $n
     }
 
-    return do given $type {
+    my $core-matrix = do given $type {
         when Whatever {
             Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol)
         }
@@ -46,6 +49,7 @@ multi sub generate-random-sparse-matrix(
             die 'The argument $type is expected to be one of "CSR", "DOK", or Whatever.'
         }
     }
+    return $decorated ?? Math::SparseMatrix.new($core-matrix) !! $core-matrix;
 }
 
 #=====================================================================
