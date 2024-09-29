@@ -11,8 +11,8 @@ my $density = 0.25;
 my $tol = 0.01;
 my $type = 'DOK';
 
-my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type);
-my $matrix2 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type);
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type):!decorated;
+my $matrix2 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type):!decorated;
 
 
 plan *;

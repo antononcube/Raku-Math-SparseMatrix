@@ -11,7 +11,7 @@ my $ncol = 8;
 my $density = 0.25;
 my $tol = 0.01;
 
-my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol):!decorated;
 
 plan *;
 

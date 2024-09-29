@@ -14,7 +14,7 @@ my $tol = 0.01;
 plan *;
 
 ## 1
-ok generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+ok generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol):!decorated;
 
 ## 2
 subtest {
@@ -27,7 +27,7 @@ subtest {
 }, "Creation from rules";
 
 ## 3
-my $matrix3 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol);
+my $matrix3 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol):!decorated;
 isa-ok
         $matrix3,
         Math::SparseMatrix::CSR,
