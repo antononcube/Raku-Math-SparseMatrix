@@ -208,6 +208,8 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
 
         # Ineffective, but quick to implement
         #return self.rules.Hash eqv $other.rules.Hash;
+        # This "quick" but it is not correct --
+        # some matrices with "transposed" values within a row can give True.
         if @!row-ptr ne $other.row-ptr { return False; }
         if @!col-index.sort ne $other.col-index.sort { return False; }
         my Numeric $diff = (@!values.sort <<->> $other.values.sort)>>.abs.max;
