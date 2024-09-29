@@ -905,7 +905,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     # Representation
     #=================================================================
     #| Wolfram Language (WL) representation
-    method wl() {
+    method to-wl() {
         my $rules = self.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
         return "SparseArray[\{$rules\}, \{{$!nrow}, {$!ncol}\}, {$!implicit-value}]"
     }

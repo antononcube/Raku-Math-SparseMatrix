@@ -495,7 +495,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
 
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
-    method wl() {
+    method to-wl() {
         my $rules = self.rules.map({ "\{{ $_.key.words.head + 1 },{ $_.key.words.tail + 1 }\}->{ $_.value }" }).join(',');
         return "SparseArray[\{$rules\}, \{{ $!nrow }, { $!ncol }\}, { $!implicit-value }]"
     }
