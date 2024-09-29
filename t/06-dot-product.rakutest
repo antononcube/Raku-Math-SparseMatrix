@@ -76,4 +76,13 @@ is
         True,
         "Matrix-matrix products equivalence";
 
+## 11
+my $smat11 = Math::SparseMatrix.new($matrix1);
+my @vec11 = rand xx $matrix1.columns-count;
+isa-ok $smat11.dot(@vec11), Math::SparseMatrix:D;
+
+## 12
+isa-ok $smat11.dot(rand xx $matrix1.columns-count), Math::SparseMatrix:D;
+
+
 done-testing;
