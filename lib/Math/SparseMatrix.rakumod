@@ -7,7 +7,7 @@ use Math::SparseMatrix::DOK;
 #=====================================================================
 # Math::SparseMatrix
 #=====================================================================
-class Math::SparseMatrix {
+class Math::SparseMatrix is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
             handles <columns-count explicit-length density dimensions rows-count>
@@ -39,10 +39,13 @@ class Math::SparseMatrix {
         }
     }
 
-    multi method new(Math::SparseMatrix::CSR:D :m(:matrix(:$core-matrix)),
+    multi method new(Math::SparseMatrix::Abstract:D :m(:matrix(:$core-matrix)),
                      :$row-names = Whatever,
                      :$column-names = Whatever,
                      :$dimension-names = Whatever) {
+        if $core-matrix ~~ Math::SparseMatrix:D {
+            return $core-matrix.clone;
+        }
         self.bless(:$core-matrix,
                 row-names => self!process-names($row-names, $core-matrix.nrow, 'row-names'),
                 column-names => self!process-names($column-names, $core-matrix.ncol, 'column-names'),
@@ -50,7 +53,7 @@ class Math::SparseMatrix {
                 );
     }
 
-    multi method new(Math::SparseMatrix::CSR:D $core-matrix,
+    multi method new(Math::SparseMatrix::Abstract:D $core-matrix,
                      :$row-names = Whatever,
                      :$column-names = Whatever,
                      :$dimension-names = Whatever) {
@@ -266,7 +269,7 @@ class Math::SparseMatrix {
 
     #| Wolfram Language (WL) representation
     method to-wl() {
-        my $sp = $!core-matrix.wl;
+        my $sp = $!core-matrix.to-wl;
         my @row-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
         my @column-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
         my $rowNames = @row-names-list.raku.trans('[]'=>'{}');
