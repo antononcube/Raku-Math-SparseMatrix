@@ -10,7 +10,7 @@ use Math::SparseMatrix::DOK;
 class Math::SparseMatrix is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
-            handles <columns-count explicit-length density dimensions rows-count>
+            handles <columns-count explicit-length density dimensions ncol nrow rows-count>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names is rw = %();
     has %.column-names is rw = %();
@@ -40,11 +40,14 @@ class Math::SparseMatrix is Math::SparseMatrix::Abstract {
     }
 
     multi method new(Math::SparseMatrix::Abstract:D :m(:matrix(:$core-matrix)),
-                     :$row-names = Whatever,
-                     :$column-names = Whatever,
-                     :$dimension-names = Whatever) {
+                     :$row-names is copy = Whatever,
+                     :$column-names is copy = Whatever,
+                     :$dimension-names is copy = Whatever) {
         if $core-matrix ~~ Math::SparseMatrix:D {
-            return $core-matrix.clone;
+            if $row-names.isa(Whatever) { $row-names = $core-matrix.row-names }
+            if $column-names.isa(Whatever) { $column-names = $core-matrix.column-names }
+            if $dimension-names.isa(Whatever) { $dimension-names = $core-matrix.dimension-names }
+            self.new(core-matrix => $core-matrix.core-matrix, :$row-names, :$column-names, :$dimension-names);
         }
         self.bless(:$core-matrix,
                 row-names => self!process-names($row-names, $core-matrix.nrow, 'row-names'),
