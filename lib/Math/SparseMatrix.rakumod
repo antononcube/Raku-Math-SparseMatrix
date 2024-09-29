@@ -246,8 +246,26 @@ class Math::SparseMatrix {
     #=================================================================
     # Representation
     #=================================================================
+    method to-html() {
+        my $html = '<table border="1">';
+        $html ~= '<thead><tr><th></th>';
+        for %.column-names.keys.sort -> $col {
+            $html ~= "<th>{$col}</th>";
+        }
+        $html ~= '</tr></thead>';
+        for %.row-names.keys.sort -> $row {
+            $html ~= "<tr><th>{$row}</th>";
+            for %.column-names.keys.sort -> $col {
+                $html ~= "<td>{self.value-at(%!row-names{$row}, %!column-names{$col}) // self.implicit-value}</td>";
+            }
+            $html ~= '</tr>';
+        }
+        $html ~= '</table>';
+        return $html;
+    }
+
     #| Wolfram Language (WL) representation
-    method wl() {
+    method to-wl() {
         my $sp = $!core-matrix.wl;
         my @row-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
         my @column-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
