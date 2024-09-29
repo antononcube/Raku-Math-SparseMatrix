@@ -117,8 +117,8 @@ $smat2.print;
 ### Implicit value
 
 The sparse matrices can have an _implicit value_ that is different from 0.
-For example, adding a number to a sparse matrix (object) produces a sparse matrix object, 
-but with different implicit value:
+For example, adding a number to a sparse matrix produces another sparse matrix 
+with different implicit value:
 
 ```perl6
 my $matrix3 = $matrix1.add(10);
