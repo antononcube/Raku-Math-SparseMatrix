@@ -534,13 +534,13 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             my $row-start = self.row-ptr[$i];
             my $row-end = self.row-ptr[$i + 1];
 
-            for $row-start ..^ $row-end -> int $jp {
-                my int $j = self.col-index[$jp];
-                my num $a = self.values[$jp].Num;
+            for $row-start ..^ $row-end -> $jp {
+                my $j = self.col-index[$jp];
+                my $a = self.values[$jp].Num;
                 my $col-start = $B.row-ptr[$j];
                 my $col-end = $B.row-ptr[$j + 1];
 
-                for $col-start ..^ $col-end -> int $kp {
+                for $col-start ..^ $col-end -> $kp {
                     my $k = $B.col-index[$kp];
                     %accumulator{$k} += $a * $B.values[$kp];
                 }
