@@ -1,7 +1,8 @@
 {
   "name": "Math::SparseMatrix",
   "description": "Sparse matrix algorithms.",
-  "version": "0.0.2",
+  "version": "0.0.1",
+  "api": "0",
   "perl": "6.d",
   "authors": [
     "Anton Antonov"
