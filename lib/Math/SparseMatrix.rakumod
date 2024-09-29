@@ -10,7 +10,7 @@ use Math::SparseMatrix::DOK;
 class Math::SparseMatrix is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
-            handles <columns-count explicit-length density dimensions ncol nrow rows-count>
+            handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names is rw = %();
     has %.column-names is rw = %();
