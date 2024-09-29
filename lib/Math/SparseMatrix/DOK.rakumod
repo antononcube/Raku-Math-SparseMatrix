@@ -250,13 +250,14 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     # Transpose
     #=================================================================
     method transpose(--> Math::SparseMatrix::DOK) {
-        return Math::SparseMatrix::DOK.new(
-                rules => self.rules.map({ $_.key.words.reverse => $_.value }).Hash,
-                nrow => self.ncol,
-                ncol => self.nrow
-                );
+        my %transposed;
+        for %!adjacency-map.kv -> $row, %cols {
+            for %cols.kv -> $col, $value {
+                %transposed{$col}{$row} = $value;
+            }
+        }
+        self.bless(:%transposed, :nrow($!ncol), :ncol($!nrow), :$!implicit-value);
     }
-
 
     #=================================================================
     # Matrix-vector multiplication
