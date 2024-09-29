@@ -344,15 +344,6 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #=================================================================
     # Transpose
     #=================================================================
-    method transpose-by-rules(--> Math::SparseMatrix::CSR) {
-        my @rules = |self.rules;
-        return Math::SparseMatrix::CSR.new(
-                rules => @rules.map({ $_.key.reverse => $_.value }),
-                nrow => self.ncol,
-                ncol => self.nrow
-                );
-    }
-
     method transpose() {
         my @IAT = 0 xx ($!ncol + 1);
         my @JAT;
