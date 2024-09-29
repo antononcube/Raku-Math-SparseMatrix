@@ -199,7 +199,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #=================================================================
     # Equivalence
     #=================================================================
-    method eqv(Math::SparseMatrix::CSR:D $other --> Bool:D) {
+    method eqv(Math::SparseMatrix::CSR:D $other, Numeric:D :$tol = 1e-14 --> Bool:D) {
         if $!nrow != $other.nrow || $!ncol != $other.ncol ||
                 @!values.elems != $other.values.elems ||
                 $!implicit-value != $other.implicit-value {
@@ -207,7 +207,11 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
         }
 
         # Ineffective, but quick to implement
-        return self.rules.Hash eqv $other.rules.Hash;
+        #return self.rules.Hash eqv $other.rules.Hash;
+        if @!row-ptr ne $other.row-ptr { return False; }
+        if @!col-index ne $other.col-index { return False; }
+        my Numeric $diff = (@!values <<->> $other.values)>>.abs.max;
+        return $diff ≤ $tol;
     }
 
     #=================================================================
@@ -528,13 +532,13 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             my $row-start = self.row-ptr[$i];
             my $row-end = self.row-ptr[$i + 1];
 
-            for $row-start ..^ $row-end -> $jp {
-                my $j = self.col-index[$jp];
-                my $a = self.values[$jp];
+            for $row-start ..^ $row-end -> int $jp {
+                my int $j = self.col-index[$jp];
+                my num $a = self.values[$jp].Num;
                 my $col-start = $B.row-ptr[$j];
                 my $col-end = $B.row-ptr[$j + 1];
 
-                for $col-start ..^ $col-end -> $kp {
+                for $col-start ..^ $col-end -> int $kp {
                     my $k = $B.col-index[$kp];
                     %accumulator{$k} += $a * $B.values[$kp];
                 }
