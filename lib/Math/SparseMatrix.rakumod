@@ -39,7 +39,7 @@ class Math::SparseMatrix is Math::SparseMatrix::Abstract {
         }
     }
 
-    multi method new(Math::SparseMatrix::Abstract:D :m(:matrix(:$core-matrix)),
+    multi method new(Math::SparseMatrix::Abstract:D :m(:matrix(:$core-matrix)) is copy,
                      :$row-names is copy = Whatever,
                      :$column-names is copy = Whatever,
                      :$dimension-names is copy = Whatever) {
@@ -47,7 +47,7 @@ class Math::SparseMatrix is Math::SparseMatrix::Abstract {
             if $row-names.isa(Whatever) { $row-names = $core-matrix.row-names }
             if $column-names.isa(Whatever) { $column-names = $core-matrix.column-names }
             if $dimension-names.isa(Whatever) { $dimension-names = $core-matrix.dimension-names }
-            self.new(core-matrix => $core-matrix.core-matrix, :$row-names, :$column-names, :$dimension-names);
+            $core-matrix = $core-matrix.core-matrix;
         }
         self.bless(:$core-matrix,
                 row-names => self!process-names($row-names, $core-matrix.nrow, 'row-names'),
@@ -196,10 +196,11 @@ class Math::SparseMatrix is Math::SparseMatrix::Abstract {
             #$obj.core-matrix.eliminate-zeros();
             $obj.column-names = $other.column-names;
             $obj.row-names = self.row-names;
-        } elsif $other ~~ Math::SparseMatrix::CSR:D {
+        } elsif $other ~~ Math::SparseMatrix::Abstract:D {
             $obj.core-matrix = self.core-matrix.dot($other);
             #$obj.core-matrix.eliminate-zeros();
             $obj.row-names = self.row-names;
+            $obj.column-names = self!process-names(Whatever, $obj.core-matrix.ncol, 'column-names');
         } elsif $other ~~ Seq:D {
             return self.dot($other.Array);
         } elsif $other ~~ Array:D | List:D {
@@ -208,6 +209,7 @@ class Math::SparseMatrix is Math::SparseMatrix::Abstract {
             #$res.eliminate-zeros();
             $obj.core-matrix = $res;
             $obj.row-names = self.row-names;
+            $obj.column-names = self!process-names(Whatever, 1, 'column-names');
         } else {
             die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
         }
