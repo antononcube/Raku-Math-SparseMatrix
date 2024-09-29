@@ -64,7 +64,7 @@ my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
 say $matrix1;
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
+# Math::SparseMatrix(:specified-elements(6), :dimensions((5, 8)), :density(0.15))
 ```
 
 Here it is "pretty printed": 
@@ -73,11 +73,14 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# .    .    .    .    .    .    .    .   
-# 0.36 .    .    0.14 .    .    .    0.38
-# .    .    .    .    .    .    .    .   
-# .    .    .    .    .    0.27 .    0.41
-# .    .    .    0.86 0.97 .    .    .
+# –––––––––––––––––––––––––––––––––––––––––––
+#     0    1    2    3    4    5    6    7   
+# ––┼––––––––––––––––––––––––––––––––––––––––
+# 0 │ .    .    .    0.92 .    .    .    .   
+# 1 │ .    .    .    .    .    .    .    .   
+# 2 │ .    .    .    .    .    0.92 0.39 .   
+# 3 │ .    .    .    .    0.9  .    .    .   
+# 4 │ 0.5  .    .    .    .    .    .    0.74
 ```
 
 Here `10` is multiplied with all elements:
@@ -88,11 +91,14 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# .   .   .   .   .   .   .   .  
-# 3.6 .   .   1.4 .   .   .   3.8
-# .   .   .   .   .   .   .   .  
-# .   .   .   .   .   2.7 .   4.1
-# .   .   .   8.6 9.7 .   .   .
+# –––––––––––––––––––––––––––––––––––
+#     0   1   2   3   4   5   6   7  
+# ––┼––––––––––––––––––––––––––––––––
+# 0 │ .   .   .   9.2 .   .   .   .  
+# 1 │ .   .   .   .   .   .   .   .  
+# 2 │ .   .   .   .   .   9.2 3.9 .  
+# 3 │ .   .   .   .   9   .   .   .  
+# 4 │ 5   .   .   .   .   .   .   7.4
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -103,11 +109,14 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# .                   .                   .                   .                   .                  
-# .                   0.29359999999999997 .                   0.1558              0.12040000000000001
-# .                   .                   .                   .                   .                  
-# .                   0.1558              .                   0.241               .                  
-# .                   0.12040000000000001 .                   .                   1.6804999999999999
+# ––––––––––––––––––––––––––––––––––––––
+#     0      1      2      3      4     
+# ––┼–––––––––––––––––––––––––––––––––––
+# 0 │ 0.8464 .      .      .      .     
+# 1 │ .      .      .      .      .     
+# 2 │ .      .      0.9985 .      .     
+# 3 │ .      .      .      0.81   .     
+# 4 │ .      .      .      .      0.7976
 ```
 
 -----
@@ -132,11 +141,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    .    .    .    .    .    .    .   
-# b │ 0.36 .    .    0.14 .    .    .    0.38
-# c │ .    .    .    .    .    .    .    .   
-# d │ .    .    .    .    .    0.27 .    0.41
-# e │ .    .    .    0.86 0.97 .    .    .
+# a │ .    .    .    0.92 .    .    .    .   
+# b │ .    .    .    .    .    .    .    .   
+# c │ .    .    .    .    .    0.92 0.39 .   
+# d │ .    .    .    .    0.9  .    .    .   
+# e │ 0.5  .    .    .    .    .    .    0.74
 ```
 
 
@@ -148,14 +157,14 @@ my $smat2 = $smat.dot($smat.transpose);
 $smat2.print;
 ```
 ```
-# –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-#     a                   b                   c                   d                   e                  
-# ––┼––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# a │ .                   .                   .                   .                   .                  
-# b │ .                   0.29359999999999997 .                   0.1558              0.12040000000000001
-# c │ .                   .                   .                   .                   .                  
-# d │ .                   0.1558              .                   0.241               .                  
-# e │ .                   0.12040000000000001 .                   .                   1.6804999999999999
+# ––––––––––––––––––––––––––––––––––––––
+#     a      b      c      d      e     
+# ––┼–––––––––––––––––––––––––––––––––––
+# a │ 0.8464 .      .      .      .     
+# b │ .      .      .      .      .     
+# c │ .      .      0.9985 .      .     
+# d │ .      .      .      0.81   .     
+# e │ .      .      .      .      0.7976
 ```
 
 ### Implicit value
@@ -168,14 +177,16 @@ but with different implicit value:
 my $matrix3 = $matrix1.add(10);
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
+# Math::SparseMatrix(:specified-elements(6), :dimensions((5, 8)), :density(0.15))
 ```
 
 ```perl6
 $matrix3.implicit-value
 ```
 ```
-# 10
+#ERROR: No such method 'implicit-value' for invocant of type
+#ERROR: 'Math::SparseMatrix'
+# Nil
 ```
 
 Here is the pretty print:
@@ -184,11 +195,14 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# 10    10    10    10    10    10    10    10   
-# 10.36 10    10    10.14 10    10    10    10.38
-# 10    10    10    10    10    10    10    10   
-# 10    10    10    10    10    10.27 10    10.41
-# 10    10    10    10.86 10.97 10    10    10
+# –––––––––––––––––––––––––––––––––––––––––––––––––––
+#     0     1     2     3     4     5     6     7    
+# ––┼––––––––––––––––––––––––––––––––––––––––––––––––
+# 0 │ .     .     .     10.92 .     .     .     .    
+# 1 │ .     .     .     .     .     .     .     .    
+# 2 │ .     .     .     .     .     10.92 10.39 .    
+# 3 │ .     .     .     .     10.9  .     .     .    
+# 4 │ 10.5  .     .     .     .     .     .     10.74
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
@@ -227,7 +241,6 @@ $matrix3.print(:iv)
     - That is a "top level", interface class.
     - Allows access using named rows and columns.
     - "Hides" the actual component class used.
-    - *At this point it is _not_ a descendant of `Math::SparseMatrix::Abstact`.*
 
 Here is a corresponding diagram:
 

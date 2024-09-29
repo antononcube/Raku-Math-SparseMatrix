@@ -170,7 +170,6 @@ $matrix3.print(:iv)
     - That is a "top level", interface class.
     - Allows access using named rows and columns.
     - "Hides" the actual component class used.
-    - *At this point it is _not_ a descendant of `Math::SparseMatrix::Abstact`.*
 
 Here is a corresponding diagram:
 
