@@ -514,14 +514,14 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     }
 
     #| Dot product of two sparse matrices
-    multi method dot(Math::SparseMatrix::CSR:D $B --> Math::SparseMatrix::CSR:D) {
+    multi method dot(Math::SparseMatrix::CSR:D $B, Bool:D :$sort-indexes = False --> Math::SparseMatrix::CSR:D) {
         die 'The number of rows of the argument is expected to be equal to the number of columns of the object.'
         unless $!ncol == $B.nrow;
 
         my @values;
         my @col-index;
         my @row-ptr = 0 xx (self.nrow + 1);
-        my @X = 0 xx $B.ncol;
+        #my @X = 0 xx $B.ncol;
 
         for ^self.nrow -> $i {
             my %accumulator;
@@ -540,11 +540,21 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
                 }
             }
 
-            # Having sorted keys is not essential.
-            # It makes the execution of the algorithm 50% slower.
-            for %accumulator.keys.sort -> $j {
-                @values.push(%accumulator{$j});
-                @col-index.push($j.Int);
+            if $sort-indexes {
+                # Having sorted keys is not essential.
+                # It makes the execution of the algorithm 50% slower.
+                for %accumulator.keys.sort -> $j {
+                    @values.push(%accumulator{$j});
+                    @col-index.push($j.Int);
+                }
+            } else {
+                # Why is this so slow?
+                # @values = @values.append(%accumulator.values);
+                # @col-index = @col-index.append(%accumulator.keys>>.Int);
+                for %accumulator.keys -> $j {
+                    @values.push(%accumulator{$j});
+                    @col-index.push($j.Int);
+                }
             }
             @row-ptr[$i + 1] = @values.elems;
         }
