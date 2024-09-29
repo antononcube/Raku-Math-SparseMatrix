@@ -76,7 +76,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
 
     method row-at(Int:D $i --> Math::SparseMatrix::DOK) {
         return Math::SparseMatrix::DOK.new(
-                adjacency-map => {0 =>  %!adjacency-map{$i}},
+                adjacency-map => %!adjacency-map{$i}:exists ?? {0 => %!adjacency-map{$i}} !! %(),
                 nrow => 1,
                 :$!ncol,
                 :$!implicit-value
@@ -96,7 +96,14 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     method column-at(Int:D $col --> Math::SparseMatrix::DOK) {
-        return self.transpose.row-at($col).transpose;
+        # return self.transpose.row-at($col).transpose;
+        my %res-adjacency-map = %!adjacency-map.map({ $_.value{$col}:exists ?? ($_.key => %(0 => $_.value{$col})) !! Empty });
+        return Math::SparseMatrix::DOK.new(
+                adjacency-map => %res-adjacency-map,
+                :$!nrow,
+                ncol => 1,
+                :$!implicit-value
+                );
     }
 
     method AT-POS(*@index) {
@@ -189,14 +196,13 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         die 'The the implicit value of the argument is expected to be same as the explicit value of the object.'
         unless $!implicit-value == $other.implicit-value;
 
-        my %resRules = self.rules.clone;
-        my %resRules2 = $other.rules.clone.map({
-            my ($i, $j) = $_.key.words>>.Int;
-            ($i + $!nrow, $j) => $_.value
+        my %res-adjacency-map = %!adjacency-map.clone;
+        my %res-adjacency-map2 = $other.adjacency-map.map({
+            ($_.key + $!nrow) => $_.value
         });
-        %resRules = %resRules, %resRules2;
+        %res-adjacency-map = %res-adjacency-map , %res-adjacency-map2;
         return Math::SparseMatrix::DOK.new(
-                rules => %resRules,
+                adjacency-map => %res-adjacency-map,
                 nrow => $!nrow + $other.nrow,
                 :$!ncol,
                 :$!implicit-value
