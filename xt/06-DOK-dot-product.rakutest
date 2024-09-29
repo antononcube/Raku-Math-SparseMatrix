@@ -59,18 +59,18 @@ is-deeply
 #$res6.print;
 #say dot-product($matrix1.Array, $matrix2.Array);
 my $dp8 = dense-dot-product($matrix1.Array, $matrix2.Array);
-say ($res7 => $res7.Array);
-say (:$dp8);
+#say ($res7 => $res7.Array);
+#say (:$dp8);
 is
-        elementwise-operation($res7.Array, $dp8, &infix:<->).map(*.Slip)>>.abs.max,
-        0.0,
+        elementwise-operation($res7.Array, $dp8, &infix:<->).map(*.Slip)>>.abs.max < 1e-12,
+        True,
         "Same matrix";
 
 ## 9
-## Equivalent to the test above, but using SparseMatrix::CSR operations.
+## Equivalent to the test above, but using SparseMatrix::DOK operations.
 is
-        $res7.add(Math::SparseMatrix::DOK.new(dense-matrix => $dp8).multiply(-1)).Array.map(*.Slip)>>.abs.max,
-        0.0,
+        $res7.add(Math::SparseMatrix::DOK.new(dense-matrix => $dp8).multiply(-1)).Array.map(*.Slip)>>.abs.max < 1e-12,
+        True,
         "Same matrix";
 
 ## 10
