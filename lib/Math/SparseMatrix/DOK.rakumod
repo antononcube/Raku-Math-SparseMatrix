@@ -134,14 +134,19 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     # Equivalence
     #=================================================================
-    method eqv(Math::SparseMatrix::DOK:D $other --> Bool:D) {
-        if $!nrow != $other.nrow || $!ncol != $other.ncol ||
-                %!adjacency-map.elems != $other.adjacency-map.elems ||
-                $!implicit-value != $other.implicit-value {
-            return False;
+    method eqv(Math::SparseMatrix::DOK:D $other, Numeric:D :$tol = 1e-14 --> Bool:D) {
+        return False unless $!nrow == $other.nrow && $!ncol == $other.ncol;
+        for %!adjacency-map.kv -> $row, %cols {
+            for %cols.kv -> $col, $value {
+                return False unless abs($value - ($other.adjacency-map{$row}{$col} // $other.implicit-value)) <= $tol;
+            }
         }
-
-        return self.adjacency-map eqv $other.adjacency-map;
+        for $other.adjacency-map.kv -> $row, %cols {
+            for %cols.kv -> $col, $value {
+                return False unless abs($value - (%!adjacency-map{$row}{$col} // $!implicit-value)) <= $tol;
+            }
+        }
+        return True;
     }
 
     #=================================================================
