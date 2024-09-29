@@ -64,7 +64,7 @@ my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
 say $matrix1;
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
 ```
 
 Here it is "pretty printed": 
@@ -73,11 +73,11 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# .    .    0.1  .    .    .    .    0.13
 # .    .    .    .    .    .    .    .   
-# .    .    .    .    .    .    0.31 .   
-# .    0.3  .    .    .    0.99 .    .   
-# .    .    .    0.21 .    0.04 .    0.01
+# 0.36 .    .    0.14 .    .    .    0.38
+# .    .    .    .    .    .    .    .   
+# .    .    .    .    .    0.27 .    0.41
+# .    .    .    0.86 0.97 .    .    .
 ```
 
 Here `10` is multiplied with all elements:
@@ -88,11 +88,11 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# .   .   1   .   .   .   .   1.3
 # .   .   .   .   .   .   .   .  
-# .   .   .   .   .   .   3.1 .  
-# .   3   .   .   .   9.9 .   .  
-# .   .   .   2.1 .   0.4 .   0.1
+# 3.6 .   .   1.4 .   .   .   3.8
+# .   .   .   .   .   .   .   .  
+# .   .   .   .   .   2.7 .   4.1
+# .   .   .   8.6 9.7 .   .   .
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -103,11 +103,11 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# 0.0269 .      .      .      0.0013
-# .      .      .      .      .     
-# .      .      0.0961 .      .     
-# .      .      .      1.0701 0.0396
-# 0.0013 .      .      0.0396 0.0458
+# .                   .                   .                   .                   .                  
+# .                   0.29359999999999997 .                   0.1558              0.12040000000000001
+# .                   .                   .                   .                   .                  
+# .                   0.1558              .                   0.241               .                  
+# .                   0.12040000000000001 .                   .                   1.6804999999999999
 ```
 
 -----
@@ -132,11 +132,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    .    0.1  .    .    .    .    0.13
-# b │ .    .    .    .    .    .    .    .   
-# c │ .    .    .    .    .    .    0.31 .   
-# d │ .    0.3  .    .    .    0.99 .    .   
-# e │ .    .    .    0.21 .    0.04 .    0.01
+# a │ .    .    .    .    .    .    .    .   
+# b │ 0.36 .    .    0.14 .    .    .    0.38
+# c │ .    .    .    .    .    .    .    .   
+# d │ .    .    .    .    .    0.27 .    0.41
+# e │ .    .    .    0.86 0.97 .    .    .
 ```
 
 
@@ -148,14 +148,14 @@ my $smat2 = $smat.dot($smat.transpose);
 $smat2.print;
 ```
 ```
-# ––––––––––––––––––––––––––––––––––––––
-#     a      b      c      d      e     
-# ––┼–––––––––––––––––––––––––––––––––––
-# a │ 0.0269 .      .      .      0.0013
-# b │ .      .      .      .      .     
-# c │ .      .      0.0961 .      .     
-# d │ .      .      .      1.0701 0.0396
-# e │ 0.0013 .      .      0.0396 0.0458
+# –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+#     a                   b                   c                   d                   e                  
+# ––┼––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# a │ .                   .                   .                   .                   .                  
+# b │ .                   0.29359999999999997 .                   0.1558              0.12040000000000001
+# c │ .                   .                   .                   .                   .                  
+# d │ .                   0.1558              .                   0.241               .                  
+# e │ .                   0.12040000000000001 .                   .                   1.6804999999999999
 ```
 
 ### Implicit value
@@ -168,7 +168,7 @@ but with different implicit value:
 my $matrix3 = $matrix1.add(10);
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
 ```
 
 ```perl6
@@ -184,33 +184,124 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# 10    10    10.1  10    10    10    10    10.13
 # 10    10    10    10    10    10    10    10   
-# 10    10    10    10    10    10    10.31 10   
-# 10    10.3  10    10    10    10.99 10    10   
-# 10    10    10    10.21 10    10.04 10    10.01
+# 10.36 10    10    10.14 10    10    10    10.38
+# 10    10    10    10    10    10    10    10   
+# 10    10    10    10    10    10.27 10    10.41
+# 10    10    10    10.86 10.97 10    10    10
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
 
 -----
 
-## Implementation notes
+## Design
 
-- The most important operation is matrix-vector multiplication.
+### General
+
+- There should be a "main" class, `Math::SpareMatrix` that:
+  - Provides the SMA functionalities
+  - Delegates to concrete sparse matrix classes that are based on different representation formats
+  - Can have named rows, columns, and dimensions
+  - Gives access to sparse matrix elements, rows, columns, and sub-matrices
+- The default or "main" core sparse matrix class should use Compressed Sparse Row (CSR) format.
+- Also, a class using Dictionary Of Keys (DOK) format should be provided.
+- The core sparse matrix classes do not have named rows, columns, and dimensions.
+- Ideally, a class using `NativeCall` should be implemented at some point.
+  - It looks like this is "a must", since the CSR and DOK classes are fairly slow.
+  - Both "plain C" and macOS [Accelerate](https://developer.apple.com/accelerate/) implementations should be made.
+- The _most important operation_ is Matrix-Vector Dot Product.
+  - The current design is to use one-row or one-column matrices for the vectors.
+  - Dense vectors are (of course) also supported
+
+### Object-Oriented Programming (OOP) architecture
+
+- The OOP [Decorator Design Pattern](https://en.wikipedia.org/wiki/Decorator_pattern) is used to organize the SMA functionalities.
+- In that pattern:
+  - The _Component_ is played by the class [`Math::SparseMatrix::Abstract`](./lib/Math/SparseMatrix/Abstract.rakumod).
+  - The _ConcreteComponent_ is played by the classes:
+    - [`Math::SparseMatrix::CSR`](./lib/Math/SparseMatrix/CSR.rakumod)
+    - [`Math::SparseMatrix::DOK`](./lib/Math/SparseMatrix/DOK.rakumod)
+  - The concrete component classes provide the core SMA operations.
+  - The _Decorator_ is played by [`Math::SparseMatrix`](./lib/Math/SparseMatrix.rakumod).
+    - That is a "top level", interface class.
+    - Allows access using named rows and columns.
+    - "Hides" the actual component class used.
+    - *At this point it is _not_ a descendant of `Math::SparseMatrix::Abstact`.*
+
+Here is a corresponding diagram:
+
+```mermaid
+classDiagram
+    class Abstract["Math::SparseMatrix::Abstract"] {
+        <<abstract>>
+        +value-at()
+        +row-at()
+        +column-at()
+        +row-slice()
+        +AT-POS()
+        +print()
+        +transpose()
+        +add()
+        +multiply()
+        +dot()
+    }
+    
+    class CSR["Math::SparseMatrix::CSR"] {
+        @row-ptr
+        @col-index
+        @values
+        nrow
+        ncol
+        implicit-value
+    }
+    
+    class DOK["Math::SparseMatrix::DOK"] {
+        %adjacency-map
+        nrow
+        ncol
+        implicit-value
+    }
+    
+    class SparseMatrix["Math::SparseMatrix"] {
+        Abstract core-matrix
+        +AT-POS()
+        +print()
+        +transpose()
+        +add()
+        +multiply()
+        +dot()
+    }
+    
+    CSR --> Abstract : implements
+    DOK --> Abstract : implements
+    SparseMatrix --> Abstract : Hides actual component class
+    SparseMatrix *--> Abstract
+```
+
+### Implementation details
+
+- Again, the most important operation is Matrix-Vector Dot Product.
     - It has to be as fast as possible.
-    - There are two Dot Product implementations:
+    - There are two Dot Product implementations for CSR:
         - Direct
         - Symbolic-&-numeric
-    - The direct one is 20-50% faster.
-- It seems it a good idea to provide for some operations a _symbolic_ (or sparse matrix elements pattern) method.
+    - (Currently) the direct one is 20-50% faster.
+- It seems it is a good idea to provide for some operations _symbolic_ (or sparse matrix elements pattern) methods.
     - For example:
         - `add-pattern` / `add`
         - `dot-pattern` / `dot-numeric`
 - It is important to have access methods / operators.
     - All three are used in the accessor implementation: `AT-POS`, `postcircumfix:<[ ]>`, `postcircumfix:<[; ]>` .
-- The core sparse matrix classes do not have named rows, columns, and dimensions. 
-- That is done via suitable role. (Not implemented yest.) 
+
+
+-----
+
+## Performance
+
+- Performance of CSR and DOK sparse matrices is not good: between 100 to 300 times slower than Wolfram Language
+    - (Using the same matrices, of course.)
+- It somewhat surprising that DOK is faster than CSR
 
 -----
 

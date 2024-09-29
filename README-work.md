@@ -138,22 +138,113 @@ $matrix3.print(:iv)
 
 -----
 
-## Implementation notes
+## Design
 
-- The most important operation is matrix-vector multiplication.
+### General
+
+- There should be a "main" class, `Math::SpareMatrix` that:
+  - Provides the SMA functionalities
+  - Delegates to concrete sparse matrix classes that are based on different representation formats
+  - Can have named rows, columns, and dimensions
+  - Gives access to sparse matrix elements, rows, columns, and sub-matrices
+- The default or "main" core sparse matrix class should use Compressed Sparse Row (CSR) format.
+- Also, a class using Dictionary Of Keys (DOK) format should be provided.
+- The core sparse matrix classes do not have named rows, columns, and dimensions.
+- Ideally, a class using `NativeCall` should be implemented at some point.
+  - It looks like this is "a must", since the CSR and DOK classes are fairly slow.
+  - Both "plain C" and macOS [Accelerate](https://developer.apple.com/accelerate/) implementations should be made.
+- The _most important operation_ is Matrix-Vector Dot Product.
+  - The current design is to use one-row or one-column matrices for the vectors.
+  - Dense vectors are (of course) also supported
+
+### Object-Oriented Programming (OOP) architecture
+
+- The OOP [Decorator Design Pattern](https://en.wikipedia.org/wiki/Decorator_pattern) is used to organize the SMA functionalities.
+- In that pattern:
+  - The _Component_ is played by the class [`Math::SparseMatrix::Abstract`](./lib/Math/SparseMatrix/Abstract.rakumod).
+  - The _ConcreteComponent_ is played by the classes:
+    - [`Math::SparseMatrix::CSR`](./lib/Math/SparseMatrix/CSR.rakumod)
+    - [`Math::SparseMatrix::DOK`](./lib/Math/SparseMatrix/DOK.rakumod)
+  - The concrete component classes provide the core SMA operations.
+  - The _Decorator_ is played by [`Math::SparseMatrix`](./lib/Math/SparseMatrix.rakumod).
+    - That is a "top level", interface class.
+    - Allows access using named rows and columns.
+    - "Hides" the actual component class used.
+    - *At this point it is _not_ a descendant of `Math::SparseMatrix::Abstact`.*
+
+Here is a corresponding diagram:
+
+```mermaid
+classDiagram
+    class Abstract["Math::SparseMatrix::Abstract"] {
+        <<abstract>>
+        +value-at()
+        +row-at()
+        +column-at()
+        +row-slice()
+        +AT-POS()
+        +print()
+        +transpose()
+        +add()
+        +multiply()
+        +dot()
+    }
+    
+    class CSR["Math::SparseMatrix::CSR"] {
+        @row-ptr
+        @col-index
+        @values
+        nrow
+        ncol
+        implicit-value
+    }
+    
+    class DOK["Math::SparseMatrix::DOK"] {
+        %adjacency-map
+        nrow
+        ncol
+        implicit-value
+    }
+    
+    class SparseMatrix["Math::SparseMatrix"] {
+        Abstract core-matrix
+        +AT-POS()
+        +print()
+        +transpose()
+        +add()
+        +multiply()
+        +dot()
+    }
+    
+    CSR --> Abstract : implements
+    DOK --> Abstract : implements
+    SparseMatrix --> Abstract : Hides actual component class
+    SparseMatrix *--> Abstract
+```
+
+### Implementation details
+
+- Again, the most important operation is Matrix-Vector Dot Product.
     - It has to be as fast as possible.
-    - There are two Dot Product implementations:
+    - There are two Dot Product implementations for CSR:
         - Direct
         - Symbolic-&-numeric
-    - The direct one is 20-50% faster.
-- It seems it a good idea to provide for some operations a _symbolic_ (or sparse matrix elements pattern) method.
+    - (Currently) the direct one is 20-50% faster.
+- It seems it is a good idea to provide for some operations _symbolic_ (or sparse matrix elements pattern) methods.
     - For example:
         - `add-pattern` / `add`
         - `dot-pattern` / `dot-numeric`
 - It is important to have access methods / operators.
     - All three are used in the accessor implementation: `AT-POS`, `postcircumfix:<[ ]>`, `postcircumfix:<[; ]>` .
-- The core sparse matrix classes do not have named rows, columns, and dimensions. 
-- That is done via suitable role. (Not implemented yest.) 
+
+
+-----
+
+## Performance
+
+- Performance of CSR and DOK sparse matrices is not good: between 100 to 300 times slower than Wolfram Language
+    - (Using the same matrices, of course.)
+- It somewhat surprising that DOK is faster than CSR
 
 -----
 
