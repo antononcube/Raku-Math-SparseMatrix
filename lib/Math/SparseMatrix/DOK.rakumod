@@ -425,7 +425,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     # Pretty print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {
-        my $max-length = %!adjacency-map.values>>.values.map(*.Str.chars).max // 1;
+        my $max-length = %!adjacency-map.values>>.values.map(*.Slip).map(*.Str.chars).max // 1;
         my $default = $show-implicit-value ?? $!implicit-value !! '.';
         $max-length = max($max-length, $default.Str.chars);
 
