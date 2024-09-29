@@ -2,7 +2,7 @@ use Math::SparseMatrix::Abstract;
 use Math::SparseMatrix::CSR;
 
 class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
-    has %.adjacency-map;
+    has %.adjacency-list;
     has UInt:D $.nrow is required;
     has UInt:D $.ncol is required;
     has Numeric:D $.implicit-value is rw = 0;
@@ -10,13 +10,13 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     # Creators
     #=================================================================
-    multi method new(:%adjacency-map!,
+    multi method new(:%adjacency-list!,
                      :$nrow is copy = Whatever,
                      :$ncol is copy = Whatever,
                      Numeric:D :$implicit-value = 0) {
-        if $nrow.isa(Whatever) { $nrow = %adjacency-map.keys.max }
-        if $ncol.isa(Whatever) { $ncol = %adjacency-map.map({ $_.keys }).map(*.Slip).max }
-        self.bless(:%adjacency-map, :$nrow, :$ncol, :$implicit-value);
+        if $nrow.isa(Whatever) { $nrow = %adjacency-list.keys.max }
+        if $ncol.isa(Whatever) { $ncol = %adjacency-list.map({ $_.keys }).map(*.Slip).max }
+        self.bless(:%adjacency-list, :$nrow, :$ncol, :$implicit-value);
     }
 
     multi method new(:@rules! where @rules.all ~~ Pair:D,
@@ -32,23 +32,23 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
                      :$ncol is copy = %rules.map(*.key.words.tail).max + 1,
                      Numeric:D :$implicit-value = 0) {
         # There should be correctness check, etc.
-        my %adjacency-map = self.to-adjacency-map(%rules);
-        self.bless(:%adjacency-map, :$nrow, :$ncol, :$implicit-value);
+        my %adjacency-list = self.to-adjacency-list(%rules);
+        self.bless(:%adjacency-list, :$nrow, :$ncol, :$implicit-value);
     }
 
     multi method new(:@dense-matrix! where @dense-matrix ~~ List:D && @dense-matrix.all ~~ List:D,
                      :$nrow is copy = @dense-matrix.elems,
                      :$ncol is copy = @dense-matrix>>.elems.max,
                      Numeric:D :$implicit-value = 0) {
-        my %adjacency-map;
+        my %adjacency-list;
         for @dense-matrix.kv -> $row, @cols {
             for @cols.kv -> $col, $val {
                 if $val != $implicit-value && $row < $nrow && $col < $ncol {
-                    %adjacency-map{$row}{$col} = $val;
+                    %adjacency-list{$row}{$col} = $val;
                 }
             }
         }
-        self.bless(:%adjacency-map, :$nrow, :$ncol, :$implicit-value);
+        self.bless(:%adjacency-list, :$nrow, :$ncol, :$implicit-value);
     }
 
     #=================================================================
@@ -56,7 +56,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     method clone() {
         return Math::SparseMatrix::DOK.new(
-                adjacency-map => %!adjacency-map.clone,
+                adjacency-list => %!adjacency-list.clone,
                 :$!nrow,
                 :$!ncol,
                 :$!implicit-value
@@ -72,12 +72,12 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     method value-at(Int:D $row, Int:D $col) {
-        return %!adjacency-map{$row}{$col} // $!implicit-value;
+        return %!adjacency-list{$row}{$col} // $!implicit-value;
     }
 
     method row-at(Int:D $i --> Math::SparseMatrix::DOK) {
         return Math::SparseMatrix::DOK.new(
-                adjacency-map => %!adjacency-map{$i}:exists ?? {0 => %!adjacency-map{$i}} !! %(),
+                adjacency-list => %!adjacency-list{$i}:exists ?? {0 => %!adjacency-list{$i}} !! %(),
                 nrow => 1,
                 :$!ncol,
                 :$!implicit-value
@@ -98,9 +98,9 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
 
     method column-at(Int:D $col --> Math::SparseMatrix::DOK) {
         # return self.transpose.row-at($col).transpose;
-        my %res-adjacency-map = %!adjacency-map.map({ $_.value{$col}:exists ?? ($_.key => %(0 => $_.value{$col})) !! Empty });
+        my %res-adjacency-list = %!adjacency-list.map({ $_.value{$col}:exists ?? ($_.key => %(0 => $_.value{$col})) !! Empty });
         return Math::SparseMatrix::DOK.new(
-                adjacency-map => %res-adjacency-map,
+                adjacency-list => %res-adjacency-list,
                 :$!nrow,
                 ncol => 1,
                 :$!implicit-value
@@ -118,7 +118,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     # Rules and tuples
     #=================================================================
     method rules() {
-        return self.to-rules(%!adjacency-map);
+        return self.to-rules(%!adjacency-list);
     }
 
     # Same as Math::SparseMatrix::DOK.tuples
@@ -136,14 +136,14 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     method eqv(Math::SparseMatrix::DOK:D $other, Numeric:D :$tol = 1e-14 --> Bool:D) {
         return False unless $!nrow == $other.nrow && $!ncol == $other.ncol;
-        for %!adjacency-map.kv -> $row, %cols {
+        for %!adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $value {
-                return False unless abs($value - ($other.adjacency-map{$row}{$col} // $other.implicit-value)) <= $tol;
+                return False unless abs($value - ($other.adjacency-list{$row}{$col} // $other.implicit-value)) <= $tol;
             }
         }
-        for $other.adjacency-map.kv -> $row, %cols {
+        for $other.adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $value {
-                return False unless abs($value - (%!adjacency-map{$row}{$col} // $!implicit-value)) <= $tol;
+                return False unless abs($value - (%!adjacency-list{$row}{$col} // $!implicit-value)) <= $tol;
             }
         }
         return True;
@@ -153,11 +153,11 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     # Info
     #=================================================================
     method adjacency-lists() {
-        return do for ^$!nrow -> $r { %!adjacency-map{$r}.keys.sort // ()};
+        return do for ^$!nrow -> $r { %!adjacency-list{$r}.keys.sort // ()};
     }
 
     method column-indices() {
-        return %!adjacency-map.map({ $_.keys }).map(*.Slip).unique;
+        return %!adjacency-list.map({ $_.keys }).map(*.Slip).unique;
     }
 
     method columns-count() {
@@ -165,7 +165,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     method density() {
-        return %!adjacency-map.values>>.elems.sum / ($!nrow * $!ncol);
+        return %!adjacency-list.values>>.elems.sum / ($!nrow * $!ncol);
     }
 
     method dimensions() {
@@ -173,7 +173,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     method explicit-length() {
-        return %!adjacency-map.values>>.elems.sum;
+        return %!adjacency-list.values>>.elems.sum;
     }
 
     method explicit-positions() {
@@ -181,7 +181,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     method explicit-values() {
-        return %!adjacency-map.values>>.values.map(*.Slip);
+        return %!adjacency-list.values>>.values.map(*.Slip);
     }
 
     method row-pointers() {
@@ -202,13 +202,13 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         die 'The the implicit value of the argument is expected to be same as the explicit value of the object.'
         unless $!implicit-value == $other.implicit-value;
 
-        my %res-adjacency-map = %!adjacency-map.clone;
-        my %res-adjacency-map2 = $other.adjacency-map.map({
+        my %res-adjacency-list = %!adjacency-list.clone;
+        my %res-adjacency-map2 = $other.adjacency-list.map({
             ($_.key + $!nrow) => $_.value
         });
-        %res-adjacency-map = %res-adjacency-map , %res-adjacency-map2;
+        %res-adjacency-list = %res-adjacency-list , %res-adjacency-map2;
         return Math::SparseMatrix::DOK.new(
-                adjacency-map => %res-adjacency-map,
+                adjacency-list => %res-adjacency-list,
                 nrow => $!nrow + $other.nrow,
                 :$!ncol,
                 :$!implicit-value
@@ -245,7 +245,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         for ^$!nrow -> $i {
             my @row;
             for ^$!ncol -> $j {
-                @row.push(%!adjacency-map{$i}{$j} // $implicit-value);
+                @row.push(%!adjacency-list{$i}{$j} // $implicit-value);
             }
             @matrix.push(@row);
         }
@@ -257,12 +257,12 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     method transpose(--> Math::SparseMatrix::DOK) {
         my %transposed;
-        for %!adjacency-map.kv -> $row, %cols {
+        for %!adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $value {
                 %transposed{$col}{$row} = $value;
             }
         }
-        self.new(adjacency-map => %transposed, :nrow($!ncol), :ncol($!nrow), :$!implicit-value);
+        self.new(adjacency-list => %transposed, :nrow($!ncol), :ncol($!nrow), :$!implicit-value);
     }
 
     #=================================================================
@@ -290,15 +290,15 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         unless $!ncol == $other.nrow;
 
         my %result;
-        for %!adjacency-map.kv -> $i, %row {
+        for %!adjacency-list.kv -> $i, %row {
             for %row.kv -> $j, $val {
-                for $other.adjacency-map{$j}.kv -> $k, $other-val {
+                for $other.adjacency-list{$j}.kv -> $k, $other-val {
                     %result{$i}{$k} += $val * $other-val;
                 }
             }
         }
         return Math::SparseMatrix::DOK.new(
-                adjacency-map => %result,
+                adjacency-list => %result,
                 :$!nrow,
                 ncol => $other.ncol,
                 implicit-value => $!implicit-value * $other.implicit-value
@@ -310,14 +310,14 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     #| Element-wise addition
     multi method add(Numeric:D $a --> Math::SparseMatrix::DOK:D) {
-        my %res-adjacency-map;
-        for %.adjacency-map.kv -> $row, %cols {
+        my %res-adjacency-list;
+        for %.adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $val {
-                %res-adjacency-map{$row}{$col} = $val + $a;
+                %res-adjacency-list{$row}{$col} = $val + $a;
             }
         }
         return Math::SparseMatrix::DOK.bless(
-                adjacency-map => %res-adjacency-map,
+                adjacency-list => %res-adjacency-list,
                 :$!nrow,
                 :$!ncol,
                 implicit-value => $!implicit-value + $a
@@ -329,21 +329,21 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         die 'The dimensions of the argument must match the dimensions of the object.'
         unless $!nrow == $other.nrow && $!ncol == $other.ncol;
 
-        my %res-adjacency-map;
-        for %!adjacency-map.kv -> $row, %cols {
+        my %res-adjacency-list;
+        for %!adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $val {
-                %res-adjacency-map{$row}{$col} = $val + ($other.adjacency-map{$row}{$col} // $other.implicit-value);
+                %res-adjacency-list{$row}{$col} = $val + ($other.adjacency-list{$row}{$col} // $other.implicit-value);
             }
         }
 
-        for $other.adjacency-map.kv -> $row, %cols {
+        for $other.adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $val {
-                %res-adjacency-map{$row}{$col} //= $val + $!implicit-value;
+                %res-adjacency-list{$row}{$col} //= $val + $!implicit-value;
             }
         }
 
         return Math::SparseMatrix::DOK.bless(
-                adjacency-map => %res-adjacency-map,
+                adjacency-list => %res-adjacency-list,
                 :$!nrow,
                 :$!ncol,
                 implicit-value => $!implicit-value + $other.implicit-value
@@ -355,14 +355,14 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     #| Element-wise multiplication
     multi method multiply(Numeric:D $a --> Math::SparseMatrix::DOK:D) {
-        my %res-adjacency-map;
-        for %.adjacency-map.kv -> $row, %cols {
+        my %res-adjacency-list;
+        for %!adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $val {
-                %res-adjacency-map{$row}{$col} = $val * $a;
+                %res-adjacency-list{$row}{$col} = $val * $a;
             }
         }
         return Math::SparseMatrix::DOK.bless(
-                adjacency-map => %res-adjacency-map,
+                adjacency-list => %res-adjacency-list,
                 :$!nrow,
                 :$!ncol,
                 implicit-value => $!implicit-value * $a
@@ -374,26 +374,26 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         die 'The dimensions of the argument must match the dimensions of the object.'
         unless $!nrow == $other.nrow && $!ncol == $other.ncol;
 
-        my %res-adjacency-map;
-        for %!adjacency-map.kv -> $row, %cols {
+        my %res-adjacency-list;
+        for %!adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $val {
-                if $other.adjacency-map{$row}{$col}:exists {
-                    %res-adjacency-map{$row}{$col} = $val * $other.adjacency-map{$row}{$col};
+                if $other.adjacency-list{$row}{$col}:exists {
+                    %res-adjacency-list{$row}{$col} = $val * $other.adjacency-list{$row}{$col};
                 } else {
-                    %res-adjacency-map{$row}{$col} = $val * $other.implicit-value;
+                    %res-adjacency-list{$row}{$col} = $val * $other.implicit-value;
                 }
             }
         }
 
-        for $other.adjacency-map.kv -> $row, %cols {
+        for $other.adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $val {
-                unless %!adjacency-map{$row}{$col}:exists {
-                    %res-adjacency-map{$row}{$col} = $.implicit-value * $val;
+                unless %!adjacency-list{$row}{$col}:exists {
+                    %res-adjacency-list{$row}{$col} = $.implicit-value * $val;
                 }
             }
         }
         return Math::SparseMatrix::DOK.bless(
-                adjacency-map => %res-adjacency-map,
+                adjacency-list => %res-adjacency-list,
                 :$!nrow,
                 :$!ncol,
                 implicit-value => $!implicit-value * $other.implicit-value
@@ -409,7 +409,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         if $clone {
             return self.clone.unitize(:!clone);
         }
-        %!adjacency-map = %!adjacency-map.map({ $_.map({ $_.key => 1 }) });
+        %!adjacency-list = %!adjacency-list.map({ $_.map({ $_.key => 1 }) });
         return self;
     }
 
@@ -424,7 +424,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         if $clone {
             return self.clone.clip(:$v-min, :$v-max, :!clone);
         }
-        %!adjacency-map = %!adjacency-map.map({
+        %!adjacency-list = %!adjacency-list.map({
             $_.map({
                 $_.key => do if $_.value < $v-min { $v-min }
                 elsif $v-max < $_.value { $v-max }
@@ -438,15 +438,15 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     # Pretty print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {
-        my $max-length = %!adjacency-map.values>>.values.map(*.Slip).map(*.Str.chars).max // 1;
+        my $max-length = %!adjacency-list.values>>.values.map(*.Slip).map(*.Str.chars).max // 1;
         my $default = $show-implicit-value ?? $!implicit-value !! '.';
         $max-length = max($max-length, $default.Str.chars);
 
         my @rows;
         for ^$!nrow -> $i {
             my @row = do for ^$!ncol -> $j {
-                my $formatted = do if %!adjacency-map{$i}{$j}:exists {
-                    %!adjacency-map{$i}{$j} ;
+                my $formatted = do if %!adjacency-list{$i}{$j}:exists {
+                    %!adjacency-list{$i}{$j} ;
                 } else {
                     $default;
                 }
@@ -475,7 +475,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         my $nnz = 0;
 
         for ^$!nrow -> $row {
-            for %.adjacency-map{$row}.kv -> $col, $value {
+            for %.adjacency-list{$row}.kv -> $col, $value {
                 @values.push($value);
                 @col-index.push($col);
                 $nnz++;

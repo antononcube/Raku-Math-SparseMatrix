@@ -139,7 +139,7 @@ class Math::SparseMatrix::Abstract {
     # Representation
     #=================================================================
     #| Convert to adjacency maps.
-    method to-adjacency-map(%rules) {
+    method to-adjacency-list(%rules) {
         my %hash-of-hashes;
         for %rules.kv -> $key, $value {
             my ($row, $col) = $key.words;
