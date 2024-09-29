@@ -241,9 +241,9 @@ classDiagram
 
 ## Performance
 
-- Performance of CSR and DOK sparse matrices is not good: between 100 to 300 times slower than Wolfram Language
+- Performance of CSR and DOK sparse matrices is not good: between 40 to 150 times slower than Wolfram Language.
     - (Using the same matrices, of course.)
-- It somewhat surprising that DOK is faster than CSR
+- It is somewhat surprising that DOK is faster than CSR.
 
 -----
 
