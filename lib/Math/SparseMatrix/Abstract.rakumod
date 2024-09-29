@@ -138,6 +138,27 @@ class Math::SparseMatrix::Abstract {
     #=================================================================
     # Representation
     #=================================================================
+    #| Convert to adjacency maps.
+    method to-adjacency-map(%rules) {
+        my %hash-of-hashes;
+        for %rules.kv -> $key, $value {
+            my ($row, $col) = $key.words;
+            %hash-of-hashes{$row}{$col} = $value;
+        }
+        return %hash-of-hashes;
+    }
+
+    #| From adjacency map to dictionary of keys
+    method to-rules(%adjacency-map) {
+        my %rules;
+        for %adjacency-map.kv -> $i, %row {
+            for %row.kv -> $j, $val {
+                %rules{($i, $j).Str} = $val;
+            }
+        }
+        return %rules;
+    }
+
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
     method wl() {...}
