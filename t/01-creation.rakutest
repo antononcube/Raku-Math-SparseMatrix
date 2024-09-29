@@ -67,9 +67,16 @@ ok Math::SparseMatrix.new($matrix3);
 isa-ok Math::SparseMatrix.new($matrix3), Math::SparseMatrix:D;
 
 ## 7
-isa-ok Math::SparseMatrix.new($matrix3, row-names => Whatever, column-names => ('A'..'Z').head($ncol)), Math::SparseMatrix:D;
+isa-ok Math::SparseMatrix.new($matrix3, row-names => Whatever, column-names => ('A' .. 'Z').head($ncol)),
+        Math::SparseMatrix:D;
 
 ## 8
 ok Math::SparseMatrix.new(core-matrix => $matrix3, row-names => 'a' .. 'e', column-names => 'A' .. 'H');
+
+## 9
+my $smat9 = Math::SparseMatrix.new($matrix3);
+isa-ok
+        Math::SparseMatrix.new(core-matrix => $smat9, row-names => 'a' .. 'e', column-names => 'A' .. 'H'),
+        Math::SparseMatrix:D;
 
 done-testing;
