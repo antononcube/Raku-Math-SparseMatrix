@@ -33,6 +33,11 @@ class Math::SparseMatrix
             when ($_ ~~ Map:D) && $_.elems == $n {
                 $_
             }
+            when ($_ ~~ Map:D) && $_.elems == 0 {
+                # This is somewhat hacky.
+                # It might happen with a step-by-step building of a Math::SparseMatrix object.
+                $_
+            }
             when Whatever {
                 ((^$n) Z=> (^$n)).Hash
             }
@@ -251,6 +256,20 @@ class Math::SparseMatrix
         for ^@rows.elems -> $i {
             say [sprintf("%-*s", $row-width, @row-names[$i]), $v-sep, |@rows[$i].map({ sprintf("%-*s", $max-len, $_) })].join(' ');
         }
+    }
+
+    #=================================================================
+    # Wrapper delegations
+    #=================================================================
+    #| Round the sparse matrix
+    #| C<$scale> -- Scale to round to.
+    #| C<:$clone> -- Whether to clone or not.
+    method round(Numeric:D $scale = 1, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.round($scale, :!clone);
+        }
+        $!core-matrix.round($scale, :!clone);
+        return self;
     }
 
 
