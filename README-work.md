@@ -250,7 +250,7 @@ classDiagram
 
 ## Acknowledgements
 
-Thanks to [@lizmat](https://github.com/lizmat) and [@tonyo](https://github.com/tonyo) for helping figuring out the proper use of `postcircumfix:<[]>` and `postcircumfix:<[; ]>`
+Thanks to [@lizmat](https://github.com/lizmat) and [@tony-o](https://github.com/tony-o) for helping figuring out the proper use of `postcircumfix:<[]>` and `postcircumfix:<[; ]>`
 in order to have the named rows and columns functionalities.
 
 -----
