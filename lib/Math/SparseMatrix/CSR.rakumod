@@ -11,15 +11,6 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #=================================================================
     # Creators
     #=================================================================
-    #    submethod BUILD(
-    #            :@!values,
-    #            :@!col-index,
-    #            :@!row-ptr,
-    #            UInt:D :$!nrow,
-    #            UInt:D :$!ncol
-    #                    ) {
-    #    }
-    #
     multi method new(:@values! where @values.all ~~ Numeric:D,
                      :@col-index, :@row-ptr,
                      UInt:D :$nrow, UInt:D :$ncol,
@@ -869,6 +860,19 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             elsif $v-max < $_ { $v-max }
             else {$_}
         });
+        return self;
+    }
+
+    #=================================================================
+    # Round
+    #=================================================================
+    #| Round the sparse matrix
+    #| C<:$scale> -- Scale to round to.
+    method round(Numeric:D $scale = 1, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.round($scale, :!clone);
+        }
+        @!values = @!values>>.round($scale);
         return self;
     }
 

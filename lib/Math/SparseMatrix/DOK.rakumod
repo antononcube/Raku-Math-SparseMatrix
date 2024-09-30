@@ -435,6 +435,19 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     #=================================================================
+    # Round
+    #=================================================================
+    #| Round the sparse matrix
+    #| C<:$scale> -- Scale to round to.
+    method round(Numeric:D $scale = 1, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.round($scale, :!clone);
+        }
+        %!adjacency-list = %!adjacency-list.nodemap({ $_.round($scale) });
+        return self;
+    }
+
+    #=================================================================
     # Pretty print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {
