@@ -59,8 +59,9 @@ my $nrow = 5;
 my $ncol = 8;
 my $density = 0.2;
 my $tol = 0.01;
+my $type = 'CSR';
 
-my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):!decorated;
 say $matrix1;
 ```
 
@@ -111,7 +112,7 @@ Here is the dot-product of that matrix with its transpose:
 ```perl6
 my $smat2 = $smat.dot($smat.transpose); 
 
-$smat2.print;
+$smat2.round(0.02).print;
 ```
 
 ### Implicit value
@@ -249,7 +250,7 @@ classDiagram
 
 ## Acknowledgements
 
-Thanks to [@lizmat](https://github.com/lizmat) and [@timo](https://github.com/timo) for helping figuring out the proper use of `postcircumfix:<[]>` and `postcircumfix:<[; ]>`
+Thanks to [@lizmat](https://github.com/lizmat) and [@tonyo](https://github.com/tonyo) for helping figuring out the proper use of `postcircumfix:<[]>` and `postcircumfix:<[; ]>`
 in order to have the named rows and columns functionalities.
 
 -----

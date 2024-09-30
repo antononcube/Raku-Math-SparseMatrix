@@ -59,12 +59,13 @@ my $nrow = 5;
 my $ncol = 8;
 my $density = 0.2;
 my $tol = 0.01;
+my $type = 'CSR';
 
-my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):!decorated;
 say $matrix1;
 ```
 ```
-# Math::SparseMatrix(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
 ```
 
 Here it is "pretty printed": 
@@ -73,14 +74,11 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# –––––––––––––––––––––––––––––––––––––––––––
-#     0    1    2    3    4    5    6    7   
-# ––┼––––––––––––––––––––––––––––––––––––––––
-# 0 │ .    .    0.58 .    0.6  .    .    0.19
-# 1 │ .    .    .    .    .    .    .    .   
-# 2 │ .    .    .    .    .    .    0.31 .   
-# 3 │ .    .    .    0.79 .    .    .    .   
-# 4 │ 0.03 .    0.73 .    .    .    .    0.9
+# .    .    .    .    0.84 .    .    0.97
+# .    0.66 .    .    .    .    .    .   
+# 0.99 .    .    .    .    .    .    0.51
+# .    .    .    .    .    0.87 0.68 .   
+# .    .    .    .    .    .    .    .
 ```
 
 Here `10` is multiplied with all elements:
@@ -91,14 +89,11 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# –––––––––––––––––––––––––––––––––––
-#     0   1   2   3   4   5   6   7  
-# ––┼––––––––––––––––––––––––––––––––
-# 0 │ .   .   5.8 .   6   .   .   1.9
-# 1 │ .   .   .   .   .   .   .   .  
-# 2 │ .   .   .   .   .   .   3.1 .  
-# 3 │ .   .   .   7.9 .   .   .   .  
-# 4 │ 0.3 .   7.3 .   .   .   .   9
+# .   .   .   .   8.4 .   .   9.7
+# .   6.6 .   .   .   .   .   .  
+# 9.9 .   .   .   .   .   .   5.1
+# .   .   .   .   .   8.7 6.8 .  
+# .   .   .   .   .   .   .   .
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -109,14 +104,11 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-#     0                  1                  2                  3                  4                 
-# ––┼–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 0 │ 0.7324999999999999 .                  .                  .                  0.5943999999999999
-# 1 │ .                  .                  .                  .                  .                 
-# 2 │ .                  .                  0.0961             .                  .                 
-# 3 │ .                  .                  .                  0.6241000000000001 .                 
-# 4 │ 0.5943999999999999 .                  .                  .                  1.3437999999999999
+# 1.6464999999999999  .                   0.4947              .                   .                  
+# .                   0.43560000000000004 .                   .                   .                  
+# 0.4947              .                   1.2402              .                   .                  
+# .                   .                   .                   1.2193              .                  
+# .                   .                   .                   .                   .
 ```
 
 -----
@@ -141,11 +133,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    .    0.58 .    0.6  .    .    0.19
-# b │ .    .    .    .    .    .    .    .   
-# c │ .    .    .    .    .    .    0.31 .   
-# d │ .    .    .    0.79 .    .    .    .   
-# e │ 0.03 .    0.73 .    .    .    .    0.9
+# a │ .    .    .    .    0.84 .    .    0.97
+# b │ .    0.66 .    .    .    .    .    .   
+# c │ 0.99 .    .    .    .    .    .    0.51
+# d │ .    .    .    .    .    0.87 0.68 .   
+# e │ .    .    .    .    .    .    .    .
 ```
 
 
@@ -154,17 +146,17 @@ Here is the dot-product of that matrix with its transpose:
 ```perl6
 my $smat2 = $smat.dot($smat.transpose); 
 
-$smat2.print;
+$smat2.round(0.02).print;
 ```
 ```
-# ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-#     a                  b                  c                  d                  e                 
-# ––┼–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# a │ 0.7324999999999999 .                  .                  .                  0.5943999999999999
-# b │ .                  .                  .                  .                  .                 
-# c │ .                  .                  0.0961             .                  .                 
-# d │ .                  .                  .                  0.6241000000000001 .                 
-# e │ 0.5943999999999999 .                  .                  .                  1.3437999999999999
+# ––––––––––––––––––––––––––––
+#     a    b    c    d    e   
+# ––┼–––––––––––––––––––––––––
+# a │ 1.64 .    0.5  .    .   
+# b │ .    0.44 .    .    .   
+# c │ 0.5  .    1.24 .    .   
+# d │ .    .    .    1.22 .   
+# e │ .    .    .    .    .
 ```
 
 ### Implicit value
@@ -177,7 +169,7 @@ with different implicit value:
 my $matrix3 = $matrix1.add(10);
 ```
 ```
-# Math::SparseMatrix(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
 ```
 
 ```perl6
@@ -193,14 +185,11 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# –––––––––––––––––––––––––––––––––––––––––––––––––––
-#     0     1     2     3     4     5     6     7    
-# ––┼––––––––––––––––––––––––––––––––––––––––––––––––
-# 0 │ .     .     10.58 .     10.6  .     .     10.19
-# 1 │ .     .     .     .     .     .     .     .    
-# 2 │ .     .     .     .     .     .     10.31 .    
-# 3 │ .     .     .     10.79 .     .     .     .    
-# 4 │ 10.03 .     10.73 .     .     .     .     10.9
+# 10    10    10    10    10.84 10    10    10.97
+# 10    10.66 10    10    10    10    10    10   
+# 10.99 10    10    10    10    10    10    10.51
+# 10    10    10    10    10    10.87 10.68 10   
+# 10    10    10    10    10    10    10    10
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
@@ -318,7 +307,7 @@ classDiagram
 
 ## Acknowledgements
 
-Thanks to [@lizmat](https://github.com/lizmat) and [@timo](https://github.com/timo) for helping figuring out the proper use of `postcircumfix:<[]>` and `postcircumfix:<[; ]>`
+Thanks to [@lizmat](https://github.com/lizmat) and [@tonyo](https://github.com/tonyo) for helping figuring out the proper use of `postcircumfix:<[]>` and `postcircumfix:<[; ]>`
 in order to have the named rows and columns functionalities.
 
 -----
