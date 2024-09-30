@@ -467,32 +467,6 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     # Representation
     #=================================================================
-    #| To CSR sparse matrix.
-    method to-csr() {
-        my @values;
-        my @col-index;
-        my @row-ptr = 0;
-        my $nnz = 0;
-
-        for ^$!nrow -> $row {
-            for %.adjacency-list{$row}.kv -> $col, $value {
-                @values.push($value);
-                @col-index.push($col);
-                $nnz++;
-            }
-            @row-ptr.push($nnz);
-        }
-
-        return Math::SparseMatrix::CSR.new(
-                :@values,
-                :@col-index,
-                :@row-ptr,
-                :$!nrow,
-                :$!ncol,
-                :$!implicit-value
-                );
-    }
-
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
     method to-wl() {
