@@ -131,6 +131,13 @@ class Math::SparseMatrix::Abstract {
     method clip(Numeric:D :min(:$v-min)!, Numeric:D :max(:$v-max)!, Bool:D :$clone = True) {...}
 
     #=================================================================
+    # Round
+    #=================================================================
+    #| Round the sparse matrix
+    #| C<:$scale> -- Scale to round to.
+    method round(Numeric:D $scale = 1, Bool:D :$clone = True) {...}
+
+    #=================================================================
     # Pretty print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {...}
@@ -161,7 +168,7 @@ class Math::SparseMatrix::Abstract {
 
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
-    method wl() {...}
+    method to-wl() {...}
 
     # As Math::SparseMatrix::CSR.Hash
     #| To Hash
