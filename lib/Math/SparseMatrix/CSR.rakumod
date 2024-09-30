@@ -349,10 +349,6 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
         my $MH = $!ncol + 1;
         my $NH = $!nrow + 1;
 
-        for 2 ..^ $MH -> $i {
-            @IAT[$i] = 0;
-        }
-
         my $IAB = @!row-ptr[$NH - 1];
 
         for ^$IAB -> $i {
