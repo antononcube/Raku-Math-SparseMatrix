@@ -5,6 +5,8 @@ use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::DOK;
 
 #=====================================================================
+# Random sparse matrix
+#=====================================================================
 proto sub generate-random-sparse-matrix(|) is export {*}
 
 multi sub generate-random-sparse-matrix(
@@ -17,9 +19,6 @@ multi sub generate-random-sparse-matrix(
     return generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type, :$decorated);
 }
 
-#=====================================================================
-# Random sparse matrix
-#=====================================================================
 multi sub generate-random-sparse-matrix(
         UInt:D :$nrow,
         UInt:D :$ncol,
