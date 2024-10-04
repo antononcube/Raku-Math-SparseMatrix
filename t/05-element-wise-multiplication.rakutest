@@ -67,7 +67,7 @@ subtest {
     is
             $matrix1iv.multiply($matrix2iv).implicit-value,
             $matrix1iv.implicit-value * $matrix2iv.implicit-value,
-            "Implcit value";
+            "Implicit value";
 }, "Multiplication with implicit values";
 
 ## 7
