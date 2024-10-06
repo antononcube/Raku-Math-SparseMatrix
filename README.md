@@ -65,7 +65,7 @@ my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$ty
 say $matrix1;
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
+# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
 ```
 
 Here it is "pretty printed": 
@@ -74,11 +74,11 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# .    .    .    .    0.36 .    0.08 .   
-# .    .    .    0.6  .    .    .    .   
-# .    .    .    .    .    0.84 .    0.61
-# .    .    .    0.3  .    .    0.29 .   
-# .    .    .    .    .    .    .    .
+# .    .    0.47 .    0.77 .    .    .   
+# .    0.78 .    0.99 .    .    0.54 .   
+# .    .    .    .    .    .    .    .   
+# .    .    .    .    .    0.07 .    0.39
+# .    .    .    .    .    .    0.37 .
 ```
 
 Here `10` is multiplied with all elements:
@@ -89,11 +89,11 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# .   .   .   .   3.6 .   0.8 .  
-# .   .   .   6   .   .   .   .  
-# .   .   .   .   .   8.4 .   6.1
-# .   .   .   3   .   .   2.9 .  
-# .   .   .   .   .   .   .   .
+# .   .   4.7 .   7.7 .   .   .  
+# .   7.8 .   9.9 .   .   5.4 .  
+# .   .   .   .   .   .   .   .  
+# .   .   .   .   .   0.7 .   3.9
+# .   .   .   .   .   .   3.7 .
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -104,11 +104,11 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# 0.13599999999999998 .                   .                   0.0232              .                  
-# .                   0.36                .                   0.18                .                  
-# .                   .                   1.0776999999999999  .                   .                  
-# 0.0232              0.18                .                   0.17409999999999998 .                  
-# .                   .                   .                   .                   .
+# 0.8138 .      .      .      .     
+# .      1.8801 .      .      0.1998
+# .      .      .      .      .     
+# .      .      .      0.157  .     
+# .      0.1998 .      .      0.1369
 ```
 
 -----
@@ -133,11 +133,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    .    .    .    0.36 .    0.08 .   
-# b │ .    .    .    0.6  .    .    .    .   
-# c │ .    .    .    .    .    0.84 .    0.61
-# d │ .    .    .    0.3  .    .    0.29 .   
-# e │ .    .    .    .    .    .    .    .
+# a │ .    .    0.47 .    0.77 .    .    .   
+# b │ .    0.78 .    0.99 .    .    0.54 .   
+# c │ .    .    .    .    .    .    .    .   
+# d │ .    .    .    .    .    0.07 .    0.39
+# e │ .    .    .    .    .    .    0.37 .
 ```
 
 
@@ -152,11 +152,11 @@ $smat2.round(0.02).print;
 # ––––––––––––––––––––––––––––
 #     a    b    c    d    e   
 # ––┼–––––––––––––––––––––––––
-# a │ 0.14 .    .    0.02 .   
-# b │ .    0.36 .    0.18 .   
-# c │ .    .    1.08 .    .   
-# d │ 0.02 0.18 .    0.18 .   
-# e │ .    .    .    .    .
+# a │ 0.82 .    .    .    .   
+# b │ .    1.88 .    .    0.2 
+# c │ .    .    .    .    .   
+# d │ .    .    .    0.16 .   
+# e │ .    0.2  .    .    0.14
 ```
 
 ### Implicit value
@@ -169,7 +169,7 @@ with different implicit value:
 my $matrix3 = $matrix1.add(10);
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
+# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
 ```
 
 ```perl6
@@ -185,11 +185,11 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# 10    10    10    10    10.36 10    10.08 10   
-# 10    10    10    10.6  10    10    10    10   
-# 10    10    10    10    10    10.84 10    10.61
-# 10    10    10    10.3  10    10    10.29 10   
-# 10    10    10    10    10    10    10    10
+# 10    10    10.47 10    10.77 10    10    10   
+# 10    10.78 10    10.99 10    10    10.54 10   
+# 10    10    10    10    10    10    10    10   
+# 10    10    10    10    10    10.07 10    10.39
+# 10    10    10    10    10    10    10.37 10
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
@@ -246,7 +246,29 @@ classDiagram
         +multiply()
         +dot()
     }
+
+    class CSRStruct {
+        <<C struct>>
+    }
     
+    class NativeCSR["Math::SparseMatrix::CSR::Native"] {
+        $row_ptr
+        $col_index
+        @values
+        nrow
+        ncol
+        implicit_value
+    }
+
+    class NativeAdapater["Math::SparseMatrix::NativeAdapter"] {
+        +row-ptr
+        +col-index
+        +values
+        +nrow
+        +ncol
+        +implicit-value
+    }    
+
     class CSR["Math::SparseMatrix::CSR"] {
         @row-ptr
         @col-index
@@ -275,8 +297,11 @@ classDiagram
     
     CSR --> Abstract : implements
     DOK --> Abstract : implements
+    NativeAdapater --> Abstract : implements
     SparseMatrix --> Abstract : Hides actual component class
     SparseMatrix *--> Abstract
+    NativeAdapater *--> NativeCSR
+    NativeCSR -- CSRStruct : reprents
 ```
 
 ### Implementation details
@@ -300,8 +325,11 @@ classDiagram
 ## Performance
 
 - Performance of CSR and DOK sparse matrices is not good: between 40 to 150 times slower than Wolfram Language.
-    - (Using the same matrices, of course.)
-- It is somewhat surprising that DOK is faster than CSR.
+  - (Using the same matrices, of course.)
+- It is somewhat surprising that DOK is faster than CSR. 
+  - (Using pure-Raku.)
+- `NativeCall` based implementations are ≈ 100 times faster.
+  - See ["Math::SparseMatrix::NativeCall"](https://github.com/antononcube/Raku-Math-SparseMatrix-Native), [AAp3].
 
 -----
 
@@ -327,6 +355,11 @@ in order to have the named rows and columns functionalities.
 
 [AAp2] Anton Antonov,
 [Graph Raku package](https://github.com/antononcube/Raku-Graph),
+(2024),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp3] Anton Antonov,
+[Math::SparseMatrix::NativeCAll Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
 (2024),
 [GitHub/antononcube](https://github.com/antononcube).
 

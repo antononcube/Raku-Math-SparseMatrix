@@ -189,7 +189,29 @@ classDiagram
         +multiply()
         +dot()
     }
+
+    class CSRStruct {
+        <<C struct>>
+    }
     
+    class NativeCSR["Math::SparseMatrix::CSR::Native"] {
+        $row_ptr
+        $col_index
+        @values
+        nrow
+        ncol
+        implicit_value
+    }
+
+    class NativeAdapater["Math::SparseMatrix::NativeAdapter"] {
+        +row-ptr
+        +col-index
+        +values
+        +nrow
+        +ncol
+        +implicit-value
+    }    
+
     class CSR["Math::SparseMatrix::CSR"] {
         @row-ptr
         @col-index
@@ -218,8 +240,11 @@ classDiagram
     
     CSR --> Abstract : implements
     DOK --> Abstract : implements
+    NativeAdapater --> Abstract : implements
     SparseMatrix --> Abstract : Hides actual component class
     SparseMatrix *--> Abstract
+    NativeAdapater *--> NativeCSR
+    NativeCSR -- CSRStruct : reprents
 ```
 
 ### Implementation details
@@ -243,8 +268,11 @@ classDiagram
 ## Performance
 
 - Performance of CSR and DOK sparse matrices is not good: between 40 to 150 times slower than Wolfram Language.
-    - (Using the same matrices, of course.)
-- It is somewhat surprising that DOK is faster than CSR.
+  - (Using the same matrices, of course.)
+- It is somewhat surprising that DOK is faster than CSR. 
+  - (Using pure-Raku.)
+- `NativeCall` based implementations are ≈ 100 times faster.
+  - See ["Math::SparseMatrix::NativeCall"](https://github.com/antononcube/Raku-Math-SparseMatrix-Native), [AAp3].
 
 -----
 
@@ -270,6 +298,11 @@ in order to have the named rows and columns functionalities.
 
 [AAp2] Anton Antonov,
 [Graph Raku package](https://github.com/antononcube/Raku-Graph),
+(2024),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp3] Anton Antonov,
+[Math::SparseMatrix::NativeCAll Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
 (2024),
 [GitHub/antononcube](https://github.com/antononcube).
 
