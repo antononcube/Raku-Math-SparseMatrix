@@ -19,6 +19,7 @@
     "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod",
     "Math::SparseMatrix::Convertish": "lib/Math/SparseMatrix/Convertish.rakumod",
     "Math::SparseMatrix::DOK": "lib/Math/SparseMatrix/DOK.rakumod",
+    "Math::SparseMatrix::NativeAdapter": "lib/Math/SparseMatrix/NativeAdapter.rakumod",
     "Math::SparseMatrix::Utilities": "lib/Math/SparseMatrix/Utilities.rakumod"
   },
   "resources": [],
