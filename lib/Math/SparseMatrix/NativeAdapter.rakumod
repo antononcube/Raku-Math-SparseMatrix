@@ -131,7 +131,9 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
     #=================================================================
     # Equivalence
     #=================================================================
-    method eqv(Math::SparseMatrix::Abstract:D $other --> Bool:D) {...}
+    method eqv(Math::SparseMatrix::NativeAdapter:D $other --> Bool:D) {
+        return $!csr-struct.eqv($other.csr-struct);
+    }
 
     #=================================================================
     # Info
@@ -187,8 +189,7 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
     #=================================================================
     #| Dot product of a sparse matrix with dense vector
     multi method dot(@vector --> Array) {
-        my $csr-struct = $!csr-struct.add(@vector);
-        return Math::SparseMatrix::NativeAdapter.new(:$csr-struct);
+        return $!csr-struct.dot(@vector);
     }
 
     #=================================================================
