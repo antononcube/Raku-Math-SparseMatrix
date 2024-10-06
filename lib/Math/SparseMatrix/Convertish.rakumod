@@ -1,6 +1,7 @@
 use Math::SparseMatrix::Abstract;
 use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::DOK;
+use Math::SparseMatrix::NativeAdapter;
 
 role Math::SparseMatrix::Convertish {
 
@@ -60,9 +61,32 @@ role Math::SparseMatrix::Convertish {
         }
         return Math::SparseMatrix::DOK.new(
                 :%adjacency-map,
-                :nrow($m.nrow),
-                :ncol($m.ncol),
-                :implicit-value($m.implicit-value)
+                nrow => $m.nrow,
+                ncol => $m.ncol,
+                implicit-value => $m.implicit-value
                 );
+    }
+
+    #=================================================================
+    # To NativeAdapter
+    #=================================================================
+    proto method to-adapted(Math::SparseMatrix::CSR:D $m --> Math::SparseMatrix::NativeAdapter:D) {*}
+
+    multi method to-adapted(Math::SparseMatrix::NativeAdapter:D $m) {
+        return $m;
+    }
+    multi method to-adapted(Math::SparseMatrix::CSR:D $m --> Math::SparseMatrix::NativeAdapter:D) {
+        return Math::SparseMatrix::NativeAdapter.new(
+                values => $m.values,
+                row-ptr => $m.row-ptr,
+                col-index => $m.col-index,
+                nrow => $m.nrow,
+                ncol => $m.ncol,
+                implicit-values => $m.implicit-values,
+                );
+    }
+
+    multi method to-adapted(Math::SparseMatrix::DOK:D $m --> Math::SparseMatrix::NativeAdapter:D) {
+        return $m.to-csr.to-adapted;
     }
 }
