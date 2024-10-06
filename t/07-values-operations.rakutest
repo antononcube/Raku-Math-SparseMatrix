@@ -1,0 +1,29 @@
+use v6.d;
+
+#use lib <. lib>;
+use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol):!decorated;
+
+plan *;
+
+## 1
+isa-ok $matrix1.unitize, Math::SparseMatrix::CSR:D, "unitize type";
+
+## 2
+isa-ok $matrix1.clip(min => 0.2, max => 0.6), Math::SparseMatrix::CSR:D, "clip type";
+
+## 3
+isa-ok $matrix1.round(0.2), Math::SparseMatrix::CSR:D, "round type";
+
+## 4
+isa-ok $matrix1.round(0.2, :clone), Math::SparseMatrix::CSR:D, "round with cloning type";
+
+done-testing;
