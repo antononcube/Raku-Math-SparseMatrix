@@ -1,0 +1,57 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::Native;
+use Math::SparseMatrix::NativeAdapter;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $nnz = ($nrow * $ncol * $density).Int;
+my $seed = Whatever;
+
+my $matrix1 = Math::SparseMatrix::Native::CSRStruct.new.random(:$nrow, :$ncol, :$nnz, seed => 3232);
+my $matrix2 = Math::SparseMatrix::Native::CSRStruct.new.random(:$nrow, :$ncol, :$nnz, seed => 882);
+
+
+plan *;
+
+## 1
+$matrix1 = Math::SparseMatrix::NativeAdapter.new($matrix1);
+isa-ok $matrix1, Math::SparseMatrix::NativeAdapter:D;
+
+## 2
+$matrix2 = Math::SparseMatrix::NativeAdapter.new($matrix2);
+isa-ok $matrix2, Math::SparseMatrix::NativeAdapter:D;
+
+
+## 3
+isa-ok $matrix1.multiply(4.3), Math::SparseMatrix::NativeAdapter;
+
+## 4
+isa-ok $matrix1.multiply($matrix2), Math::SparseMatrix::NativeAdapter;
+
+## 5
+my @arr5 = elementwise-operation($matrix1.Array, $matrix2.Array, &infix:<*>);
+is
+        elementwise-operation($matrix1.multiply($matrix2).Array, @arr5, &infix:<->).map(*.Slip)>>.abs.max < 1e-12,
+        True,
+        "Same dense matrix";
+
+## 6
+subtest {
+    my $matrix1iv = $matrix1.clone;
+    $matrix1iv.implicit-value = 1.5.Num;
+    my $matrix2iv = $matrix2.clone;
+    $matrix2iv.implicit-value = 2.2.Num;
+    my @arr = elementwise-operation($matrix1.Array, $matrix2.Array, &infix:<*>);
+    is
+            elementwise-operation($matrix1.multiply($matrix2).Array, @arr, &infix:<->).map(*.Slip)>>.abs.max < 1e-12,
+            True,
+            "Same dense matrix";
+}, "Multiplication with implicit values";
+
+done-testing;
