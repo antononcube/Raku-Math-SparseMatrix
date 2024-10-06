@@ -1,0 +1,87 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::Native;
+use Math::SparseMatrix::NativeAdapter;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $nnz = ($nrow * $ncol * $density).Int;
+my $seed = Whatever;
+
+my $matrix1 = Math::SparseMatrix::Native::CSRStruct.new.random(:$nrow, :$ncol, :$nnz, seed => 3232);
+my $matrix2 = Math::SparseMatrix::Native::CSRStruct.new.random(nrow => $ncol, ncol => $nrow, :$nnz, seed => 882);
+
+
+plan *;
+
+## 1
+$matrix1 = Math::SparseMatrix::NativeAdapter.new($matrix1);
+isa-ok $matrix1, Math::SparseMatrix::NativeAdapter:D;
+
+## 2
+$matrix2 = Math::SparseMatrix::NativeAdapter.new($matrix2);
+isa-ok $matrix2, Math::SparseMatrix::NativeAdapter:D;
+
+## 3
+my @vec3 = rand xx $ncol;
+isa-ok
+        $matrix1.dot(@vec3),
+        Array:D,
+        "Expected type of matrix-vector dot product";
+
+## 4
+my $res4 = $matrix1.dot(@vec3);
+is
+        $res4.elems,
+        $nrow,
+        "Expected number of columns";
+
+## 5
+is
+        ($res4 <<->> dense-dot-product($matrix1.Array, @vec3.map({ [$_,] })).map(*.Slip))>>.abs.max < 1e-12,
+        True,
+        "Same vector dot product";
+
+## 6
+isa-ok
+        $matrix1.dot($matrix2),
+        Math::SparseMatrix::NativeAdapter:D,
+        "Expected matrix-matrix dot product type";
+
+## 7
+my $res7 = $matrix1.dot($matrix2);
+is-deeply
+        $res7.dimensions,
+        ($nrow, $nrow),
+        "Dimensions of matrix-matrix product";
+
+## 8
+#$res6.print;
+#say dot-product($matrix1.Array, $matrix2.Array);
+my $dp8 = dense-dot-product($matrix1.Array, $matrix2.Array);
+#say ($res7 => $res7.Array);
+#say (:$dp8);
+is
+        elementwise-operation($res7.Array, $dp8, &infix:<->).map(*.Slip)>>.abs.max < 1e-12,
+        True,
+        "Same matrix";
+
+## 9
+## Equivalent to the test above, but using SparseMatrix::NativeAdapter operations.
+is
+        $res7.add(Math::SparseMatrix::NativeAdapter.new(dense-matrix => $dp8).multiply(-1)).Array.map(*.Slip)>>.abs.max < 1e-12,
+        True,
+        "Same matrix";
+
+## 10
+is
+        $res7.eqv(Math::SparseMatrix::NativeAdapter.new(dense-matrix => $dp8)),
+        True,
+        "Matrix-matrix producs equivalence";
+
+done-testing;
