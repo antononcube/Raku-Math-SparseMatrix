@@ -9,8 +9,9 @@ my $nrow = 5;
 my $ncol = 8;
 my $density = 0.25;
 my $tol = 0.01;
+my $type = 'CSR';
 
-my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol):!decorated;
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol, :$type):!decorated;
 
 plan *;
 
