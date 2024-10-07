@@ -234,6 +234,7 @@ class Math::SparseMatrix
     method dot($other, Bool :$copy = True) {
         my $obj = $copy ?? Math::SparseMatrix.new() !! self;
         if $other ~~ Math::SparseMatrix:D {
+            # We have to make sure the row names and column names match!
             $obj.core-matrix = self.core-matrix.dot($other.core-matrix);
             #$obj.core-matrix.eliminate-zeros();
             $obj.column-names = $other.column-names;
@@ -276,7 +277,7 @@ class Math::SparseMatrix
         my $max-len = max($col-width, 1);
 
         @rows = $!core-matrix.print(:!echo);
-        $max-len = @rows.map(*.Slip).map(*.chars).max;
+        $max-len = max($max-len, @rows.map(*.Slip).map(*.chars).max);
         $col-width = max($col-width, $max-len);
 
         my $header = (' ' x ($row-width + 3)) ~ @col-names.map({ sprintf("%-*s", $max-len, $_) }).join(' ');
