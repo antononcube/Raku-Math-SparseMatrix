@@ -1,0 +1,95 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+# The rules were created with this code
+#`[
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol):decorated;
+$matrix1 = Math::SparseMatrix.new($matrix1, row-names => ('a'...'z').head($nrow));
+$matrix1.print;
+say $matrix1.rules.raku;
+]
+
+my $nrow = 5;
+my $ncol = 8;
+my @rules = [(0, 7) => 0.65, (1, 0) => 0.24, (1, 1) => 0.81, (1, 3) => 0.68, (1, 4) => 0.34, (2, 0) => 0.68, (2, 2) => 0.28, (2, 5) => 0.43, (3, 0) => 0.32, (4, 1) => 0.67];
+my $matrix1 = Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol);
+$matrix1 = Math::SparseMatrix.new($matrix1, row-names => ('a'...'z').head($nrow));
+#$matrix1.print;
+
+plan *;
+
+## 1
+isa-ok
+        $matrix1,
+        Math::SparseMatrix,
+        "Expected type after creation";
+
+## 2
+is
+        $matrix1.elems,
+        $nrow,
+        "Expected number of elements";
+
+## 3
+subtest {
+        isa-ok $matrix1.value-at(2, 6), Numeric:D;
+        isa-ok $matrix1.value-at('b', '5'), Numeric:D;
+        is $matrix1.value-at('c', '5'),  $matrix1.value-at(2, 5);
+        is $matrix1.value-at('c', 5),  $matrix1.value-at(2, 5);
+}, "Value retrieval";
+
+## 4
+my @rules4 = $matrix1.rules;
+is
+        ([&&] |@rules4.map({ $matrix1.value-at(|$_.key) == $_.value })),
+        True,
+        'Same values from .rules and .value-at';
+
+## 5
+my $rowInd5 = 3;
+isa-ok $matrix1.row-at($rowInd5), Math::SparseMatrix;
+
+## 6
+my @rules6 = $matrix1.rules.grep({ $_.key.head == $rowInd5 }).map({ (0, $_.key.tail) => $_.value });
+is-deeply
+        $matrix1.row-at($rowInd5).rules.Hash,
+        @rules6.Hash,
+        'Same values from .rules and .row-at';
+
+## 7
+my $colInd7 = 3;
+isa-ok $matrix1.column-at($colInd7), Math::SparseMatrix;
+
+## 8
+my $matrix8 = $matrix1.column-at($colInd7);
+is-deeply
+        (^$nrow).map({ $matrix8.value-at($_, 0) }).List,
+        (^$nrow).map({ $matrix1.value-at($_, $colInd7) }).List,
+        'Same value-at values for .column-at';
+
+## 9
+ok $matrix1[2];
+
+## 10
+is-deeply $matrix1[2], $matrix1.row-at(2);
+
+## 11
+#$matrix1.print;
+#say '-' x 120;
+#$matrix1[2, 3, 1].print;
+ok $matrix1[2, 3, 1];
+
+## 12
+is $matrix1[3;2], $matrix1.value-at(3, 2);
+
+done-testing;
