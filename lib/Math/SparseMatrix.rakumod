@@ -13,11 +13,28 @@ class Math::SparseMatrix
         is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
-            handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count>
+            handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count rules tuples>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names is rw = %();
     has %.column-names is rw = %();
     has %.dimension-names is rw = %();
+
+    has %!indexes-to-row-names;
+    has %!indexes-to-column-names;
+
+    method get-row-name(Int:D $i) {
+        if %!indexes-to-row-names.elems == 0 {
+            %!indexes-to-row-names = %!row-names.invert;
+        }
+        return %!indexes-to-row-names{$i};
+    }
+
+    method get-column-name(Int:D $i) {
+        if %!indexes-to-column-names.elems = 0 {
+            %!indexes-to-column-names = %!column-names.invert;
+        }
+        return %!indexes-to-column-names{$i};
+    }
 
     #=================================================================
     # Creators
@@ -97,12 +114,24 @@ class Math::SparseMatrix
         return $!core-matrix.value-at(%!row-names{$row}, %!column-names{$col});
     }
 
+    multi method value-at(Str:D $row, Int:D $col) {
+        return $!core-matrix.value-at(%!row-names{$row}, $col);
+    }
+
+    multi method value-at(Int:D $row, Str:D $col) {
+        return $!core-matrix.value-at($row, %!column-names{$col});
+    }
+
     multi method row-at(Int:D $row --> Math::SparseMatrix) {
-        return $!core-matrix.row-at($row);
+        return Math::SparseMatrix.new(
+                core-matrix => $!core-matrix.row-at($row),
+                row-names => [self.get-row-name($row), ],
+                :%!column-names
+                );
     }
 
     multi method row-at(Str:D $row --> Math::SparseMatrix) {
-        return $!core-matrix.row-at(%!row-names{$row});
+        return self.row-at(%!row-names{$row});
     }
 
     method row-slice(*@indexes) {
@@ -141,6 +170,11 @@ class Math::SparseMatrix
         }
         die "Only one index is expected.";
     }
+    #=================================================================
+    # Rules and tuples
+    #=================================================================
+
+    # Delegated.
 
     #=================================================================
     # Transpose
@@ -231,15 +265,15 @@ class Math::SparseMatrix
         my $connector = '┼'; # '+'; # '┼';
         my $v-sep = '│'; #'|'; #'│';
         my $h-sep = '–'; # '-''–'
-        my @col-names = self.column-names.keys.sort;
-        my @row-names = self.row-names.keys.sort;
+        my @col-names = self.column-names.sort(*.value)».key;
+        my @row-names = self.row-names.sort(*.value)».key;
 
         my $col-width = @col-names.map(*.chars).max // 0;
         my $row-width = @row-names.map(*.chars).max // 0;
 
         my @rows;
-        my $max-len = 1;
-        # Minimum length for '.'
+        # Minimum length for '.' is 1
+        my $max-len = max($col-width, 1);
 
         @rows = $!core-matrix.print(:!echo);
         $max-len = @rows.map(*.Slip).map(*.chars).max;
