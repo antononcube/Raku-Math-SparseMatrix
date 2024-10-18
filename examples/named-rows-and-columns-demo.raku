@@ -39,6 +39,11 @@ my $smat2 = $smat.row-slice(<a c d>);
 $smat2.print;
 
 say "\n" x 2;
+# Here is row slice specified by using row names
+my $smat2a = $smat.row-slice(<d c a>);
+$smat2a.print;
+
+say "\n" x 2;
 # Here is a column sub-matrix specified with a column name
 my $smat3 = $smat.column-at('B');
 $smat3.print;
