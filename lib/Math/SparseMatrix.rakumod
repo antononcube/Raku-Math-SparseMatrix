@@ -15,25 +15,45 @@ class Math::SparseMatrix
             is rw
             handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count rules tuples>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
-    has %.row-names is rw = %();
-    has %.column-names is rw = %();
-    has %.dimension-names is rw = %();
+    has %.row-names-map;
+    has %.column-names-map;
+    has %.dimension-names-map;
 
-    has %!indexes-to-row-names;
-    has %!indexes-to-column-names;
+    has @.row-names;
+    has @.column-names;
+    has @.dimension-names;
+
+    method set-row-names(@names) {
+        my @res = self!process-names(@names.Array, $!core-matrix.nrow, 'row-names');
+        @!row-names = |@res.head;
+        %!row-names-map = @res.tail;
+        return self;
+    }
+
+    method set-column-names(@names) {
+        my @res = self!process-names(@names.Array, $!core-matrix.ncol, 'column-names');
+        @!column-names = |@res.head;
+        %!column-names-map = @res.tail;
+        return self;
+    }
+
+    method set-dimension-names(@names) {
+        my @res = self!process-names(@names.Array, $!core-matrix.ncol, 'dimension-names');
+        @!dimension-names = |@res.head;
+        %!dimension-names-map = @res.tail;
+        return self;
+    }
 
     method get-row-name(Int:D $i) {
-        if %!indexes-to-row-names.elems == 0 {
-            %!indexes-to-row-names = %!row-names.invert;
-        }
-        return %!indexes-to-row-names{$i};
+        return @!row-names[$i];
     }
 
     method get-column-name(Int:D $i) {
-        if %!indexes-to-column-names.elems = 0 {
-            %!indexes-to-column-names = %!column-names.invert;
-        }
-        return %!indexes-to-column-names{$i};
+        return @!column-names[$i];
+    }
+
+    method get-dimension-name(Int:D $i) {
+        return @!dimension-names[$i];
     }
 
     #=================================================================
@@ -45,18 +65,19 @@ class Math::SparseMatrix
                 self!process-names($names.Array, $n, $arg-name)
             }
             when ($_ ~~ List:D | Array:D) && $_.unique.elems == $n {
-                $_.kv.rotor(2)>>.reverse.flat.Hash
+                ($names, $names.kv.rotor(2)>>.reverse.flat.Hash)
             }
             when ($_ ~~ Map:D) && $_.elems == $n {
-                $_
+                my @names = $_.sort(*.value)>>.key;
+                (@names, $_)
             }
-            when ($_ ~~ Map:D) && $_.elems == 0 {
+            when ($_ ~~ Map:D | Array:D | List:D) && $_.elems == 0 {
                 # This is somewhat hacky.
                 # It might happen with a step-by-step building of a Math::SparseMatrix object.
-                $_
+                (Empty, $_)
             }
             when Whatever {
-                ((^$n) Z=> (^$n)).Hash
+                ((^$n)>>.Str, ((^$n) Z=> (^$n)).Hash)
             }
             default {
                 die "The argument $arg-name is expected to be a Positional or a Map of length $n, or Whatever."
@@ -74,10 +95,17 @@ class Math::SparseMatrix
             if $dimension-names.isa(Whatever) { $dimension-names = $core-matrix.dimension-names }
             $core-matrix = $core-matrix.core-matrix;
         }
+        my @rowNames = self!process-names($row-names, $core-matrix.nrow, 'row-names');
+        my @colNames = self!process-names($column-names, $core-matrix.ncol, 'column-names');
+        my @dimNames = self!process-names($dimension-names, 2, 'dimension-names');
+
         self.bless(:$core-matrix,
-                row-names => self!process-names($row-names, $core-matrix.nrow, 'row-names'),
-                column-names => self!process-names($column-names, $core-matrix.ncol, 'column-names'),
-                dimension-names => self!process-names($dimension-names, 2, 'dimension-names')
+                row-names => @rowNames.head.Array,
+                row-names-map => @rowNames.tail,
+                column-names => @colNames.head.Array,
+                column-names-map => @colNames.tail,
+                dimension-names => @dimNames.head.Array,
+                dimension-names-map => @dimNames.tail,
                 );
     }
 
@@ -94,11 +122,12 @@ class Math::SparseMatrix
     method clone() {
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.clone,
-                row-names => %!row-names.clone,
-                column-names => %!column-names.clone,
-                dimension-names => %!dimension-names.clone,
+                row-names => @!row-names.clone,
+                column-names => @!column-names.clone,
+                dimension-names => @!dimension-names.clone,
                 );
     }
+
     #=================================================================
     # Access
     #=================================================================
@@ -111,56 +140,56 @@ class Math::SparseMatrix
     }
 
     multi method value-at(Str:D $row, Str:D $col) {
-        return $!core-matrix.value-at(%!row-names{$row}, %!column-names{$col});
+        return $!core-matrix.value-at(%!row-names-map{$row}, %!column-names-map{$col});
     }
 
     multi method value-at(Str:D $row, Int:D $col) {
-        return $!core-matrix.value-at(%!row-names{$row}, $col);
+        return $!core-matrix.value-at(%!row-names-map{$row}, $col);
     }
 
     multi method value-at(Int:D $row, Str:D $col) {
-        return $!core-matrix.value-at($row, %!column-names{$col});
+        return $!core-matrix.value-at($row, %!column-names-map{$col});
     }
 
     multi method row-at(Int:D $row --> Math::SparseMatrix) {
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.row-at($row),
                 row-names => [self.get-row-name($row), ],
-                :%!column-names
+                column-names => @!column-names
                 );
     }
 
     multi method row-at(Str:D $row --> Math::SparseMatrix) {
-        return self.row-at(%!row-names{$row});
+        return self.row-at(%!row-names-map{$row});
     }
 
     method row-slice(*@indexes) {
         die 'The indexes are expected to be non-negative integers or strings.'
         unless (@indexes.all ~~ Int:D | Str:D) && min(@indexes.grep(*~~ Int)) ≥ 0;
 
-        my @indexes2 = @indexes.map({ %!row-names{$_} // $_ });
+        my @indexes2 = @indexes.map({ %!row-names-map{$_} // $_ });
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.row-slice(@indexes2),
-                row-names => %!row-names.grep({ $_.key ∈ @indexes }).Hash,
-                :%!column-names
+                row-names => @indexes,
+                column-names => @!column-names,
                 );
     }
 
     multi method column-at(Int:D $col --> Math::SparseMatrix) {
-        my %columnInds = %!column-names.invert;
+        my %columnInds = %!column-names-map.invert;
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.column-at($col),
-                :%!row-names,
-                column-names => %(%columnInds{$col} => $col)
+                row-names => %!row-names-map,
+                column-names => [%columnInds{$col},]
                 );
     }
 
     multi method column-at(Str:D $col --> Math::SparseMatrix) {
-        die 'Unknown column name.' if %!column-names{$col}:!exists;
+        die 'Unknown column name.' if %!column-names-map{$col}:!exists;
         return Math::SparseMatrix.new(
-                core-matrix => $!core-matrix.column-at(%!column-names{$col}),
-                :%!row-names,
-                column-names => %($col => %!column-names{$col})
+                core-matrix => $!core-matrix.column-at(%!column-names-map{$col}),
+                :%!row-names-map,
+                column-names => [$col,]
                 );
     }
 
@@ -170,6 +199,7 @@ class Math::SparseMatrix
         }
         die "Only one index is expected.";
     }
+
     #=================================================================
     # Rules and tuples
     #=================================================================
@@ -183,7 +213,7 @@ class Math::SparseMatrix
     #| Transpose the matrix
     method transpose(-->Math::SparseMatrix) {
         my $smat = $!core-matrix.transpose;
-        return Math::SparseMatrix.new(core-matrix => $smat, row-names => %!column-names, column-names => %!row-names);
+        return Math::SparseMatrix.new(core-matrix => $smat, row-names => %!column-names-map, column-names => %!row-names-map);
     }
 
     #=================================================================
@@ -194,8 +224,8 @@ class Math::SparseMatrix
     method add($other, Bool:D $clone = True -->Math::SparseMatrix:D) {
         my $obj = $clone ?? self.clone !! self;
         if ($other ~~ Math::SparseMatrix:D)
-                && %!row-names eqv $other.row-names
-                && %!column-names eqv $other.column-names {
+                && %!row-names-map eqv $other.row-names
+                && %!column-names-map eqv $other.column-names {
             $obj.core-matrix = $obj.core-matrix.add($other.core-matrix);
         }
         elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
@@ -215,8 +245,8 @@ class Math::SparseMatrix
     method multiply($other, Bool:D $clone = True -->Math::SparseMatrix:D) {
         my $obj = $clone ?? self.clone !! self;
         if ($other ~~ Math::SparseMatrix:D)
-                && %!row-names eqv $other.row-names
-                && %!column-names eqv $other.column-names {
+                && %!row-names-map eqv $other.row-names
+                && %!column-names-map eqv $other.column-names {
             $obj.core-matrix = $obj.core-matrix.multiply($other.core-matrix);
         }
         elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
@@ -235,15 +265,25 @@ class Math::SparseMatrix
         my $obj = $copy ?? Math::SparseMatrix.new() !! self;
         if $other ~~ Math::SparseMatrix:D {
             # We have to make sure the row names and column names match!
-            $obj.core-matrix = self.core-matrix.dot($other.core-matrix);
+            if self.column-names eq $other.row-names {
+                # Optimization
+                $obj.core-matrix = self.core-matrix.dot($other.core-matrix);
+            } else {
+                $obj.core-matrix = self.core-matrix.dot($other.row-slice(self.column-names).core-matrix);
+            }
             #$obj.core-matrix.eliminate-zeros();
             $obj.column-names = $other.column-names;
+            $obj.column-names-map = $other.column-names-map;
             $obj.row-names = self.row-names;
+            $obj.row-names-map = self.row-names-map;
         } elsif $other ~~ Math::SparseMatrix::Abstract:D {
             $obj.core-matrix = self.core-matrix.dot($other);
             #$obj.core-matrix.eliminate-zeros();
             $obj.row-names = self.row-names;
-            $obj.column-names = self!process-names(Whatever, $obj.core-matrix.ncol, 'column-names');
+            $obj.row-names-map = self.row-names-map;
+            my $colNames = self!process-names(Whatever, $obj.core-matrix.ncol, 'column-names');
+            $obj.column-names = $colNames.head.Array;
+            $obj.column-names-map = $colNames.tail;
         } elsif $other ~~ Seq:D {
             return self.dot($other.Array);
         } elsif $other ~~ Array:D | List:D {
@@ -252,7 +292,10 @@ class Math::SparseMatrix
             #$res.eliminate-zeros();
             $obj.core-matrix = $res;
             $obj.row-names = self.row-names;
-            $obj.column-names = self!process-names(Whatever, 1, 'column-names');
+            $obj.row-names-map = self.row-names-map;
+            my $colNames = self!process-names(Whatever, 1, 'column-names');
+            $obj.column-names = $colNames.head.Array;
+            $obj.column-names-map = $colNames.tail;
         } else {
             die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
         }
@@ -266,11 +309,11 @@ class Math::SparseMatrix
         my $connector = '┼'; # '+'; # '┼';
         my $v-sep = '│'; #'|'; #'│';
         my $h-sep = '–'; # '-''–'
-        my @col-names = self.column-names.sort(*.value)».key;
-        my @row-names = self.row-names.sort(*.value)».key;
+        my @col-names = self.column-names;
+        my @row-names = self.row-names;
 
-        my $col-width = @col-names.map(*.chars).max // 0;
-        my $row-width = @row-names.map(*.chars).max // 0;
+        my $col-width = @col-names ?? @col-names.map(*.chars).max !! 0;
+        my $row-width = @row-names ?? @row-names.map(*.chars).max !! 0;
 
         my @rows;
         # Minimum length for '.' is 1
@@ -314,14 +357,14 @@ class Math::SparseMatrix
     method to-html() {
         my $html = '<table border="1">';
         $html ~= '<thead><tr><th></th>';
-        for %.column-names.keys.sort -> $col {
+        for @!column-names -> $col {
             $html ~= "<th>{$col}</th>";
         }
         $html ~= '</tr></thead>';
-        for %.row-names.keys.sort -> $row {
+        for @!row-names -> $row {
             $html ~= "<tr><th>{$row}</th>";
-            for %.column-names.keys.sort -> $col {
-                $html ~= "<td>{self.value-at(%!row-names{$row}, %!column-names{$col}) // self.implicit-value}</td>";
+            for @!column-names -> $col {
+                $html ~= "<td>{self.value-at(%!row-names-map{$row}, %!column-names-map{$col}) // self.implicit-value}</td>";
             }
             $html ~= '</tr>';
         }
@@ -332,8 +375,8 @@ class Math::SparseMatrix
     #| Wolfram Language (WL) representation
     method to-wl() {
         my $sp = $!core-matrix.to-wl;
-        my @row-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
-        my @column-names-list = %!row-names.pairs.sort({ $_.value })>>.key;
+        my @row-names-list = %!row-names-map.pairs.sort({ $_.value })>>.key;
+        my @column-names-list = %!row-names-map.pairs.sort({ $_.value })>>.key;
         my $rowNames = @row-names-list.raku.trans('[]'=>'{}');
         my $colNames = @column-names-list.raku.trans('[]'=>'{}');
         return "ToSSparseMatrix[$sp, \"RowNames\" -> $rowNames, \"ColumnNames\" -> $colNames]";
@@ -347,9 +390,9 @@ class Math::SparseMatrix
                     specified-elements => self.explicit-length,
                     dimensions => ($!core-matrix.nrow, $!core-matrix.ncol),
                     default => $!core-matrix.implicit-value,
-                    :%!row-names,
-                    :%!column-names,
-                    :%!dimension-names,
+                    :@!row-names,
+                    :@!column-names,
+                    :@!dimension-names,
                     density => self.density,
                     elements => self.core-matrix.rules,
                     #                    column-indices => self.column-indices,
