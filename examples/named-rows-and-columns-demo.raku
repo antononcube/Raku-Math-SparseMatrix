@@ -21,8 +21,8 @@ my $smat = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type)
 $smat =
         Math::SparseMatrix.new(
                 core-matrix => $smat,
-                row-names => ('a' .. 'e').pairs.Hash.invert.Hash.deepmap(*.Int),
-                column-names => ('A' .. 'H').pairs.Hash.invert.Hash.deepmap(*.Int)
+                row-names => 'a' .. 'e',
+                column-names => 'A' .. 'H'
         );
 
 say "\n" x 2;
