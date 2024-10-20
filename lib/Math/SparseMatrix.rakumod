@@ -354,11 +354,12 @@ class Math::SparseMatrix
     #=================================================================
     # Representation
     #=================================================================
-    method to-html() {
+    method to-html(Bool:D :v(:$vertical-column-names) = False) {
         my $html = '<table border="1">';
         $html ~= '<thead><tr><th></th>';
+        my $thLeft = $vertical-column-names ?? '<th style="writing-mode: vertical-rl; white-space: nowrap; vertical-align: bottom;">' !! '<th>';
         for @!column-names -> $col {
-            $html ~= "<th>{$col}</th>";
+            $html ~= "{$thLeft}{$col}</th>";
         }
         $html ~= '</tr></thead>';
         for @!row-names -> $row {
