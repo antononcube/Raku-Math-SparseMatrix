@@ -193,11 +193,8 @@ class Math::SparseMatrix
                 );
     }
 
-    method AT-POS(*@index) {
-        if @index.elems == 1 {
-            return self.row-at(@index.head);
-        }
-        die "Only one index is expected.";
+    method AT-POS($_) {
+        return self.row-at($_);
     }
 
     #=================================================================
@@ -446,9 +443,18 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix::Abstract:D $mat, @indexes) is
 }
 
 #=====================================================================
-#proto sub postcircumfix:<[ ]>(Math::SparseMatrix::CSR:D $mat, *@indexes) is export {*}
-multi sub postcircumfix:<[ ]>(Math::SparseMatrix:D $mat, *@indexes) is export {
-    return $mat.row-slice(@indexes);
+#proto sub postcircumfix:<[ ]>(Math::SparseMatrix:D $mat, *@indexes) is export {*}
+#multi sub postcircumfix:<[ ]>(Math::SparseMatrix:D $mat, *@indexes) is export {
+#    note "HERE 1";
+#    return $mat.row-slice(@indexes);
+#}
+
+multi sub postcircumfix:<[ ]>(Math::SparseMatrix:D $mat, $index) is export {
+    given $index {
+        when $_ ~~ Str | Int { return $mat.AT-POS($index) }
+        when Iterable:D { $mat.row-slice(|$index) }
+        default { die 'Cannot handle position spec.' }
+    }
 }
 
 multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
