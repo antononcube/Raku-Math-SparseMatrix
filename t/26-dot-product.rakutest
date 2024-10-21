@@ -1,0 +1,26 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol):!decorated;
+my $matrix2 = generate-random-sparse-matrix($ncol, $nrow, :$density, :$tol):!decorated;
+
+plan *;
+
+## 1
+my $smat11 = Math::SparseMatrix.new($matrix1);
+my @vec11 = rand xx $matrix1.columns-count;
+isa-ok $smat11.dot(@vec11), Math::SparseMatrix:D;
+
+## 2
+isa-ok $smat11.dot(rand xx $matrix1.columns-count), Math::SparseMatrix:D;
+
+done-testing;
