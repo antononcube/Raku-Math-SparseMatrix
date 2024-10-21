@@ -480,6 +480,38 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     # Representation
     #=================================================================
+    #| HTML representation
+    method to-html(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False) {
+        my $max-length = %!adjacency-list.values>>.values.map(*.Slip).map(*.Str.chars).max // 1;
+        my $default = $show-implicit-value ?? $!implicit-value !! '.';
+        $max-length = max($max-length, $default.Str.chars);
+
+        my @rows;
+        for ^$!nrow -> $i {
+            my @row = do for ^$!ncol -> $j {
+                my $formatted = do if %!adjacency-list{$i}{$j}:exists {
+                    %!adjacency-list{$i}{$j};
+                } else {
+                    $default;
+                }
+                sprintf "%-*s ", $max-length, $formatted;
+            }
+            @rows.push: @row;
+        }
+
+        my $html = '<table>';
+        for @rows -> @row {
+            $html ~= '<tr>';
+            for @row -> $cell {
+                $html ~= "<td>$cell</td>";
+            }
+            $html ~= '</tr>';
+        }
+        $html ~= '</table>';
+
+        return $html;
+    }
+
     # As Math::SparseMatrix::CSR.wl
     #| Wolfram Language (WL) representation
     method to-wl() {
