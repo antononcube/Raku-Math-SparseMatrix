@@ -904,6 +904,30 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #=================================================================
     # Representation
     #=================================================================
+    #| HTML representation
+    method to-html(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False) {
+        my $default = $show-implicit-value ?? $!implicit-value.Str !! '.';
+        my @rows;
+        my $max-len = $default.chars;
+
+        for ^self.nrow -> $i {
+            my @row = ($default xx self.ncol);
+            for self.row-ptr[$i] ..^ self.row-ptr[$i + 1] -> $j {
+                @row[self.col-index[$j]] = self.values[$j].Str;
+                $max-len = @row[self.col-index[$j]].chars if @row[self.col-index[$j]].chars > $max-len;
+            }
+            @rows.push(@row);
+        }
+
+        my $html = '<table border="1">';
+        for @rows -> @row {
+            $html ~= '<tr>' ~ @row.map({ "<td>" ~ $_ ~ "</td>" }).join ~ '</tr>';
+        }
+        $html ~= '</table>';
+
+        return $html;
+    }
+
     #| Wolfram Language (WL) representation
     method to-wl() {
         my $rules = self.rules.map({ "\{{$_.key.head+1},{$_.key.tail+1}\}->{$_.value}"}).join(',');
