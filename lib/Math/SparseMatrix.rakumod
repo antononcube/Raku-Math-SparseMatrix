@@ -221,11 +221,19 @@ class Math::SparseMatrix
     method add($other, Bool:D $clone = True -->Math::SparseMatrix:D) {
         my $obj = $clone ?? self.clone !! self;
         if ($other ~~ Math::SparseMatrix:D)
-                && %!row-names-map eqv $other.row-names
-                && %!column-names-map eqv $other.column-names {
+                && @!row-names eqv $other.row-names
+                && @!column-names eqv $other.column-names {
             $obj.core-matrix = $obj.core-matrix.add($other.core-matrix);
-        }
-        elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
+        } elsif ($other ~~ Math::SparseMatrix:D)
+                && $other.row-names eqv (^$other.nrow)».Str.Array
+                && $other.column-names eqv (^$other.ncol)».Str.Array {
+            $obj.core-matrix = $obj.core-matrix.add($other.core-matrix);
+        } elsif ($other ~~ Math::SparseMatrix:D)
+                && self.nrow eq $other.nrow
+                && self.ncol eq $other.ncol {
+            $obj = $obj.core-matrix.add($other.core-matrix);
+            $obj = Math::SparseMatrix.new($obj);
+        } elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
             $obj.core-matrix = $obj.core-matrix.add($other);
         }
         else {
@@ -242,11 +250,19 @@ class Math::SparseMatrix
     method multiply($other, Bool:D $clone = True -->Math::SparseMatrix:D) {
         my $obj = $clone ?? self.clone !! self;
         if ($other ~~ Math::SparseMatrix:D)
-                && %!row-names-map eqv $other.row-names
-                && %!column-names-map eqv $other.column-names {
+                && @!row-names eqv $other.row-names
+                && @!column-names eqv $other.column-names {
             $obj.core-matrix = $obj.core-matrix.multiply($other.core-matrix);
-        }
-        elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
+        } elsif ($other ~~ Math::SparseMatrix:D)
+                && $other.row-names eqv (^$other.nrow)».Str.Array
+                && $other.column-names eqv (^$other.ncol)».Str.Array {
+            $obj.core-matrix = $obj.core-matrix.multiply($other.core-matrix);
+        } elsif ($other ~~ Math::SparseMatrix:D)
+                && self.nrow eq $other.nrow
+                && self.ncol eq $other.ncol {
+            $obj = $obj.core-matrix.multiply($other.core-matrix);
+            $obj = Math::SparseMatrix.new($obj);
+        } elsif $other ~~ Numeric:D || $other ~~ Math::SparseMatrix::CSR {
             $obj.core-matrix = $obj.core-matrix.multiply($other);
         }
         else {
@@ -262,8 +278,12 @@ class Math::SparseMatrix
         my $obj = $copy ?? Math::SparseMatrix.new() !! self;
         if $other ~~ Math::SparseMatrix:D {
             # We have to make sure the row names and column names match!
-            if self.column-names eq $other.row-names {
+            if self.column-names eqv $other.row-names {
                 # Optimization
+                $obj.core-matrix = self.core-matrix.dot($other.core-matrix);
+            } elsif $other.row-names eqv (^$other.nrow)».Str.Array {
+                $obj.core-matrix = self.core-matrix.dot($other.core-matrix);
+            } elsif self.column-names eqv (^self.ncol)».Str.Array {
                 $obj.core-matrix = self.core-matrix.dot($other.core-matrix);
             } else {
                 $obj.core-matrix = self.core-matrix.dot($other.row-slice(self.column-names).core-matrix);
@@ -351,7 +371,10 @@ class Math::SparseMatrix
     #=================================================================
     # Representation
     #=================================================================
-    method to-html(Bool:D :v(:$vertical-column-names) = False) {
+    #| HTML representation
+    method to-html(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :v(:$vertical-column-names) = False) {
+        my $default = $show-implicit-value ?? self.implicit-value.Str !! '.';
+        my @indPairs = self.rules».key.map(*.Str);
         my $html = '<table border="1">';
         $html ~= '<thead><tr><th></th>';
         my $thLeft = $vertical-column-names ?? '<th style="writing-mode: vertical-rl; white-space: nowrap; vertical-align: bottom;">' !! '<th>';
@@ -362,7 +385,12 @@ class Math::SparseMatrix
         for @!row-names -> $row {
             $html ~= "<tr><th>{$row}</th>";
             for @!column-names -> $col {
-                $html ~= "<td>{self.value-at(%!row-names-map{$row}, %!column-names-map{$col}) // self.implicit-value}</td>";
+                my $value = do if (%!row-names-map{$row}, %!column-names-map{$col}).Str ∈ @indPairs {
+                    self.value-at(%!row-names-map{$row}, %!column-names-map{$col});
+                } else {
+                    $default
+                }
+                $html ~= "<td>{$value}</td>";
             }
             $html ~= '</tr>';
         }
