@@ -272,7 +272,7 @@ classDiagram
 - It is somewhat surprising that DOK is faster than CSR. 
   - (Using pure-Raku.)
 - `NativeCall` based implementations are ≈ 100 times faster.
-  - See ["Math::SparseMatrix::NativeCall"](https://github.com/antononcube/Raku-Math-SparseMatrix-Native), [AAp3].
+  - See ["Math::SparseMatrix::Native"](https://github.com/antononcube/Raku-Math-SparseMatrix-Native), [AAp3].
 
 -----
 
@@ -302,7 +302,7 @@ in order to have the named rows and columns functionalities.
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp3] Anton Antonov,
-[Math::SparseMatrix::NativeCAll Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
+[Math::SparseMatrix::Native Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
 (2024),
 [GitHub/antononcube](https://github.com/antononcube).
 

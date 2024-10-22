@@ -65,7 +65,7 @@ my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$ty
 say $matrix1;
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+# Math::SparseMatrix::CSR(:specified-elements(6), :dimensions((5, 8)), :density(0.15))
 ```
 
 Here it is "pretty printed": 
@@ -74,11 +74,11 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# .    .    0.47 .    0.77 .    .    .   
-# .    0.78 .    0.99 .    .    0.54 .   
 # .    .    .    .    .    .    .    .   
-# .    .    .    .    .    0.07 .    0.39
-# .    .    .    .    .    .    0.37 .
+# .    .    .    .    .    .    .    .   
+# .    .    0.35 0.85 .    .    0.52 .   
+# .    .    .    .    .    0.92 .    .   
+# .    .    0.43 .    .    0.07 .    .
 ```
 
 Here `10` is multiplied with all elements:
@@ -89,11 +89,11 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# .   .   4.7 .   7.7 .   .   .  
-# .   7.8 .   9.9 .   .   5.4 .  
 # .   .   .   .   .   .   .   .  
-# .   .   .   .   .   0.7 .   3.9
-# .   .   .   .   .   .   3.7 .
+# .   .   .   .   .   .   .   .  
+# .   .   3.5 8.5 .   .   5.2 .  
+# .   .   .   .   .   9.2 .   .  
+# .   .   4.3 .   .   0.7 .   .
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -104,11 +104,11 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# 0.8138 .      .      .      .     
-# .      1.8801 .      .      0.1998
-# .      .      .      .      .     
-# .      .      .      0.157  .     
-# .      0.1998 .      .      0.1369
+# .                   .                   .                   .                   .                  
+# .                   .                   .                   .                   .                  
+# .                   .                   1.1154              .                   0.1505             
+# .                   .                   .                   0.8464              0.06440000000000001
+# .                   .                   0.1505              0.06440000000000001 0.18979999999999997
 ```
 
 -----
@@ -133,11 +133,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    .    0.47 .    0.77 .    .    .   
-# b │ .    0.78 .    0.99 .    .    0.54 .   
-# c │ .    .    .    .    .    .    .    .   
-# d │ .    .    .    .    .    0.07 .    0.39
-# e │ .    .    .    .    .    .    0.37 .
+# a │ .    .    .    .    .    .    .    .   
+# b │ .    .    .    .    .    .    .    .   
+# c │ .    .    0.35 0.85 .    .    0.52 .   
+# d │ .    .    .    .    .    0.92 .    .   
+# e │ .    .    0.43 .    .    0.07 .    .
 ```
 
 
@@ -152,11 +152,11 @@ $smat2.round(0.02).print;
 # ––––––––––––––––––––––––––––
 #     a    b    c    d    e   
 # ––┼–––––––––––––––––––––––––
-# a │ 0.82 .    .    .    .   
-# b │ .    1.88 .    .    0.2 
-# c │ .    .    .    .    .   
-# d │ .    .    .    0.16 .   
-# e │ .    0.2  .    .    0.14
+# a │ .    .    .    .    .   
+# b │ .    .    .    .    .   
+# c │ .    .    1.12 .    0.16
+# d │ .    .    .    0.84 0.06
+# e │ .    .    0.16 0.06 0.18
 ```
 
 ### Implicit value
@@ -169,7 +169,7 @@ with different implicit value:
 my $matrix3 = $matrix1.add(10);
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(8), :dimensions((5, 8)), :density(0.2))
+# Math::SparseMatrix::CSR(:specified-elements(6), :dimensions((5, 8)), :density(0.15))
 ```
 
 ```perl6
@@ -185,11 +185,11 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# 10    10    10.47 10    10.77 10    10    10   
-# 10    10.78 10    10.99 10    10    10.54 10   
 # 10    10    10    10    10    10    10    10   
-# 10    10    10    10    10    10.07 10    10.39
-# 10    10    10    10    10    10    10.37 10
+# 10    10    10    10    10    10    10    10   
+# 10    10    10.35 10.85 10    10    10.52 10   
+# 10    10    10    10    10    10.92 10    10   
+# 10    10    10.43 10    10    10.07 10    10
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
@@ -329,7 +329,7 @@ classDiagram
 - It is somewhat surprising that DOK is faster than CSR. 
   - (Using pure-Raku.)
 - `NativeCall` based implementations are ≈ 100 times faster.
-  - See ["Math::SparseMatrix::NativeCall"](https://github.com/antononcube/Raku-Math-SparseMatrix-Native), [AAp3].
+  - See ["Math::SparseMatrix::Native"](https://github.com/antononcube/Raku-Math-SparseMatrix-Native), [AAp3].
 
 -----
 
@@ -359,7 +359,7 @@ in order to have the named rows and columns functionalities.
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp3] Anton Antonov,
-[Math::SparseMatrix::NativeCAll Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
+[Math::SparseMatrix::Native Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
 (2024),
 [GitHub/antononcube](https://github.com/antononcube).
 
