@@ -57,12 +57,13 @@ is
 
 ## 5
 my $rowInd5 = 3;
+my $rowName5 = $matrix1.row-names[$rowInd5];
 isa-ok $matrix1.row-at($rowInd5), Math::SparseMatrix;
 
 ## 6
-my @rules6 = $matrix1.rules.grep({ $_.key.head == $rowInd5 }).map({ (0, $_.key.tail) => $_.value });
+my @rules6 = $matrix1.rules(:names).grep({ $_.key.head eq $rowName5 }).map({ ($rowName5, $_.key.tail) => $_.value });
 is-deeply
-        $matrix1.row-at($rowInd5).rules.Hash,
+        $matrix1.row-at($rowInd5).rules(:names).Hash,
         @rules6.Hash,
         'Same values from .rules and .row-at';
 
