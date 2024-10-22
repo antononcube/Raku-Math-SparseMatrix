@@ -13,7 +13,7 @@ class Math::SparseMatrix
         is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
-            handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count rules tuples Array>
+            handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count Array>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names-map;
     has %.column-names-map;
@@ -269,7 +269,28 @@ class Math::SparseMatrix
     # Rules and tuples
     #=================================================================
 
-    # Delegated.
+    method rules(Bool:D :n(:$names) = False) {
+        my @res = do if $names {
+            self.core-matrix.rules.map({ (self.row-names[$_.key[0]], self.column-names[$_.key[1]]) => $_.value }).Array
+        } else {
+            self.core-matrix.rules
+        }
+
+        return @res;
+    }
+
+    method tuples(Bool:D :n(:$names) = False, Bool:D :d(:$dataset) = False) {
+        if !$names {
+            return self.core-matrix.tuples(:$dataset)
+        }
+
+        my @res = do if $dataset {
+            self.core-matrix.tuples(:dataset).map({ %(i => self.row-names[$_<i>], j => self.column-names[$_<j>], x => $_<x>) });
+        } else {
+            self.core-matrix.tuples.map({ (self.row-names[$_[0]], self.column-names[$_[1]], $_[2]) });
+        }
+        return @res;
+    }
 
     #=================================================================
     # Transpose
