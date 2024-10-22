@@ -116,6 +116,22 @@ class Math::SparseMatrix
         self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
     }
 
+    multi method new(:@rules! where @rules.all ~~ Pair:D,
+                     :$nrow is copy = @rules.map(*.key[0]).max + 1,
+                     :$ncol is copy = @rules.map(*.key[1]).max + 1,
+                     Numeric:D :$implicit-value = 0) {
+        my $core-matrix = Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol, :$implicit-value);
+        self.new(:$core-matrix);
+     }
+
+    multi method new(:@dense-matrix! where @dense-matrix ~~ List:D && @dense-matrix.all ~~ List:D,
+                     :$nrow is copy = @dense-matrix.elems,
+                     :$ncol is copy = @dense-matrix>>.elems.max,
+                     Numeric:D :$implicit-value = 0) {
+        my $core-matrix = Math::SparseMatrix::CSR.new(:@dense-matrix, :$nrow, :$ncol, :$implicit-value);
+        self.new(:$core-matrix);
+    }
+
     #=================================================================
     # Clone
     #=================================================================
@@ -195,6 +211,58 @@ class Math::SparseMatrix
 
     method AT-POS($_) {
         return self.row-at($_);
+    }
+
+    #=================================================================
+    # Row-bind
+    #=================================================================
+    method row-bind(Math::SparseMatrix:D $other) {
+        die "The column names of the two Math::SparseMatrix objects are expected to be the same."
+        unless self.column-names.sort eqv $other.column-names.sort;
+
+        my $res-matrix;
+
+        if self.column-names eqv $other.column-names {
+            $res-matrix = $!core-matrix.row-bind($other.core-matrix);
+        } else {
+            my $other-matrix = $other[*;self.column-names].core-matrix;
+            $res-matrix = $!core-matrix.row-bind($other-matrix);
+        }
+
+        my %newRowMap = %!row-names-map , $other.row-names-map;
+        my @newRowNames = do if %newRowMap.elems == (self.nrow + $other.nrow) {
+            self.row-names.clone.append($other.row-names)
+        } else {
+            self.row-names.clone.map({ $_ ~ ".1" }).Array.append($other.row-names.map({ $_ ~ ".2" }).Array)
+        }
+
+        return Math::SparseMatrix.new(core-matrix => $res-matrix, :@!column-names, row-names => @newRowNames);
+    }
+
+    #=================================================================
+    # Column-bind
+    #=================================================================
+    method column-bind(Math::SparseMatrix:D $other) {
+        die "The row names of the two Math::SparseMatrix objects are expected to be the same."
+        unless self.row-names.sort eqv $other.row-names.sort;
+
+        my $res-matrix;
+
+        if self.row-names eqv $other.row-names {
+            $res-matrix = $!core-matrix.column-bind($other.core-matrix);
+        } else {
+            my $other-matrix = $other[self.row-names].core-matrix;
+            $res-matrix = $!core-matrix.column-bind($other-matrix);
+        }
+
+        my %newColumnMap = %!column-names-map , $other.column-names-map;
+        my @newColumnNames = do if %newColumnMap.elems == (self.ncol + $other.ncol) {
+            self.column-names.clone.append($other.column-names)
+        } else {
+            self.column-names.clone.map({ $_ ~ ".1" }).Array.append($other.column-names.map({ $_ ~ ".2" }).Array)
+        }
+
+        return Math::SparseMatrix.new(core-matrix => $res-matrix, :@!row-names, column-names => @newColumnNames);
     }
 
     #=================================================================
