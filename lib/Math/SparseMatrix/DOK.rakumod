@@ -16,6 +16,13 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
                      Numeric:D :$implicit-value = 0) {
         if $nrow.isa(Whatever) { $nrow = %adjacency-list.keys.max }
         if $ncol.isa(Whatever) { $ncol = %adjacency-list.map({ $_.keys }).map(*.Slip).max }
+
+        die "The argument adjacency list is expected to be a Map of Maps."
+        unless %adjacency-list.values.all ~~ Map:D;
+
+        die "The values of the argument adjacency list are expected to be numeric."
+        unless %adjacency-list.map({ $_.value.values }).map(*.Slip).all ~~ Numeric:D;
+
         self.bless(:%adjacency-list, :$nrow, :$ncol, :$implicit-value);
     }
 
