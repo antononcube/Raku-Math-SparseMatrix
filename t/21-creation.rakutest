@@ -55,33 +55,33 @@ ok
         'Object created successfully for undirected graph with default parameters';
 
 ## 9
-ok
-        Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>),
-        'Object created successfully for directed graph with custom row and column names';
+subtest {
+        ok
+                Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>),
+                'Object created successfully for directed graph with custom row and column names';
+
+        my $m = Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>);
+        is $m.dimensions, (5, 3), "Expected number of rows";
+        is $m.row-names, <X A B C Y>, "Expected rows names";
+}
 
 ## 10
-is
-        Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>).dimensions,
-        (5, 3),
-        "Expected number of rows";
-
-## 11
 ok
         Math::SparseMatrix.new(:@edge-dataset, :!directed, :implicit-value(5)),
         'Object created successfully for undirected graph with implicit value';
 
-## 12
+## 11
 subtest {
-    my $obj11 = Math::SparseMatrix.new(:@edge-dataset, :!directed, row-names => <A B C D E>);
+    my $obj11 = Math::SparseMatrix.new(:@edge-dataset, :!directed, row-names => <B A C E D>.map(*.Str));
     is-deeply
             $obj11.row-names.Array,
-            'ABCDE'.comb.Array,
-            'Matrix has sorted row-names as provided';
+            'BACED'.comb.Array,
+            'Matrix has row-names as provided';
 
     is-deeply
             $obj11.column-names.Array,
-            'ABCDE'.comb.Array,
-            'Matrix has sorted column-names as provided';
+            'BACED'.comb.Array,
+            'Matrix has column-names as provided';
 
 }
 
