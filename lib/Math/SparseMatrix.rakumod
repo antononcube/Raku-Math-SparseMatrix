@@ -132,6 +132,43 @@ class Math::SparseMatrix
         self.new(:$core-matrix);
     }
 
+    multi method new(:@edge-dataset! where @edge-dataset.all ~~ Map:D,
+                     Bool:D :$directed = False,
+                     Numeric:D :$implicit-value = 0,
+                     :$row-names is copy = Whatever,
+                     :$column-names is copy = Whatever,
+                     :$dimension-names is copy = Whatever) {
+
+        if $row-names.isa(Whatever) { $row-names = []}
+        die "Row names is expected to be a list of strings or Whatever."
+        unless ($row-names ~~ Positional:D | Seq:D) && ($row-names.all ~~ Str:D);
+
+        if $column-names.isa(Whatever) { $column-names = []}
+        die "Column names is expected to be a list of strings or Whatever."
+        unless ($column-names ~~ Positional:D | Seq:D) && ($column-names.all ~~ Str:D);
+
+        my @rowNames;
+        my @colNames;
+        my @rules;
+        if $directed {
+            @rowNames = [|@edge-dataset.map(*<from>), |$row-names].unique.sort;
+            my %rowNames = @rowNames Z=> (^@rowNames.elems);
+            @colNames = [|@edge-dataset.map(*<to>), |$column-names].unique.sort;
+            my %colNames = @colNames Z=> (^@colNames.elems);
+            @rules = @edge-dataset.map({ (%rowNames{$_<from>}, %colNames{$_<to>}) => $_<weight> });
+        } else {
+            @rowNames = [|$row-names, |$column-names].unique;
+            @rowNames = [|@edge-dataset.map(*<from>), |@edge-dataset.map(*<to>), |@rowNames].unique.sort;
+            @colNames = @rowNames;
+            my %allNames = @rowNames Z=> (^@rowNames.elems);
+            my @rules1 = @edge-dataset.map({ (%allNames{$_<from>}, %allNames{$_<to>}) => $_<weight> });
+            my @rules2 = @edge-dataset.map({ (%allNames{$_<to>}, %allNames{$_<from>}) => $_<weight> });
+            @rules = @rules1.append(@rules2);
+        }
+        my $core-matrix = Math::SparseMatrix::CSR.new(:@rules, nrow => @rowNames.elems, ncol => @colNames.elems, :$implicit-value);
+        self.new(:$core-matrix, row-names => @rowNames, column-names => @colNames, :$dimension-names);
+    }
+
     #=================================================================
     # Clone
     #=================================================================
