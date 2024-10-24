@@ -20,23 +20,69 @@ isa-ok
         Math::SparseMatrix::CSR,
         "Expected type after creation";
 
-## 5
+## 2
 ok Math::SparseMatrix.new($matrix1);
 
-## 6
+## 3
 isa-ok Math::SparseMatrix.new($matrix1), Math::SparseMatrix:D;
 
-## 7
+## 4
 isa-ok Math::SparseMatrix.new($matrix1, row-names => Whatever, column-names => ('A' .. 'Z').head($ncol)),
         Math::SparseMatrix:D;
 
-## 8
+## 5
 ok Math::SparseMatrix.new(core-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H');
 
-## 9
+## 6
 my $smat9 = Math::SparseMatrix.new($matrix1);
 isa-ok
         Math::SparseMatrix.new(core-matrix => $smat9, row-names => 'a' .. 'e', column-names => 'A' .. 'H'),
         Math::SparseMatrix:D;
+
+## 7
+my @edge-dataset =
+        { from => 'A', to => 'B', weight => 1 },
+        { from => 'B', to => 'C', weight => 2 },
+        { from => 'C', to => 'A', weight => 3 };
+
+ok
+        Math::SparseMatrix.new(:@edge-dataset, :directed),
+        'Object created successfully for directed graph with default parameters';
+
+## 8
+ok
+        Math::SparseMatrix.new(:@edge-dataset, :!directed),
+        'Object created successfully for undirected graph with default parameters';
+
+## 9
+ok
+        Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>),
+        'Object created successfully for directed graph with custom row and column names';
+
+## 10
+is
+        Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>).dimensions,
+        (5, 3),
+        "Expected number of rows";
+
+## 11
+ok
+        Math::SparseMatrix.new(:@edge-dataset, :!directed, :implicit-value(5)),
+        'Object created successfully for undirected graph with implicit value';
+
+## 12
+subtest {
+    my $obj11 = Math::SparseMatrix.new(:@edge-dataset, :!directed, row-names => <A B C D E>);
+    is-deeply
+            $obj11.row-names.Array,
+            'ABCDE'.comb.Array,
+            'Matrix has sorted row-names as provided';
+
+    is-deeply
+            $obj11.column-names.Array,
+            'ABCDE'.comb.Array,
+            'Matrix has sorted column-names as provided';
+
+}
 
 done-testing;
