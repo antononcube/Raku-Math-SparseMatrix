@@ -138,35 +138,88 @@ class Math::SparseMatrix
                      :$row-names is copy = Whatever,
                      :$column-names is copy = Whatever,
                      :$dimension-names is copy = Whatever) {
+        if $row-names ~~ Seq:D { $row-names = $row-names.Array }
+        if $column-names ~~ Seq:D { $column-names = $column-names.Array }
 
-        if $row-names.isa(Whatever) { $row-names = []}
         die "Row names is expected to be a list of strings or Whatever."
-        unless ($row-names ~~ Positional:D | Seq:D) && ($row-names.all ~~ Str:D);
+        unless $row-names.isa(Whatever) || ($row-names ~~ Positional:D | Seq:D) && ($row-names.all ~~ Str:D);
 
-        if $column-names.isa(Whatever) { $column-names = []}
         die "Column names is expected to be a list of strings or Whatever."
-        unless ($column-names ~~ Positional:D | Seq:D) && ($column-names.all ~~ Str:D);
+        unless $column-names.isa(Whatever) || ($column-names ~~ Positional:D | Seq:D) && ($column-names.all ~~ Str:D);
 
-        my @rowNames;
-        my @colNames;
         my @rules;
         if $directed {
-            @rowNames = [|@edge-dataset.map(*<from>), |$row-names].unique.sort;
-            my %rowNames = @rowNames Z=> (^@rowNames.elems);
-            @colNames = [|@edge-dataset.map(*<to>), |$column-names].unique.sort;
-            my %colNames = @colNames Z=> (^@colNames.elems);
-            @rules = @edge-dataset.map({ (%rowNames{$_<from>}, %colNames{$_<to>}) => $_<weight> });
+            # Row names
+            my @rowNames = @edge-dataset.map(*<from>).unique.sort;
+            if $row-names.isa(Whatever) {
+                $row-names = @rowNames;
+            } else {
+                my $set = Set.new($row-names);
+                @rowNames = @rowNames.grep({ $_ ∈ $set })
+            }
+            my %rowNames = $row-names.Array Z=> (^$row-names.elems);
+
+            # Column names
+            my @colNames = @edge-dataset.map(*<to>).unique.sort;
+            if $column-names.isa(Whatever) {
+                $column-names = @colNames;
+            } else {
+                my $set = Set.new($column-names);
+                @colNames = @colNames.grep({ $_ ∈ $set })
+            }
+            my %colNames = $column-names.Array Z=> (^$column-names.elems);
+
+            # Rules
+            @rules = @edge-dataset.map({
+                if (%rowNames{$_<from>}:exists) && (%rowNames{$_<to>}:exists) {
+                    (%rowNames{$_<from>}, %colNames{$_<to>}) => $_<weight>
+                } else {
+                    Empty
+                }
+            });
         } else {
-            @rowNames = [|$row-names, |$column-names].unique;
-            @rowNames = [|@edge-dataset.map(*<from>), |@edge-dataset.map(*<to>), |@rowNames].unique.sort;
-            @colNames = @rowNames;
-            my %allNames = @rowNames Z=> (^@rowNames.elems);
-            my @rules1 = @edge-dataset.map({ (%allNames{$_<from>}, %allNames{$_<to>}) => $_<weight> });
-            my @rules2 = @edge-dataset.map({ (%allNames{$_<to>}, %allNames{$_<from>}) => $_<weight> });
-            @rules = @rules1.append(@rules2);
+
+            my @rowNames = [|@edge-dataset.map(*<from>), |@edge-dataset.map(*<to>)].unique.sort;
+
+            given ($row-names, $column-names) {
+                when (Whatever, Whatever) {
+                    $row-names = @rowNames
+                }
+                when (Positional, Whatever) {
+                }
+                when (Whatever, Positional) {
+                    $row-names = $column-names
+                }
+                when (Positional, Positional) {
+                    die 'If the $directed is set to False, then $row-names and $column-names are expected to match if they are both lists.'
+                    unless $row-names eqv $column-names
+                }
+                default {
+                    # Should not happen
+                    die 'If the $directed is set to False, then $row-names and $column-names are expected to be compatible.'
+                }
+            }
+            $column-names = $row-names;
+            my %allNames = $row-names.Array Z=> (^$row-names.elems);
+
+            # Rules
+            @rules = @edge-dataset.map({
+                if (%allNames{$_<from>}:exists) && (%allNames{$_<to>}:exists) {
+                    [
+                        (%allNames{$_<from>}, %allNames{$_<to>}) => $_<weight>,
+                        (%allNames{$_<to>}, %allNames{$_<from>}) => $_<weight>,
+                    ]
+                } else {
+                    Empty
+                }
+            }).map(*.Slip);
         }
-        my $core-matrix = Math::SparseMatrix::CSR.new(:@rules, nrow => @rowNames.elems, ncol => @colNames.elems, :$implicit-value);
-        self.new(:$core-matrix, row-names => @rowNames, column-names => @colNames, :$dimension-names);
+
+        # Core matrix
+        my $core-matrix = Math::SparseMatrix::CSR.new(:@rules, nrow => $row-names.elems, ncol => $column-names.elems, :$implicit-value);
+
+        # Object
+        self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
     }
 
     #=================================================================
