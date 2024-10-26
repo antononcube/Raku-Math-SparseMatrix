@@ -261,7 +261,7 @@ class Math::SparseMatrix
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.row-at($row),
                 row-names => [self.get-row-name($row), ],
-                column-names => @!column-names
+                :@!column-names
                 );
     }
 
@@ -277,7 +277,7 @@ class Math::SparseMatrix
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.row-slice(@indexes2),
                 row-names => @indexes,
-                column-names => @!column-names,
+                :@!column-names,
                 );
     }
 
@@ -675,10 +675,13 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
         when $_.head.isa(Whatever) && ($_.tail ~~ Int || $_.tail ~~ Str) {
             $mat.column-at($_.tail)
         }
-        when $_.head.isa(Whatever) && $_.tail ~~ Range {
+        when ($_.head ~~ Range || $_.head ~~ Iterable) && $_.tail.isa(Whatever) {
+            $mat.row-slice($_.head);
+        }
+        when $_.head.isa(Whatever) && ($_.tail ~~ Range || $_.tail ~~ Iterable) {
             $mat.transpose.row-slice($_.tail).transpose
         }
-        when $_.head ~~ Range && $_.tail ~~ Range {
+        when ($_.head ~~ Range || $_.head ~~ Iterable) && ($_.tail ~~ Range || $_.tail ~~ Iterable) {
             $mat.row-slice($_.head).transpose.row-slice($_.tail).transpose
         }
         default {
