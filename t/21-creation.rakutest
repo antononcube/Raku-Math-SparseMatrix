@@ -31,8 +31,12 @@ isa-ok Math::SparseMatrix.new($matrix1, row-names => Whatever, column-names => (
         Math::SparseMatrix:D;
 
 ## 5
-ok Math::SparseMatrix.new(core-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H');
-
+subtest {
+        ok Math::SparseMatrix.new(core-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H');
+        my $m = Math::SparseMatrix.new(core-matrix => $matrix1, row-names => 'a' .. 'e', column-names => 'A' .. 'H');
+        isa-ok $m, Math::SparseMatrix:D;
+        is $m.dimensions, ($nrow, $ncol), "Expected dimensions";
+}
 ## 6
 my $smat9 = Math::SparseMatrix.new($matrix1);
 isa-ok
@@ -40,6 +44,15 @@ isa-ok
         Math::SparseMatrix:D;
 
 ## 7
+subtest {
+        my $m = Math::SparseMatrix.new(core-matrix => $matrix1, row-names => 'a' .. 'e');
+        isa-ok Math::SparseMatrix.new($m, column-names => 'A' .. 'H'), Math::SparseMatrix:D;
+        my $m2 = Math::SparseMatrix.new($m, column-names => 'A' .. 'H');
+        is $m2.row-names, ('a'...'e');
+        is $m2.column-names, ('A'...'H');
+}
+
+## 8
 my @edge-dataset =
         { from => 'A', to => 'B', weight => 1 },
         { from => 'B', to => 'C', weight => 2 },
@@ -49,12 +62,12 @@ ok
         Math::SparseMatrix.new(:@edge-dataset, :directed),
         'Object created successfully for directed graph with default parameters';
 
-## 8
+## 9
 ok
         Math::SparseMatrix.new(:@edge-dataset, :!directed),
         'Object created successfully for undirected graph with default parameters';
 
-## 9
+## 10
 subtest {
         ok
                 Math::SparseMatrix.new(:@edge-dataset, :directed, row-names => <X A B C Y>, column-names => <A B C>),
@@ -65,21 +78,21 @@ subtest {
         is $m.row-names, <X A B C Y>, "Expected rows names";
 }
 
-## 10
+## 11
 ok
         Math::SparseMatrix.new(:@edge-dataset, :!directed, :implicit-value(5)),
         'Object created successfully for undirected graph with implicit value';
 
-## 11
+## 12
 subtest {
-    my $obj11 = Math::SparseMatrix.new(:@edge-dataset, :!directed, row-names => <B A C E D>.map(*.Str));
+    my $obj12 = Math::SparseMatrix.new(:@edge-dataset, :!directed, row-names => <B A C E D>.map(*.Str));
     is-deeply
-            $obj11.row-names.Array,
+            $obj12.row-names.Array,
             'BACED'.comb.Array,
             'Matrix has row-names as provided';
 
     is-deeply
-            $obj11.column-names.Array,
+            $obj12.column-names.Array,
             'BACED'.comb.Array,
             'Matrix has column-names as provided';
 

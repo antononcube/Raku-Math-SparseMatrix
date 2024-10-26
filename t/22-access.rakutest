@@ -93,4 +93,10 @@ ok $matrix1[2, 3, 1];
 ## 12
 is $matrix1[3;2], $matrix1.value-at(3, 2);
 
+## 13
+my $matrix13 = Math::SparseMatrix.new($matrix1, row-names => 'a'..'e', column-names => 'A'..'H');
+#$matrix13.print;
+#$matrix13[<b c>; (0,2)].print;
+is $matrix13[<b c>; <A C>].Array, $matrix13[(1, 2);(0, 2)].Array;
+
 done-testing;
