@@ -1,10 +1,11 @@
 #!/usr/bin/env raku
 use v6.d;
 
+use Math::SparseMatrix;
 use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::Utilities;
 
-my $op = 'add';
+my $op = 'multiply';
 
 my $nrow = 5;
 my $ncol = 8;
@@ -13,7 +14,7 @@ my $tol = 0.01;
 
 say "=" x 100;
 say "Matrix 1:";
-my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :!decorated);
 say $matrix1;
 say "-" x 100;
 $matrix1.print;
@@ -21,7 +22,7 @@ say "-" x 100;
 
 say "=" x 100;
 say "Matrix 2:";
-my $matrix2 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
+my $matrix2 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :!decorated);
 say $matrix2;
 say "-" x 100;
 $matrix2.print;

@@ -2,18 +2,17 @@
 use v6.d;
 
 use Math::SparseMatrix;
-use Math::SparseMatrix::CSR;
 use Math::SparseMatrix::Utilities;
-
 
 my $nrow = 5;
 my $ncol = 8;
 my $density = 0.35;
 my $tol = 0.01;
+my $type = 'CSR';
 
 say "-" x 100;
 say "Matrix 1:";
-my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol);
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type);
 say $matrix1;
 say "-" x 100;
 $matrix1.print;
