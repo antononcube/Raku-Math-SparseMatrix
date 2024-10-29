@@ -716,6 +716,6 @@ multi sub infix:<*>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL)
     $m.multiply($scalar)
 }
 
-multi sub infix:<o>( Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) {
+multi sub infix:<o>( Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is equiv(&infix:<**>) is export(:ALL) {
     $m1.dot($m2)
 }
