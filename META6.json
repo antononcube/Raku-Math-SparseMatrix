@@ -1,36 +1,33 @@
 {
-  "name": "Math::SparseMatrix",
-  "description": "Sparse matrix algorithms.",
-  "version": "0.0.3",
-  "api": "0",
-  "perl": "6.d",
-  "authors": [
-    "Anton Antonov"
-  ],
-  "auth": "zef:antononcube",
-  "depends": [
-    "Math::SparseMatrix::Native:ver<0.0.1+>"
-  ],
-  "build-depends": [],
-  "test-depends": [],
-  "provides": {
-    "Math::SparseMatrix": "lib/Math/SparseMatrix.rakumod",
-    "Math::SparseMatrix::Abstract": "lib/Math/SparseMatrix/Abstract.rakumod",
-    "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod",
-    "Math::SparseMatrix::Convertish": "lib/Math/SparseMatrix/Convertish.rakumod",
-    "Math::SparseMatrix::DOK": "lib/Math/SparseMatrix/DOK.rakumod",
-    "Math::SparseMatrix::NativeAdapter": "lib/Math/SparseMatrix/NativeAdapter.rakumod",
-    "Math::SparseMatrix::Utilities": "lib/Math/SparseMatrix/Utilities.rakumod"
-  },
-  "resources": [],
-  "license": "Artistic-2.0",
-  "tags": [
-    "math",
-    "mathematics",
-    "matrix",
-    "sparse matrix algebra",
-    "sparse matrix",
-    "sparse"
-  ],
-  "source-url": "https://github.com/antononcube/Raku-Math-SparseMatrix.git"
+    "name": "Math::SparseMatrix",
+    "description": "Sparse matrix algorithms.",
+    "version": "0.0.4",
+    "authors": [
+        "Anton Antonov"
+    ],
+    "auth": "zef:antononcube",
+    "depends": [
+        "Math::SparseMatrix::Native:ver<0.0.1+>"
+    ],
+    "build-depends": [],
+    "provides": {
+        "Math::SparseMatrix": "lib/Math/SparseMatrix.rakumod",
+        "Math::SparseMatrix::Abstract": "lib/Math/SparseMatrix/Abstract.rakumod",
+        "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod",
+        "Math::SparseMatrix::Convertish": "lib/Math/SparseMatrix/Convertish.rakumod",
+        "Math::SparseMatrix::DOK": "lib/Math/SparseMatrix/DOK.rakumod",
+        "Math::SparseMatrix::NativeAdapter": "lib/Math/SparseMatrix/NativeAdapter.rakumod",
+        "Math::SparseMatrix::Utilities": "lib/Math/SparseMatrix/Utilities.rakumod"
+    },
+    "license": "Artistic-2.0",
+    "tags": [
+        "math",
+        "mathematics",
+        "matrix",
+        "sparse matrix algebra",
+        "sparse matrix",
+        "sparse"
+    ],
+    "api": "0",
+    "source-url": "https://github.com/antononcube/Raku-Math-SparseMatrix.git"
 }
