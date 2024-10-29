@@ -58,4 +58,4 @@ say 'Multiplication by scalar and sum:';
 
 say "\n" x 2;
 say 'Dot product:';
-($smat1 o $smat2.transpose).print;
+($smat1 • $smat2.transpose + 100).print(:iv);
