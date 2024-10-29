@@ -38,9 +38,10 @@ $smat2.print;
 
 say "\n" x 2;
 say 'Sum of a matrix and a scalar:';
-($smat1 + 1000).print(:iv);
+my $scalar = 10;
+($smat1 + $scalar).print(:iv);
 
-say "implicit value : ", ($smat1 + 1000).implicit-value;
+say "implicit value : ", ($smat1 + $scalar).implicit-value;
 
 say "\n" x 2;
 say 'Sum of the matrices:';
