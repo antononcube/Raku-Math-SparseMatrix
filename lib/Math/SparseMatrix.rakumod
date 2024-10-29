@@ -689,3 +689,33 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
         }
     }
 }
+
+#=====================================================================
+# Arithmetic
+multi sub infix:<+>(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) {
+    $m1.add($m2)
+}
+
+multi sub infix:<+>(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) {
+    $m.add($scalar)
+}
+
+multi sub infix:<+>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) {
+    $m.add($scalar)
+}
+
+multi sub infix:<*>(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) {
+    $m1.multiply($m2)
+}
+
+multi sub infix:<*>(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) {
+    $m.multiply($scalar)
+}
+
+multi sub infix:<*>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) {
+    $m.multiply($scalar)
+}
+
+multi sub infix:<o>( Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) {
+    $m1.dot($m2)
+}
