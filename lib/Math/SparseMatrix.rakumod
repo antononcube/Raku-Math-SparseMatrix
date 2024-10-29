@@ -501,7 +501,7 @@ class Math::SparseMatrix
     #=================================================================
     # Print
     #=================================================================
-    method print() {
+    method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, ) {
         my $connector = '┼'; # '+'; # '┼';
         my $v-sep = '│'; #'|'; #'│';
         my $h-sep = '–'; # '-''–'
@@ -515,7 +515,7 @@ class Math::SparseMatrix
         # Minimum length for '.' is 1
         my $max-len = max($col-width, 1);
 
-        @rows = $!core-matrix.print(:!echo);
+        @rows = $!core-matrix.print(:!echo, :$show-implicit-value);
         $max-len = max($max-len, @rows.map(*.Slip).map(*.chars).max);
         $col-width = max($col-width, $max-len);
 
