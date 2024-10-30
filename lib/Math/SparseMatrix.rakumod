@@ -451,6 +451,15 @@ class Math::SparseMatrix
     }
 
     #=================================================================
+    # Negate
+    #=================================================================
+    #| Negate the elements of a matrix
+    method negate() {
+        # Maybe redundant, but useful for "symmetry" with the unary operation, e.g. -$m .
+        return self.multiply(-1);
+    }
+
+    #=================================================================
     # Dot product
     #=================================================================
     method dot($other, Bool :$copy = True) {
@@ -691,33 +700,31 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
 }
 
 #=====================================================================
+# Unary operator shortcuts
+multi sub prefix:<@>( Math::SparseMatrix:D $m --> Array) is export(:ALL) { $m.Array }
+multi sub prefix:<%>( Math::SparseMatrix:D $m --> Hash) is export(:ALL) { $m.rules.Hash }
+
+#=====================================================================
 # Arithmetic
-multi sub infix:<+>(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) {
-    $m1.add($m2)
-}
+multi sub prefix:<->( Math::SparseMatrix:D $m --> Math::SparseMatrix:D) is export(:ALL) { $m.multiply(-1) }
 
-multi sub infix:<+>(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) {
-    $m.add($scalar)
-}
+multi sub infix:<+>(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) { $m1.add($m2)}
+multi sub infix:<+>(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) { $m.add($scalar) }
+multi sub infix:<+>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) { $m.add($scalar) }
 
-multi sub infix:<+>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) {
-    $m.add($scalar)
-}
+multi sub infix:<->(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) { $m1.add($m2.multiply(-1))}
+multi sub infix:<->(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) { $m.add(-$scalar) }
+multi sub infix:<->( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) { $m.add(-$scalar) }
 
-multi sub infix:<*>(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) {
-    $m1.multiply($m2)
-}
-
-multi sub infix:<*>(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) {
-    $m.multiply($scalar)
-}
-
-multi sub infix:<*>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) {
-    $m.multiply($scalar)
-}
+multi sub infix:<*>(Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is export(:ALL) { $m1.multiply($m2) }
+multi sub infix:<*>(Math::SparseMatrix:D $m, Numeric:D $scalar) is export(:ALL) { $m.multiply($scalar)}
+multi sub infix:<*>( Numeric:D $scalar, Math::SparseMatrix:D $m) is export(:ALL) { $m.multiply($scalar) }
 
 # is equiv(&infix:<**>)
 # Opt-8 for ⎡•⎦
-multi sub infix:<•>( Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is equiv(&infix:<**>) is export(:ALL) {
-    $m1.dot($m2)
-}
+multi sub infix:<•>( Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is tighter(&infix:<*>) is export(:ALL) { $m1.dot($m2) }
+multi sub infix:<dot>( Math::SparseMatrix:D $m1, Math::SparseMatrix:D $m2) is equiv(&infix:<•>) is export(:ALL) { $m1.dot($m2) }
+
+#=====================================================================
+# Determinants and norms
+# TBD...
