@@ -844,6 +844,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             return self.clone.unitize(:!clone);
         }
         @!values = 1 xx (@!values.elems);
+        if $!implicit-value { $!implicit-value = 1 }
         return self;
     }
 
@@ -863,6 +864,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             elsif $v-max < $_ { $v-max }
             else {$_}
         });
+        # !! What about the implicit value?
         return self;
     }
 
@@ -876,6 +878,20 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             return self.clone.round($scale, :!clone);
         }
         @!values = @!values>>.round($scale);
+        if $!implicit-value { $!implicit-value .= round($scale) }
+        return self;
+    }
+
+    #=================================================================
+    # Conjugate
+    #=================================================================
+    #| Conjugate the sparse matrix
+    method conjugate(Bool:D $clone = True -->Math::SparseMatrix:D) {
+        if $clone {
+            return self.clone.conjugate(:!clone);
+        }
+        @!values = @!values>>.conj;
+        if $!implicit-value { $!implicit-value .= conj }
         return self;
     }
 

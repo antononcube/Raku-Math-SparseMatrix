@@ -454,9 +454,9 @@ class Math::SparseMatrix
     # Negate
     #=================================================================
     #| Negate the elements of a matrix
-    method negate() {
+    method negate(Bool:D $clone = True -->Math::SparseMatrix:D) {
         # Maybe redundant, but useful for "symmetry" with the unary operation, e.g. -$m .
-        return self.multiply(-1);
+        return self.multiply(-1, :$clone);
     }
 
     #=================================================================
@@ -555,6 +555,15 @@ class Math::SparseMatrix
         return self;
     }
 
+    #| Conjugate the sparse matrix
+    #| C<:$clone> -- Whether to clone or not.
+    method conjugate(Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.conjugate(:!clone);
+        }
+        $!core-matrix.conjugate(:!clone);
+        return self;
+    }
 
     #=================================================================
     # Representation

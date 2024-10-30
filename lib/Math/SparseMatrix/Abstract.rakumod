@@ -138,6 +138,12 @@ class Math::SparseMatrix::Abstract {
     method round(Numeric:D $scale = 1, Bool:D :$clone = True) {...}
 
     #=================================================================
+    # Conjugate
+    #=================================================================
+    #| Round the sparse matrix
+    method conjugate(Bool:D :$clone = True) {...}
+
+    #=================================================================
     # Pretty print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {...}

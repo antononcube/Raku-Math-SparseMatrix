@@ -451,6 +451,20 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
             return self.clone.round($scale, :!clone);
         }
         %!adjacency-list = %!adjacency-list.nodemap({ $_.round($scale) });
+        if $!implicit-value { $!implicit-value .= round($scale) }
+        return self;
+    }
+
+    #=================================================================
+    # Conjugate
+    #=================================================================
+    #| Conjugate the sparse matrix
+    method conjugate(Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.conjugate(:!clone);
+        }
+        %!adjacency-list = %!adjacency-list.nodemap({ $_.conj });
+        if $!implicit-value { $!implicit-value .= conj }
         return self;
     }
 
