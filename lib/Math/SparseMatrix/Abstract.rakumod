@@ -140,7 +140,7 @@ class Math::SparseMatrix::Abstract {
     #=================================================================
     # Conjugate
     #=================================================================
-    #| Round the sparse matrix
+    #| Conjugate the sparse matrix
     method conjugate(Bool:D :$clone = True) {...}
 
     #=================================================================
