@@ -886,7 +886,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     # Conjugate
     #=================================================================
     #| Conjugate the sparse matrix
-    method conjugate(Bool:D $clone = True -->Math::SparseMatrix:D) {
+    method conjugate(Bool:D :$clone = True -->Math::SparseMatrix::CSR:D) {
         if $clone {
             return self.clone.conjugate(:!clone);
         }
