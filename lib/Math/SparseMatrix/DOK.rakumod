@@ -459,7 +459,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     # Conjugate
     #=================================================================
     #| Conjugate the sparse matrix
-    method conjugate(Bool:D :$clone = True) {
+    method conjugate(Bool:D :$clone = True --> Math::SparseMatrix::DOK:D) {
         if $clone {
             return self.clone.conjugate(:!clone);
         }
