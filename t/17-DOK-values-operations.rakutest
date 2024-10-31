@@ -1,0 +1,45 @@
+use v6.d;
+
+#use lib <. lib>;
+use Math::SparseMatrix::DOK;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+my $type = 'DOK';
+
+my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$type, :$tol):!decorated;
+
+plan *;
+
+## 1
+subtest {
+    my $matrix1a = $matrix1.clone;
+    isa-ok $matrix1a.unitize, Math::SparseMatrix::DOK:D;
+}, "unitize";
+
+## 2
+subtest {
+    my $matrix1a = $matrix1.clone;
+    isa-ok $matrix1a.clip(min => 0.01, max => 0.6), Math::SparseMatrix::DOK:D;
+    isa-ok $matrix1a.clip(min => 0.01, max => 0.6, :clone), Math::SparseMatrix::DOK:D;
+}, "clip";
+
+## 3
+subtest {
+    my $matrix1a = $matrix1.clone;
+    isa-ok $matrix1a.round(0.2), Math::SparseMatrix::DOK:D;
+    isa-ok $matrix1a.round(0.2, :clone), Math::SparseMatrix::DOK:D;
+}, "round";
+
+## 4
+subtest {
+    my $matrix1c = $matrix1.clone;
+    ok $matrix1c.conjugate;
+    ok $matrix1c.conjugate(:clone);
+}, "conjugate";
+
+done-testing;

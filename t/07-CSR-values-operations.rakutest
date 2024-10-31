@@ -16,7 +16,8 @@ plan *;
 
 ## 1
 subtest {
-    isa-ok $matrix1.unitize, Math::SparseMatrix::CSR:D;
+    my $matrix1a = $matrix1.clone;
+    isa-ok $matrix1a.unitize, Math::SparseMatrix::CSR:D;
 }, "unitize";
 
 ## 2
