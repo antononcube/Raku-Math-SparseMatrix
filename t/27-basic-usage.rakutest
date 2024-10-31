@@ -20,6 +20,9 @@ my $rmat = Math::SparseMatrix.new(
 my $dmat2 = [2, 2, 4, 4, 4, 2, 3, 2, 0, 2, 1, 4, 4, 1, 1, 3, 1, 2, 1, 0].rotor(4);
 my $rmat2 = Math::SparseMatrix.new(dense-matrix => $dmat2);
 
+#==========================================================
+# Expected test matrices
+#==========================================================
 subtest {
     is
             $rmat,
@@ -53,6 +56,9 @@ subtest {
 }, "Expected test matrices";
 
 
+#==========================================================
+# Transposing
+#==========================================================
 subtest {
 
     is
@@ -67,6 +73,9 @@ subtest {
 
 }, "Transposing";
 
+#==========================================================
+# Dot product: matrix by vector
+#==========================================================
 subtest {
     is
             $rmat[0].transpose,
@@ -80,6 +89,9 @@ subtest {
 
 }, "Dot product: matrix by vector";
 
+#==========================================================
+# Dot product: matrix by its transpose
+#==========================================================
 subtest {
     is
             $rmat.core-matrix.transpose,
@@ -96,9 +108,11 @@ subtest {
             Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [4e0, 1e0, 4e0, 9e0, 16e0, 4e0, 4e0], col-index => [3, 0, 1, 2, 3, 0, 4], row-ptr => [0, 2, 3, 4, 6, 7], nrow => 5, ncol => 5, implicit-value => 0), row-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, column-names-map => {"0" => 0, "1" => 1, "2" => 2, "3" => 3, "4" => 4}, dimension-names-map => {}, row-names => ["a", "b", "c", "d", "e"], column-names => ["0", "1", "2", "3", "4"], dimension-names => []),
             '$rmat.transpose.dot($rmat.core-matrix)';
 
-}, "Dot product: matrix by its tranpose";
+}, "Dot product: matrix by its transpose";
 
+#==========================================================
 # Next we look into two dot products of two `Math::SparseMatrix` objects:
+#==========================================================
 subtest {
     is
             $rmat.dot($rmat2),
@@ -118,7 +132,9 @@ subtest {
 
 }, "Dot product: two Math::SparseMatrix objects";
 
+#==========================================================
 # Row- and column binding
+#==========================================================
 subtest {
 
     my $rmat2 = Math::SparseMatrix.new($rmat, row-names => $rmat.row-names.map('s.' ~ *));
@@ -146,6 +162,9 @@ subtest {
 
 }, "Row and column binding";
 
+#==========================================================
+# Tuplese
+#==========================================================
 subtest {
     is
             $rmat.tuples(:dataset),
