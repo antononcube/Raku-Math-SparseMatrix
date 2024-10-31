@@ -61,4 +61,20 @@ subtest {
             "Same rules of add-by-rules";
 }, "Addition with implicit values";
 
+## 7
+subtest {
+
+    my $matrix1a = $matrix1.clone;
+    ok $matrix1a.clip(min => 0.01, max => 0.6);
+    ok $matrix1a.clip(min => 0.01, max => 0.6, :clone);
+
+    my $matrix1b = $matrix1.clone;
+    ok $matrix1b.round(0.01);
+    ok $matrix1b.round(0.01, :clone);
+
+    my $matrix1c = $matrix1.clone;
+    ok $matrix1c.conjugate;
+    ok $matrix1c.conjugate(:clone);
+}, "Clip, round, conjugate";
+
 done-testing;
