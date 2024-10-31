@@ -1,0 +1,162 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSR;
+
+use Test;
+
+plan *;
+
+# Test matrices
+my $rmatCore = Math::SparseMatrix::CSR.new(rules => [[0, 0] => 1, [1, 1] => 2, [3, 2] => 3, [0, 3] => 4, [2, 4] => 2]);
+
+my $rmat = Math::SparseMatrix.new(
+        $rmatCore,
+        column-names => ["a", "b", "c", "d", "e"],
+        row-names => ["A", "B", "C", "D"],
+        dimension-names => ["U", "V"]);
+
+my $dmat2 = [2, 2, 4, 4, 4, 2, 3, 2, 0, 2, 1, 4, 4, 1, 1, 3, 1, 2, 1, 0].rotor(4);
+my $rmat2 = Math::SparseMatrix.new(dense-matrix => $dmat2);
+
+subtest {
+    is
+            $rmat,
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4, 2, 2, 3],
+                    col-index => [0, 3, 1, 4, 2], row-ptr => [0, 2, 3, 4, 5], nrow => 4, ncol => 5,
+                    implicit-value => 0),
+                    row-names-map => { :A(0), :B(1), :C(2), :D(3) },
+                    column-names-map => { :a(0), :b(1), :c(2), :d(3), :e(4) },
+                    dimension-names-map => { :U(0), :V(1) },
+                    row-names => ["A", "B", "C", "D"],
+                    column-names => ["a", "b", "c", "d", "e"],
+                    dimension-names => ["U", "V"]),
+            '$rmat';
+
+    is
+
+            $rmat2,
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(
+                    values => [2, 2, 4, 4, 4, 2, 3, 2, 2, 1, 4, 4, 1, 1, 3, 1, 2, 1],
+                    col-index => [0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2],
+                    row-ptr => [0, 4, 8, 11, 15, 18], nrow => 5,
+                    ncol => 4, implicit-value => 0),
+                    row-names-map => { "0" => 0, "1" => 1, "2" => 2, "3" => 3, "4" => 4 },
+                    column-names-map => { "0" => 0, "1" => 1, "2" => 2, "3" => 3 },
+                    dimension-names-map => { "0" => 0, "1" => 1 },
+                    row-names => ["0", "1", "2", "3", "4"],
+                    column-names => ["0", "1", "2", "3"],
+                    dimension-names => ["0", "1"]
+                    ),
+            '$rmat2';
+}, "Expected test matrices";
+
+
+subtest {
+
+    is
+            $rmat[0].transpose,
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4], col-index => [0, 0], row-ptr => [0, 1, 1, 1, 2, 2], nrow => 5, ncol => 1, implicit-value => 0), row-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, column-names-map => {:A(0)}, dimension-names-map => {"0" => 0, "1" => 1}, row-names => ["a", "b", "c", "d", "e"], column-names => ["A"], dimension-names => ["0", "1"]),
+            '$rmat[0].transpose';
+
+    is
+            $rmat.dot($rmat[0].transpose),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [17e0], col-index => [0], row-ptr => [0, 1, 1, 1, 1], nrow => 4, ncol => 1, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {:A(0)}, dimension-names-map => {}, row-names => ["A", "B", "C", "D"], column-names => ["A"], dimension-names => []),
+            '$rmat.dot($rmat[0].transpose)';
+
+}, "Transposing";
+
+subtest {
+    is
+            $rmat[0].transpose,
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4], col-index => [0, 0], row-ptr => [0, 1, 1, 1, 2, 2], nrow => 5, ncol => 1, implicit-value => 0), row-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, column-names-map => {:A(0)}, dimension-names-map => {"0" => 0, "1" => 1}, row-names => ["a", "b", "c", "d", "e"], column-names => ["A"], dimension-names => ["0", "1"]),
+            '$rmat[0].transpose';
+
+    is
+            $rmat.dot($rmat[0].transpose),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [17e0], col-index => [0], row-ptr => [0, 1, 1, 1, 1], nrow => 4, ncol => 1, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {:A(0)}, dimension-names-map => {}, row-names => ["A", "B", "C", "D"], column-names => ["A"], dimension-names => []),
+            '$rmat.dot($rmat[0].transpose)';
+
+}, "Dot product: matrix by vector";
+
+subtest {
+    is
+            $rmat.core-matrix.transpose,
+            Math::SparseMatrix::CSR.new(values => [1, 2, 3, 4, 2], col-index => [0, 1, 3, 0, 2], row-ptr => [0, 1, 2, 3, 4, 5], nrow => 5, ncol => 4, implicit-value => 0),
+            '$rmat.core-matrix.transpose';
+
+    is
+            $rmat.dot($rmat.core-matrix.transpose),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [17e0, 4e0, 4e0, 9e0], col-index => [0, 1, 2, 3], row-ptr => [0, 1, 2, 3, 4], nrow => 4, ncol => 4, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {"0" => 0, "1" => 1, "2" => 2, "3" => 3}, dimension-names-map => {}, row-names => ["A", "B", "C", "D"], column-names => ["0", "1", "2", "3"], dimension-names => []),
+            '$rmat.dot($rmat.core-matrix.transpose)';
+
+    is
+            $rmat.transpose.dot($rmat.core-matrix),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [4e0, 1e0, 4e0, 9e0, 16e0, 4e0, 4e0], col-index => [3, 0, 1, 2, 3, 0, 4], row-ptr => [0, 2, 3, 4, 6, 7], nrow => 5, ncol => 5, implicit-value => 0), row-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, column-names-map => {"0" => 0, "1" => 1, "2" => 2, "3" => 3, "4" => 4}, dimension-names-map => {}, row-names => ["a", "b", "c", "d", "e"], column-names => ["0", "1", "2", "3", "4"], dimension-names => []),
+            '$rmat.transpose.dot($rmat.core-matrix)';
+
+}, "Dot product: matrix by its tranpose";
+
+# Next we look into two dot products of two `Math::SparseMatrix` objects:
+subtest {
+    is
+            $rmat.dot($rmat2),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [16e0, 8e0, 18e0, 6e0, 8e0, 6e0, 4e0, 4e0, 2e0, 2e0, 4e0, 12e0, 6e0, 3e0], col-index => [3, 2, 0, 1, 0, 2, 1, 3, 2, 0, 1, 3, 1, 2], row-ptr => [0, 4, 8, 11, 14], nrow => 4, ncol => 4, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {"0" => 0, "1" => 1, "2" => 2, "3" => 3}, dimension-names-map => {}, row-names => ["A", "B", "C", "D"], column-names => ["0", "1", "2", "3"], dimension-names => []),
+            '$rmat.dot($rmat2)';
+
+    is
+            $rmat2.dot($rmat),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [2e0, 4e0, 8e0, 8e0, 12e0, 16e0, 4e0, 6e0, 6e0, 4e0, 12e0, 2e0, 4e0, 2e0, 2e0, 16e0, 9e0, 4e0, 4e0, 2e0, 4e0, 1e0], col-index => [0, 1, 3, 4, 2, 3, 1, 4, 2, 0, 2, 4, 1, 4, 1, 3, 2, 0, 3, 4, 1, 0], row-ptr => [0, 5, 10, 13, 18, 22], nrow => 5, ncol => 5, implicit-value => 0), row-names-map => {"0" => 0, "1" => 1, "2" => 2, "3" => 3, "4" => 4}, column-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, dimension-names-map => {}, row-names => ["0", "1", "2", "3", "4"], column-names => ["a", "b", "c", "d", "e"], dimension-names => []),
+            '$rmat2.dot($rmat)';
+
+    is
+            $rmat.dot($rmat2).dot($rmat),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [18e0, 16e0, 12e0, 72e0, 48e0, 8e0, 12e0, 8e0, 32e0, 12e0, 8e0, 4e0, 2e0, 8e0, 6e0, 36e0, 12e0], col-index => [0, 4, 1, 3, 2, 1, 4, 0, 3, 2, 1, 4, 0, 3, 4, 2, 1], row-ptr => [0, 5, 10, 14, 17], nrow => 4, ncol => 5, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, dimension-names-map => {}, row-names => ["A", "B", "C", "D"], column-names => ["a", "b", "c", "d", "e"], dimension-names => []),
+            '$rmat.dot($rmat2).dot($rmat)';
+
+
+}, "Dot product: two Math::SparseMatrix objects";
+
+# Row- and column binding
+subtest {
+
+    my $rmat2 = Math::SparseMatrix.new($rmat, row-names => $rmat.row-names.map('s.' ~ *));
+    my $rmat3 = Math::SparseMatrix.new($rmat, column-names => $rmat.column-names.map('t.' ~ *));
+
+    is
+            $rmat.row-bind($rmat),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4, 2, 2, 3, 1, 4, 2, 2, 3], col-index => [0, 3, 1, 4, 2, 0, 3, 1, 4, 2], row-ptr => [0, 2, 3, 4, 5, 7, 8, 9, 10], nrow => 8, ncol => 5, implicit-value => 0), row-names-map => {"A.1" => 0, "A.2" => 4, "B.1" => 1, "B.2" => 5, "C.1" => 2, "C.2" => 6, "D.1" => 3, "D.2" => 7}, column-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, dimension-names-map => {"0" => 0, "1" => 1}, row-names => ["A.1", "B.1", "C.1", "D.1", "A.2", "B.2", "C.2", "D.2"], column-names => ["a", "b", "c", "d", "e"], dimension-names => ["0", "1"]),
+            '$rmat.row-bind($rmat)';
+
+    is
+            $rmat.row-bind($rmat2),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4, 2, 2, 3, 1, 4, 2, 2, 3], col-index => [0, 3, 1, 4, 2, 0, 3, 1, 4, 2], row-ptr => [0, 2, 3, 4, 5, 7, 8, 9, 10], nrow => 8, ncol => 5, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3), "s.A" => 4, "s.B" => 5, "s.C" => 6, "s.D" => 7}, column-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4)}, dimension-names-map => {"0" => 0, "1" => 1}, row-names => ["A", "B", "C", "D", "s.A", "s.B", "s.C", "s.D"], column-names => ["a", "b", "c", "d", "e"], dimension-names => ["0", "1"]),
+            '$rmat.row-bind($rmat2)';
+
+    is
+            $rmat.column-bind($rmat),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4, 1, 4, 2, 2, 2, 2, 3, 3], col-index => [0, 3, 5, 8, 1, 6, 4, 9, 2, 7], row-ptr => [0, 4, 6, 8, 10], nrow => 4, ncol => 10, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {"a.1" => 0, "a.2" => 5, "b.1" => 1, "b.2" => 6, "c.1" => 2, "c.2" => 7, "d.1" => 3, "d.2" => 8, "e.1" => 4, "e.2" => 9}, dimension-names-map => {"0" => 0, "1" => 1}, row-names => ["A", "B", "C", "D"], column-names => ["a.1", "b.1", "c.1", "d.1", "e.1", "a.2", "b.2", "c.2", "d.2", "e.2"], dimension-names => ["0", "1"]),
+            '$rmat.column-bind($rmat)';
+
+    is
+            $rmat.column-bind($rmat3),
+            Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [1, 4, 1, 4, 2, 2, 2, 2, 3, 3], col-index => [0, 3, 5, 8, 1, 6, 4, 9, 2, 7], row-ptr => [0, 4, 6, 8, 10], nrow => 4, ncol => 10, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {:a(0), :b(1), :c(2), :d(3), :e(4), "t.a" => 5, "t.b" => 6, "t.c" => 7, "t.d" => 8, "t.e" => 9}, dimension-names-map => {"0" => 0, "1" => 1}, row-names => ["A", "B", "C", "D"], column-names => ["a", "b", "c", "d", "e", "t.a", "t.b", "t.c", "t.d", "t.e"], dimension-names => ["0", "1"]),
+            '$rmat.column-bind($rmat3)';
+
+}, "Row and column binding";
+
+subtest {
+    is
+            $rmat.tuples(:dataset),
+            [{:i(0), :j(0), :x(1)}, {:i(0), :j(3), :x(4)}, {:i(1), :j(1), :x(2)}, {:i(2), :j(4), :x(2)}, {:i(3), :j(2), :x(3)}],
+            '$rmat.tuples(:dataset)';
+
+    is
+            $rmat.tuples(:names,:dataset),
+            [{:i("A"), :j("a"), :x(1)}, {:i("A"), :j("d"), :x(4)}, {:i("B"), :j("b"), :x(2)}, {:i("C"), :j("e"), :x(2)}, {:i("D"), :j("c"), :x(3)}],
+            '$rmat.tuples(:names,:dataset)';
+
+}, "Tuples";
+
+done-testing;
