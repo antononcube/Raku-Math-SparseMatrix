@@ -416,7 +416,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
         if $clone {
             return self.clone.unitize(:!clone);
         }
-        %!adjacency-list = %!adjacency-list.map({ $_.map({ $_.key => 1 }) });
+        %!adjacency-list = %!adjacency-list.map({ $_.key => $_.value.map({ $_.key => 1 }) });
         return self;
     }
 
@@ -432,7 +432,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
             return self.clone.clip(:$v-min, :$v-max, :!clone);
         }
         %!adjacency-list = %!adjacency-list.map({
-            $_.map({
+            $_.key => $_.value.map({
                 $_.key => do if $_.value < $v-min { $v-min }
                 elsif $v-max < $_.value { $v-max }
                 else { $_.value }
