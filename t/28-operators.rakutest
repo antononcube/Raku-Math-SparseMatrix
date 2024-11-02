@@ -1,0 +1,66 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix :ALL;
+use Math::SparseMatrix::Utilities;
+
+use Test;
+
+plan *;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.001;
+my $type = 'CSR';
+
+# Here we create a decorated sparse matrix
+my $smat1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
+my $smat2 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
+
+# Here that matrix is given row-names and column-names:
+$smat1 =
+        Math::SparseMatrix.new(
+                core-matrix => $smat1,
+                row-names => 'a' .. 'e',
+                column-names => 'A' .. 'H'
+                );
+
+$smat2 =
+        Math::SparseMatrix.new(
+                core-matrix => $smat2,
+                row-names => 'a' .. 'e',
+                column-names => 'A' .. 'H'
+                );
+
+#==========================================================
+# Addition
+#==========================================================
+subtest {
+    my $scalar = 10;
+    is $smat1 + $scalar, $smat1.add($scalar), 'Sum of a matrix and a scalar';
+    is $scalar + $smat1, $smat1.add($scalar), 'Sum of a scalar and a matrix';
+    is $smat1 + $smat2, $smat1.add($smat2), 'Sum of martrices';
+}, "Addition";
+
+#==========================================================
+# Multiplication
+#==========================================================
+subtest {
+    my $scalar = 100;
+    is $smat1 * $scalar, $smat1.multiply($scalar), 'Multiplication of a matrix and a scalar';
+    is $smat1 * $smat2, $smat1.multiply($smat2), 'Multiplication of matrices';
+    is $smat1 + $scalar * $smat2, $smat1.add($smat2.multiply($scalar)), 'Precedence';
+}, "Multiplication";
+
+#==========================================================
+# Dot product
+#==========================================================
+subtest {
+    my $scalar = 100;
+    is $smat1 dot $smat2.transpose, $smat1.dot($smat2.transpose), 'Dot product of matrices  ⎡dot⎦';
+    is $smat1 • $smat2.transpose, $smat1.dot($smat2.transpose), 'Dot product of matrices ⎡•⎦';
+    is $smat1 • $smat2.transpose + $scalar, $smat1.dot($smat2.transpose).add($scalar), 'Precedence';
+}, "Multiplication";
+
+done-testing;
