@@ -32,6 +32,26 @@ $smat2 =
                 row-names => 'a' .. 'e',
                 column-names => 'A' .. 'H'
                 );
+#==========================================================
+# Unary
+#==========================================================
+subtest {
+    is-deeply @ $smat1, $smat1.Array, 'Array';
+    is-deeply % $smat1, $smat1.rules.Hash, 'rules';
+}, 'Unary';
+
+#==========================================================
+# Negation
+#==========================================================
+subtest {
+    is -$smat1, $smat1.multiply(-1), 'Negation';
+    is -$smat1, $smat1.negate, 'Negation';
+    my $iv = 3;
+    my $smat1a = $smat1.clone;
+    $smat1a.implicit-value = $iv;
+    is -$smat1a, $smat1a.negate, 'Negation with implicit value';
+    is (-$smat1a).implicit-value, -$iv;
+}, 'Negation';
 
 #==========================================================
 # Addition
