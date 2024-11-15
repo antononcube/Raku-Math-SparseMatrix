@@ -710,8 +710,12 @@ multi sub postcircumfix:<[; ]>(Math::SparseMatrix:D $mat, @indexes) is export {
 
 #=====================================================================
 # Unary operator shortcuts
-multi sub prefix:<@>( Math::SparseMatrix:D $m --> Array) is export(:ALL) { $m.Array }
-multi sub prefix:<%>( Math::SparseMatrix:D $m --> Hash) is export(:ALL) { $m.rules.Hash }
+# These operators <@ %> are found "Math::Matrix" but they break typical code like:
+#   |%opts
+# multi sub prefix:<@>( Math::SparseMatrix:D $m --> Array) is export(:ALL) { $m.Array }
+
+#
+# multi sub prefix:<%>( Math::SparseMatrix:D $m --> Hash) is export(:ALL) { $m.rules.Hash }
 
 #=====================================================================
 # Arithmetic

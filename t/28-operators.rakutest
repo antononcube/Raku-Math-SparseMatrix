@@ -35,10 +35,12 @@ $smat2 =
 #==========================================================
 # Unary
 #==========================================================
-subtest {
-    is-deeply @ $smat1, $smat1.Array, 'Array';
-    is-deeply % $smat1, $smat1.rules.Hash, 'rules';
-}, 'Unary';
+# These operators <@ %> are found "Math::Matrix" but they break typical code like:
+#   |%opts
+#subtest {
+#    is-deeply @ $smat1, $smat1.Array, 'Array';
+#    is-deeply % $smat1, $smat1.rules.Hash, 'rules';
+#}, 'Unary';
 
 #==========================================================
 # Negation
