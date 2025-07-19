@@ -171,7 +171,7 @@ class Math::SparseMatrix
 
             # Rules
             @rules = @edge-dataset.map({
-                if (%rowNames{$_<from>}:exists) && (%rowNames{$_<to>}:exists) {
+                if (%rowNames{$_<from>}:exists) && (%colNames{$_<to>}:exists) {
                     (%rowNames{$_<from>}, %colNames{$_<to>}) => $_<weight>
                 } else {
                     Empty
