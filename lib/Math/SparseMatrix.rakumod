@@ -271,6 +271,7 @@ class Math::SparseMatrix
 
     #| Impose column names. (New Math::SparseMatrix object is created.)
     method impose-column-names(@names, Bool:D :$clone = True) {
+        # Not effective, but very quick to implement.
         # The method .transpose() always clones,
         # hence, this should be re-written to be same/similar to .impose-row-names().
         return self.transpose().impose-row-names(@names, :!clone).transpose();
@@ -551,6 +552,30 @@ class Math::SparseMatrix
             die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
         }
         return $obj;
+    }
+
+    #=================================================================
+    # Row and column sums
+    #=================================================================
+    #| Row sums for a sparse matrix.
+    method row-sums(Bool:D :p(:$pairs) = False) {
+        # Probably more effective implementations can be provided by the core matrix classes.
+        # But this is universal and quick to implement.
+
+        my @sums = do for ^self.nrow -> $i {
+            self.row-at($i).tuples.map(*[2]).sum
+        }
+
+        if $pairs {
+            my @rn = self.row-names.defined ?? self.row-names !! (^self.nrow);
+            return (@rn.Array Z=> @sums.Array).Hash;
+        }
+        return @sums;
+    }
+
+    method column-sums(Bool:D :p(:$pairs) = False) {
+        # Quick to implement.
+        return self.transpose.row-sums(:$pairs);
     }
 
     #=================================================================
