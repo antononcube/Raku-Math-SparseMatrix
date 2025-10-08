@@ -59,6 +59,7 @@ class Math::SparseMatrix
     #=================================================================
     # Creators
     #=================================================================
+    # Process various names specs into a list of two elements: (1) names, and (2) name-to-index hashmap.
     method !process-names($names, $n, $arg-name) {
         return do given $names {
             when ($_ ~~ Seq:D | Range:D) {
@@ -119,17 +120,23 @@ class Math::SparseMatrix
     multi method new(:@rules! where @rules.all ~~ Pair:D,
                      :$nrow is copy = @rules.map(*.key[0]).max + 1,
                      :$ncol is copy = @rules.map(*.key[1]).max + 1,
+                     :$row-names is copy = Whatever,
+                     :$column-names is copy = Whatever,
+                     :$dimension-names = Whatever,
                      Numeric:D :$implicit-value = 0) {
         my $core-matrix = Math::SparseMatrix::CSR.new(:@rules, :$nrow, :$ncol, :$implicit-value);
-        self.new(:$core-matrix);
+        self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
      }
 
     multi method new(:@dense-matrix! where @dense-matrix ~~ List:D && @dense-matrix.all ~~ List:D,
                      :$nrow is copy = @dense-matrix.elems,
                      :$ncol is copy = @dense-matrix>>.elems.max,
+                     :$row-names is copy = Whatever,
+                     :$column-names is copy = Whatever,
+                     :$dimension-names = Whatever,
                      Numeric:D :$implicit-value = 0) {
         my $core-matrix = Math::SparseMatrix::CSR.new(:@dense-matrix, :$nrow, :$ncol, :$implicit-value);
-        self.new(:$core-matrix);
+        self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
     }
 
     multi method new(:@edge-dataset! where @edge-dataset.all ~~ Map:D,
