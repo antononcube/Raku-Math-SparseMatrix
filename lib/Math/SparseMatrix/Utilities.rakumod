@@ -59,7 +59,7 @@ sub elementwise-operation(@matrix1, @matrix2, &op) is export {
     my @result;
     for @matrix1.kv -> $i, @row {
         for @row.kv -> $j, $elem {
-            @result[$i][$j] = op($elem, @matrix2[$i][$j]);
+            @result[$i][$j] = &op($elem, @matrix2[$i][$j]);
         }
     }
     return @result;
