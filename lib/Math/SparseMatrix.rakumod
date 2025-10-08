@@ -242,42 +242,6 @@ class Math::SparseMatrix
     }
 
     #=================================================================
-    # Impose row names and column names
-    #=================================================================
-    #| Impose row names. (New Math::SparseMatrix object is created.)
-    method impose-row-names(@names, Bool:D :$clone = True) {
-        my $obj = $clone ?? self.clone !! self;
-
-        die "The first argument is expected to be a list of strings."
-        unless @names ~~ (Array:D | List:D | Seq:D) && @names.all ~~ Str:D;
-
-        my @missing-rows = (@names (-) $obj.row-names).keys;
-        my $n-missing-rows = @missing-rows.elems;
-
-        if $n-missing-rows > 0 {
-            my $compl-mat = Math::SparseMatrix.new(
-                    rules => [ ],
-                    nrow => $n-missing-rows,
-                    ncol => $obj.ncol,
-                    row-names => @missing-rows,
-                    column-names => $obj.column-names
-                    );
-
-            $obj = $obj.row-bind($compl-mat);
-        }
-
-        return $obj[@names; *];
-    }
-
-    #| Impose column names. (New Math::SparseMatrix object is created.)
-    method impose-column-names(@names, Bool:D :$clone = True) {
-        # Not effective, but very quick to implement.
-        # The method .transpose() always clones,
-        # hence, this should be re-written to be same/similar to .impose-row-names().
-        return self.transpose().impose-row-names(@names, :!clone).transpose();
-    }
-
-    #=================================================================
     # Access
     #=================================================================
     method elems(::?CLASS:D:) {
@@ -348,6 +312,42 @@ class Math::SparseMatrix
 
     method AT-POS($_) {
         return self.row-at($_);
+    }
+
+    #=================================================================
+    # Impose row names and column names
+    #=================================================================
+    #| Impose row names. (New Math::SparseMatrix object is created.)
+    method impose-row-names(@names, Bool:D :$clone = True) {
+        my $obj = $clone ?? self.clone !! self;
+
+        die "The first argument is expected to be a list of strings."
+        unless @names ~~ (Array:D | List:D | Seq:D) && @names.all ~~ Str:D;
+
+        my @missing-rows = (@names (-) $obj.row-names).keys;
+        my $n-missing-rows = @missing-rows.elems;
+
+        if $n-missing-rows > 0 {
+            my $compl-mat = Math::SparseMatrix.new(
+                    rules => [ ],
+                    nrow => $n-missing-rows,
+                    ncol => $obj.ncol,
+                    row-names => @missing-rows,
+                    column-names => $obj.column-names
+                    );
+
+            $obj = $obj.row-bind($compl-mat);
+        }
+
+        return $obj[@names; *];
+    }
+
+    #| Impose column names. (New Math::SparseMatrix object is created.)
+    method impose-column-names(@names, Bool:D :$clone = True) {
+        # Not effective, but very quick to implement.
+        # The method .transpose() always clones,
+        # hence, this should be re-written to be same/similar to .impose-row-names().
+        return self.transpose().impose-row-names(@names, :!clone).transpose();
     }
 
     #=================================================================
@@ -555,15 +555,14 @@ class Math::SparseMatrix
     }
 
     #=================================================================
-    # Row and column sums
+    # Row and column sums and maxes
     #=================================================================
-    #| Row sums for a sparse matrix.
-    method row-sums(Bool:D :p(:$pairs) = False) {
+    method !row-op(&op, Bool:D :p(:$pairs) = False) {
         # Probably more effective implementations can be provided by the core matrix classes.
         # But this is universal and quick to implement.
 
         my @sums = do for ^self.nrow -> $i {
-            self.row-at($i).tuples.map(*[2]).sum
+            self.row-at($i).tuples.map(*[2]).&op
         }
 
         if $pairs {
@@ -573,9 +572,26 @@ class Math::SparseMatrix
         return @sums;
     }
 
+    #| Row sums for a sparse matrix.
+    method row-sums(Bool:D :p(:$pairs) = False) {
+        my &asum = -> @a { @a.sum + self.implicit-value * (self.ncol - @a.elems) };
+        self!row-op(&asum, :$pairs);
+    }
+
     method column-sums(Bool:D :p(:$pairs) = False) {
         # Quick to implement.
         return self.transpose.row-sums(:$pairs);
+    }
+
+    #| Row sums for a sparse matrix.
+    method row-maxes(Bool:D :p(:$pairs) = False) {
+        my &amax = -> @a { @a.Array.push(self.implicit-value).max };
+        self!row-op(&amax, :$pairs);
+    }
+
+    method column-maxes(Bool:D :p(:$pairs) = False) {
+        # Quick to implement.
+        return self.transpose.row-maxes(:$pairs);
     }
 
     #=================================================================
