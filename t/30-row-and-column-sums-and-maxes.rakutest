@@ -25,6 +25,8 @@ $smat1 =
                 column-names => 'A' .. 'H'
                 );
 
+my $smat2 = $smat1.clone;
+$smat2.implicit-value = 10;
 
 #==========================================================
 # Row sums
@@ -37,6 +39,8 @@ subtest {
     my @sums = $smat1.Array>>.sum;
     is $smat1.row-sums, @sums, 'expected sums';
 
+    my @sums2 = $smat2.Array>>.sum;
+    is $smat2.row-sums, @sums2, 'expected sums with implicit value';
 }, 'Row sums';
 
 #==========================================================
@@ -50,6 +54,38 @@ subtest {
     my @sums = $smat1.transpose.Array>>.sum;
     is $smat1.column-sums, @sums, 'expected sums';
 
+    my @sums2 = $smat2.transpose.Array>>.sum;
+    is $smat2.column-sums, @sums2, 'expected sums with implicit value';
 }, 'Column sums';
+
+#==========================================================
+# Row maxes
+#==========================================================
+subtest {
+
+    isa-ok $smat1.row-maxes, Array:D, 'expected array';
+    isa-ok $smat1.row-maxes(:pairs), Hash:D, 'expected map';
+
+    my @vals = $smat1.Array>>.max;
+    is $smat1.row-maxes, @vals, 'expected maxes';
+
+    my @sums2 = $smat2.Array>>.max;
+    is $smat2.row-maxes, @sums2, 'expected maxes with implicit value';
+}, 'Row maxes';
+
+#==========================================================
+# Column maxes
+#==========================================================
+subtest {
+
+    isa-ok $smat1.column-maxes, Array:D, 'expected array';
+    isa-ok $smat1.column-maxes(:pairs), Hash:D, 'expected map';
+
+    my @vals = $smat1.transpose.Array>>.max;
+    is $smat1.column-maxes, @vals, 'expected maxes';
+
+    my @sums2 = $smat2.transpose.Array>>.max;
+    is $smat2.column-maxes, @sums2, 'expected maxes with implicit value';
+}, 'Column maxes';
 
 done-testing;
