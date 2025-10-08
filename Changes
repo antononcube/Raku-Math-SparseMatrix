@@ -3,4 +3,7 @@ Revision history for "Math::SparseMatrix"
 0.0.5 2025-10-08
     - Enhanced creation with rules and dense matrices to take row- and column names.
     - Implemented imposing of row- and column names.
+    - Implemented row- and column sums and maxes.
+        - Implicit values are taken into account.
+        - Hashmaps with row- and column names can be obtained with the adverb :pairs.
     - Dependency increment for "Math::SparseMatrix::Native".
