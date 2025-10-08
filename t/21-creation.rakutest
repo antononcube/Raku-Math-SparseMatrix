@@ -107,7 +107,6 @@ subtest {
     my $matrix = Math::SparseMatrix.new(:@rules, nrow => 6, ncol => 5, :@row-names, :@column-names);
     is $matrix.row-names, @row-names, 'expected row names';
     is $matrix.column-names, @column-names, 'expected column names';
-    $matrix.print;
 }, 'Using row-names and column names in creation with rules';
 
 ## 14
@@ -119,7 +118,6 @@ subtest {
     my $matrix = Math::SparseMatrix.new(dense-matrix => @mat, nrow => 6, ncol => 5, :@row-names, :@column-names);
     is $matrix.row-names, @row-names, 'expected row names';
     is $matrix.column-names, @column-names, 'expected column names';
-    #$matrix.print;
 }, 'Using row-names and column names in creation with dense matrix';
 
 done-testing;
