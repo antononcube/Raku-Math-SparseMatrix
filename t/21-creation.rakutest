@@ -96,6 +96,30 @@ subtest {
             'BACED'.comb.Array,
             'Matrix has column-names as provided';
 
-}
+}, 'Creation with edge dataset';
+
+## 13
+subtest {
+    # Using row names and column names
+    my @rules = (0, 0) => 1, (0, 2) => 2, (1, 1) => 3, (2, 0) => 4, (2, 2) => 5, (3, 2) => 7;
+    my @row-names = <a b c d e f>;
+    my @column-names = <A B C D E>;
+    my $matrix = Math::SparseMatrix.new(:@rules, nrow => 6, ncol => 5, :@row-names, :@column-names);
+    is $matrix.row-names, @row-names, 'expected row names';
+    is $matrix.column-names, @column-names, 'expected column names';
+    $matrix.print;
+}, 'Using row-names and column names in creation with rules';
+
+## 14
+subtest {
+    # Using row names and column names
+    my @mat = [1, 0, 2], [0, 3, 0], [4, 0, 5], [0, 0, 7];
+    my @row-names = <a b c d e f>;
+    my @column-names = <A B C D E>;
+    my $matrix = Math::SparseMatrix.new(dense-matrix => @mat, nrow => 6, ncol => 5, :@row-names, :@column-names);
+    is $matrix.row-names, @row-names, 'expected row names';
+    is $matrix.column-names, @column-names, 'expected column names';
+    #$matrix.print;
+}, 'Using row-names and column names in creation with dense matrix';
 
 done-testing;
