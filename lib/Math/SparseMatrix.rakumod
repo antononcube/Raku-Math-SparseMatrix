@@ -259,10 +259,9 @@ class Math::SparseMatrix
                     rules => [ ],
                     nrow => $n-missing-rows,
                     ncol => $obj.ncol,
+                    row-names => @missing-rows,
+                    column-names => $obj.column-names
                     );
-
-            $compl-mat.set-row-names(@missing-rows);
-            $compl-mat.set-column-names($obj.column-names);
 
             $obj = $obj.row-bind($compl-mat);
         }
