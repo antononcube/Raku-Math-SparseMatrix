@@ -1,0 +1,71 @@
+use v6.d;
+
+use lib <. lib>;
+use Math::SparseMatrix :ALL;
+use Math::SparseMatrix::Utilities;
+
+use Test;
+
+plan *;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.001;
+my $type = 'CSR';
+
+# Here we create a decorated sparse matrix
+my $smat1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
+
+# Here that matrix is given row-names and column-names:
+$smat1 =
+        Math::SparseMatrix.new(
+                core-matrix => $smat1,
+                row-names => 'a' .. 'e',
+                column-names => 'A' .. 'H'
+                );
+
+
+#==========================================================
+# Impose row names
+#==========================================================
+subtest {
+
+    # Larger set of names
+    ok $smat1.impose-row-names('a' ... 'g'), 'larger set of names call';
+    my $smat2 = $smat1.impose-row-names('a' ... 'g');
+    #$smat2.print;
+    isa-ok $smat2.value-at('f', 'A'), Numeric:D, 'at <f A>';
+    isa-ok $smat2.value-at('g', 'C'), Numeric:D, 'at <g C>';
+
+    # Smaller set of names
+    ok $smat1.impose-row-names(<a c d>), 'smaller set of names call';
+    my $smat3 = $smat1.impose-row-names(<a c d>);
+    #$smat3.print;
+    dies-ok { $smat3.value-at('b', 'A') }, 'at <b A>';
+    dies-ok { $smat3.value-at('e', 'C') }, 'at <e C>';
+
+}, 'Impose row names';
+
+#==========================================================
+# Impose column names
+#==========================================================
+subtest {
+
+    # Larger set of names
+    ok $smat1.impose-column-names('A' ... 'J'), 'larger set of names call';
+    my $smat2 = $smat1.impose-column-names('A' ... 'J');
+    #$smat2.print;
+    isa-ok $smat2.value-at('a', 'I'), Numeric:D, 'at <a I>';
+    isa-ok $smat2.value-at('c', 'J'), Numeric:D, 'at <c J>';
+
+    # Smaller set of names
+    ok $smat1.impose-column-names(<A C D>), 'smaller set of names call';
+    my $smat3 = $smat1.impose-column-names(<A C D>);
+    #$smat3.print;
+    dies-ok { $smat3.value-at('c', 'B') }, 'at <c B>';
+    dies-ok { $smat3.value-at('d', 'E') }, 'at <d E>';
+
+}, 'Impose column names';
+
+done-testing;
