@@ -235,6 +235,42 @@ class Math::SparseMatrix
     }
 
     #=================================================================
+    # Impose row names and column names
+    #=================================================================
+    #| Impose row names. (New Math::SparseMatrix object is created.)
+    method impose-row-names(@names, Bool:D :$clone = True) {
+        my $obj = $clone ?? self.clone !! self;
+
+        die "The first argument is expected to be a list of strings."
+        unless @names ~~ (Array:D | List:D | Seq:D) && @names.all ~~ Str:D;
+
+        my @missing-rows = (@names (-) $obj.row-names).keys;
+        my $n-missing-rows = @missing-rows.elems;
+
+        if $n-missing-rows > 0 {
+            my $compl-mat = Math::SparseMatrix.new(
+                    rules => [ ],
+                    nrow => $n-missing-rows,
+                    ncol => $obj.ncol,
+                    );
+
+            $compl-mat.set-row-names(@missing-rows);
+            $compl-mat.set-column-names($obj.column-names);
+
+            $obj = $obj.row-bind($compl-mat);
+        }
+
+        return $obj[@names; *];
+    }
+
+    #| Impose column names. (New Math::SparseMatrix object is created.)
+    method impose-column-names(@names, Bool:D :$clone = True) {
+        # The method .transpose() always clones,
+        # hence, this should be re-written to be same/similar to .impose-row-names().
+        return self.transpose().impose-row-names(@names, :!clone).transpose();
+    }
+
+    #=================================================================
     # Access
     #=================================================================
     method elems(::?CLASS:D:) {
@@ -246,14 +282,18 @@ class Math::SparseMatrix
     }
 
     multi method value-at(Str:D $row, Str:D $col) {
+        die "Unknown row name: $row" unless %!row-names-map{$row}.defined;
+        die "Unknown column name: $col" unless %!column-names-map{$col}.defined;
         return $!core-matrix.value-at(%!row-names-map{$row}, %!column-names-map{$col});
     }
 
     multi method value-at(Str:D $row, Int:D $col) {
+        die "Unknown row name: $row" unless %!row-names-map{$row}.defined;
         return $!core-matrix.value-at(%!row-names-map{$row}, $col);
     }
 
     multi method value-at(Int:D $row, Str:D $col) {
+        die "Unknown column name: $col" unless %!column-names-map{$col}.defined;
         return $!core-matrix.value-at($row, %!column-names-map{$col});
     }
 
