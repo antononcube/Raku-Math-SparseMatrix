@@ -290,7 +290,7 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
                 col-index => self.col-index,
                 nrow => self.nrow,
                 ncol => self.ncol,
-                implicit-values => self.implicit-values,
+                implicit-value => self.implicit-value,
                 );
     }
 
