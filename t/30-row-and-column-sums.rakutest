@@ -1,0 +1,55 @@
+use v6.d;
+
+# use lib <. lib>;
+use Math::SparseMatrix :ALL;
+use Math::SparseMatrix::Utilities;
+
+use Test;
+
+plan *;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.001;
+my $type = 'CSR';
+
+# Here we create a decorated sparse matrix
+my $smat1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
+
+# Here that matrix is given row-names and column-names:
+$smat1 =
+        Math::SparseMatrix.new(
+                core-matrix => $smat1,
+                row-names => 'a' .. 'e',
+                column-names => 'A' .. 'H'
+                );
+
+
+#==========================================================
+# Row sums
+#==========================================================
+subtest {
+
+    isa-ok $smat1.row-sums, Array:D, 'expected array';
+    isa-ok $smat1.row-sums(:pairs), Hash:D, 'expected map';
+
+    my @sums = $smat1.Array>>.sum;
+    is $smat1.row-sums, @sums, 'expected sums';
+
+}, 'Row sums';
+
+#==========================================================
+# Column sums
+#==========================================================
+subtest {
+
+    isa-ok $smat1.column-sums, Array:D, 'expected array';
+    isa-ok $smat1.column-sums(:pairs), Hash:D, 'expected map';
+
+    my @sums = $smat1.transpose.Array>>.sum;
+    is $smat1.column-sums, @sums, 'expected sums';
+
+}, 'Column sums';
+
+done-testing;
