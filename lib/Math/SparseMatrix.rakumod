@@ -13,7 +13,8 @@ class Math::SparseMatrix
         is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
-            handles <columns-count explicit-length density dimensions implicit-value ncol nrow rows-count Array>
+            handles <columns-count explicit-length density dimensions
+                    implicit-value ncol nrow rows-count Array>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names-map;
     has %.column-names-map;
@@ -631,6 +632,28 @@ class Math::SparseMatrix
     #=================================================================
     # Wrapper delegations
     #=================================================================
+    #| Unitize the sparse matrix
+    #| C<:$clone> -- Whether to operate in-place.
+    method unitize( Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.unitize(:!clone);
+        }
+        $!core-matrix.unitize(:!clone);
+        return self;
+    }
+
+    #| Clip the sparse matrix
+    #| C<:$v-min> -- The new min value.
+    #| C<:$v-max> -- The new max value.
+    #| C<:$clone> -- Whether to operate in-place.
+    method clip(Numeric:D :min(:$v-min)!, Numeric:D :max(:$v-max)!, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.clip(:$v-min, :$v-max, :!clone);
+        }
+        $!core-matrix.clip(:$v-min, :$v-max, :!clone);
+        return self;
+    }
+
     #| Round the sparse matrix
     #| C<$scale> -- Scale to round to.
     #| C<:$clone> -- Whether to clone or not.
@@ -639,6 +662,18 @@ class Math::SparseMatrix
             return self.clone.round($scale, :!clone);
         }
         $!core-matrix.round($scale, :!clone);
+        return self;
+    }
+
+    #| Apply a function to the elements of sparse matrix.
+    #| C<&func> -- Function to apply.
+    #| C<:$skip-implicit-value> -- Should application to the implicit value be skipped or not?
+    #| C<:$clone> -- Whether to operate in-place.
+    method apply-elementwise(&func, Bool:D :$skip-implicit-value = False, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.apply-elementwise(&func, :$skip-implicit-value, :!clone);
+        }
+        $!core-matrix.apply-elementwise(&func, :$skip-implicit-value, :!clone);
         return self;
     }
 
