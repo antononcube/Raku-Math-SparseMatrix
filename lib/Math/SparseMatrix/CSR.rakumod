@@ -22,7 +22,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
                      :$nrow is copy = @rules.map(*.key[0]).max + 1,
                      :$ncol is copy = @rules.map(*.key[1]).max + 1,
                      Numeric:D :$implicit-value = 0) {
-        my $msg = "The each key of the rules is expected to be a list of two non negative integers.";
+        my $msg = 'Each key of the argument @rules is expected to be a list of two non negative integers.';
 
         my %temp;
         for @rules -> $rule {
