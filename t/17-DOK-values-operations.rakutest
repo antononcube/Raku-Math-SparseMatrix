@@ -42,4 +42,11 @@ subtest {
     ok $matrix1c.conjugate(:clone);
 }, "conjugate";
 
+## 5
+subtest {
+    my $matrix1c = $matrix1.clone;
+    ok $matrix1c.apply-elementwise({$_ + 2}, :skip-implicit-value);
+    ok $matrix1c.apply-elementwise({$_ + 2}, :skip-implicit-value, :clone);
+}, "apply-elementwise";
+
 done-testing;
