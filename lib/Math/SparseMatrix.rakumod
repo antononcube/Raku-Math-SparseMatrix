@@ -128,7 +128,7 @@ class Math::SparseMatrix
         self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
      }
 
-    multi method new(:@dense-matrix! where @dense-matrix ~~ List:D && @dense-matrix.all ~~ List:D,
+    multi method new(:@dense-matrix! where @dense-matrix ~~ (Array:D | List:D | Seq:D) && @dense-matrix.all ~~ (Array:D | List:D | Seq:D),
                      :$nrow is copy = @dense-matrix.elems,
                      :$ncol is copy = @dense-matrix>>.elems.max,
                      :$row-names is copy = Whatever,
