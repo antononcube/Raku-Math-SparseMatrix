@@ -135,7 +135,17 @@ class Math::SparseMatrix::Abstract {
     #=================================================================
     #| Round the sparse matrix
     #| C<:$scale> -- Scale to round to.
+    #| C<:$clone> -- Whether to operate in-place.
     method round(Numeric:D $scale = 1, Bool:D :$clone = True) {...}
+
+    #=================================================================
+    # Apply elementwise
+    #=================================================================
+    #| Apply a function to the elements of sparse matrix.
+    #| C<&func> -- Function to apply.
+    #| C<:$skip-implicit-value> -- Should application to the implicit value be skipped or not?
+    #| C<:$clone> -- Whether to operate in-place.
+    method apply-elementwise(&func, Bool:D :$skip-implicit-value = False, Bool:D :$clone = True) {...}
 
     #=================================================================
     # Conjugate

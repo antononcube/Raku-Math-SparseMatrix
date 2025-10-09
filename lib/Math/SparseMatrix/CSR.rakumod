@@ -873,12 +873,29 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #=================================================================
     #| Round the sparse matrix
     #| C<:$scale> -- Scale to round to.
+    #| C<:$clone> -- Whether to operate in-place.
     method round(Numeric:D $scale = 1, Bool:D :$clone = True) {
         if $clone {
             return self.clone.round($scale, :!clone);
         }
         @!values = @!values>>.round($scale);
         if $!implicit-value { $!implicit-value .= round($scale) }
+        return self;
+    }
+
+    #=================================================================
+    # Apply elementwise
+    #=================================================================
+    #| Apply a function to the elements of sparse matrix.
+    #| C<&func> -- Function to apply.
+    #| C<:$skip-implicit-value> -- Should application to the implicit value be skipped or not?
+    #| C<:$clone> -- Whether to operate in-place.
+    method apply-elementwise(&func, Bool:D :$skip-implicit-value = False, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.apply-elementwise(&func, :$skip-implicit-value, :!clone);
+        }
+        @!values = @!values.map({ &func($_) });
+        if !$skip-implicit-value { $!implicit-value .= &func($_) }
         return self;
     }
 

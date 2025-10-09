@@ -456,6 +456,22 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     }
 
     #=================================================================
+    # Apply elementwise
+    #=================================================================
+    #| Apply a function to the elements of sparse matrix.
+    #| C<&func> -- Function to apply.
+    #| C<:$skip-implicit-value> -- Should application to the implicit value be skipped or not?
+    #| C<:$clone> -- Whether to operate in-place.
+    method apply-elementwise(&func, Bool:D :$skip-implicit-value = False, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.apply-elementwise(&func, :$skip-implicit-value, :!clone);
+        }
+        %!adjacency-list = %!adjacency-list.nodemap({ &func($_) });
+        if !$skip-implicit-value { $!implicit-value .= &func($_) }
+        return self;
+    }
+
+    #=================================================================
     # Conjugate
     #=================================================================
     #| Conjugate the sparse matrix
