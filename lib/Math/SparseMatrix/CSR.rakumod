@@ -895,7 +895,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
             return self.clone.apply-elementwise(&func, :$skip-implicit-value, :!clone);
         }
         @!values = @!values.map({ &func($_) });
-        if !$skip-implicit-value { $!implicit-value .= &func($_) }
+        if !$skip-implicit-value { $!implicit-value .= &func }
         return self;
     }
 

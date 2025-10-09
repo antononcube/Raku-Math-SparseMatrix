@@ -467,7 +467,7 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
             return self.clone.apply-elementwise(&func, :$skip-implicit-value, :!clone);
         }
         %!adjacency-list = %!adjacency-list.nodemap({ &func($_) });
-        if !$skip-implicit-value { $!implicit-value .= &func($_) }
+        if !$skip-implicit-value { $!implicit-value .= &func }
         return self;
     }
 
