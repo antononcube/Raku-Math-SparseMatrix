@@ -6,4 +6,6 @@ Revision history for "Math::SparseMatrix"
     - Implemented row- and column sums and maxes.
         - Implicit values are taken into account.
         - Hashmaps with row- and column names can be obtained with the adverb :pairs.
+    - Implemented the method apply-elementwise(&func) for all three classes.
+        - Delegation to apply-elementwise(), clip(), and unitize() to the core-matrix.
     - Dependency increment for "Math::SparseMatrix::Native".
