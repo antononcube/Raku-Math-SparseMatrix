@@ -16,6 +16,9 @@ Raku package for sparse matrix algorithms:
 
 - Provides convenient interface to accessing sparse matrix elements, rows, column, and sub-matrices. 
 
+- The video ["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w), [AAv2], 
+can be used as an introduction this package and its use in different computational workflows.  
+
 -----
 
 ## Motivation
@@ -31,6 +34,7 @@ Here is a (non-exhaustive) list given in the order of _my_ preferences:
       ["ML::StreamsBlendingRecommender"](https://github.com/antononcube/Raku-ML-StreamsBlendingRecommender), [AAp1], 
       but it is too slow for "serious" datasets.
       - Still useful; see [AAv1].
+    - After implementing this SMA package I implemented (with some delay) the Sparse Matrix Recommender (SMR) package, ["ML::SparseMatrixRecommender"](https://github.com/antononcube/Raku-ML-SparseMatrixRecommender), [AAp4].
 - Latent Semantic Analysis (LSA)
     - LSA is one my favorite Unsupervised Machine Learning (ML) workflows.
     - That means that this SMA package should have algorithms facilitating the programming of:
@@ -292,18 +296,23 @@ in order to have the named rows and columns functionalities.
 ### Packages
 
 [AAp1] Anton Antonov,
-[ML::StreamsBlendingRecommender Raku package](https://github.com/antononcube/Raku-ML-StreamsBlendingRecommender), 
+[ML::StreamsBlendingRecommender, Raku package](https://github.com/antononcube/Raku-ML-StreamsBlendingRecommender), 
 (2021-2024),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp2] Anton Antonov,
-[Graph Raku package](https://github.com/antononcube/Raku-Graph),
+[Graph, Raku package](https://github.com/antononcube/Raku-Graph),
 (2024),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp3] Anton Antonov,
-[Math::SparseMatrix::Native Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
+[Math::SparseMatrix::Native, Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
 (2024),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp4] Anton Antonov,
+[ML::SpareMatrixRecommender, Raku package](https://github.com/antononcube/Raku-ML-SparseMatrixRecommender),
+(2025),
 [GitHub/antononcube](https://github.com/antononcube).
 
 ### Videos
@@ -311,4 +320,9 @@ in order to have the named rows and columns functionalities.
 [AAv1] Anton Antonov,
 ["TRC 2022 Implementation of ML algorithms in Raku"](https://youtu.be/efRHfjYebs4?si=J5P8pK1TgGSxdlmD&t=193),
 (2022),
+[YouTube/antononcube](https://www.youtube.com/@AAA4prediction).
+
+[AAv2] Anton Antonov,
+["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w),
+(2024),
 [YouTube/antononcube](https://www.youtube.com/@AAA4prediction).

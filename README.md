@@ -16,6 +16,9 @@ Raku package for sparse matrix algorithms:
 
 - Provides convenient interface to accessing sparse matrix elements, rows, column, and sub-matrices. 
 
+- The video ["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w), [AAv2], 
+can be used as an introduction this package and its use in different computational workflows.  
+
 -----
 
 ## Motivation
@@ -31,6 +34,7 @@ Here is a (non-exhaustive) list given in the order of _my_ preferences:
       ["ML::StreamsBlendingRecommender"](https://github.com/antononcube/Raku-ML-StreamsBlendingRecommender), [AAp1], 
       but it is too slow for "serious" datasets.
       - Still useful; see [AAv1].
+    - After implementing this SMA package I implemented (with some delay) the Sparse Matrix Recommender (SMR) package, ["ML::SparseMatrixRecommender"](https://github.com/antononcube/Raku-ML-SparseMatrixRecommender), [AAp4].
 - Latent Semantic Analysis (LSA)
     - LSA is one my favorite Unsupervised Machine Learning (ML) workflows.
     - That means that this SMA package should have algorithms facilitating the programming of:
@@ -65,7 +69,7 @@ my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$ty
 say $matrix1;
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(6), :dimensions((5, 8)), :density(0.15))
+# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
 ```
 
 Here it is "pretty printed": 
@@ -74,11 +78,11 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# .    .    .    .    .    .    .    .   
-# .    .    .    .    .    .    .    .   
-# .    .    0.35 0.85 .    .    0.52 .   
-# .    .    .    .    .    0.92 .    .   
-# .    .    0.43 .    .    0.07 .    .
+# .    0.49 0.09 .    .    .    .    .   
+# .    .    0.82 .    .    .    .    .   
+# .    0.04 .    .    .    .    .    .   
+# 0.36 0.38 .    .    .    .    .    .   
+# .    .    0.21 .    .    .    .    .
 ```
 
 Here `10` is multiplied with all elements:
@@ -89,11 +93,11 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# .   .   .   .   .   .   .   .  
-# .   .   .   .   .   .   .   .  
-# .   .   3.5 8.5 .   .   5.2 .  
-# .   .   .   .   .   9.2 .   .  
-# .   .   4.3 .   .   0.7 .   .
+# .   4.9 0.9 .   .   .   .   .  
+# .   .   8.2 .   .   .   .   .  
+# .   0.4 .   .   .   .   .   .  
+# 3.6 3.8 .   .   .   .   .   .  
+# .   .   2.1 .   .   .   .   .
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -104,11 +108,11 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# .                   .                   .                   .                   .                  
-# .                   .                   .                   .                   .                  
-# .                   .                   1.1154              .                   0.1505             
-# .                   .                   .                   0.8464              0.06440000000000001
-# .                   .                   0.1505              0.06440000000000001 0.18979999999999997
+# 0.24819999999999998 0.07379999999999999 0.0196              0.1862              0.0189             
+# 0.07379999999999999 0.6723999999999999  .                   .                   0.1722             
+# 0.0196              .                   0.0016              0.0152              .                  
+# 0.1862              .                   0.0152              0.274               .                  
+# 0.0189              0.1722              .                   .                   0.04409999999999999
 ```
 
 -----
@@ -133,11 +137,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    .    .    .    .    .    .    .   
-# b │ .    .    .    .    .    .    .    .   
-# c │ .    .    0.35 0.85 .    .    0.52 .   
-# d │ .    .    .    .    .    0.92 .    .   
-# e │ .    .    0.43 .    .    0.07 .    .
+# a │ .    0.49 0.09 .    .    .    .    .   
+# b │ .    .    0.82 .    .    .    .    .   
+# c │ .    0.04 .    .    .    .    .    .   
+# d │ 0.36 0.38 .    .    .    .    .    .   
+# e │ .    .    0.21 .    .    .    .    .
 ```
 
 
@@ -152,11 +156,11 @@ $smat2.round(0.02).print;
 # ––––––––––––––––––––––––––––
 #     a    b    c    d    e   
 # ––┼–––––––––––––––––––––––––
-# a │ .    .    .    .    .   
-# b │ .    .    .    .    .   
-# c │ .    .    1.12 .    0.16
-# d │ .    .    .    0.84 0.06
-# e │ .    .    0.16 0.06 0.18
+# a │ 0.24 0.08 0.02 0.18 0.02
+# b │ 0.08 0.68 .    .    0.18
+# c │ 0.02 .    0    0.02 .   
+# d │ 0.18 .    0.02 0.28 .   
+# e │ 0.02 0.18 .    .    0.04
 ```
 
 ### Implicit value
@@ -169,7 +173,7 @@ with different implicit value:
 my $matrix3 = $matrix1.add(10);
 ```
 ```
-# Math::SparseMatrix::CSR(:specified-elements(6), :dimensions((5, 8)), :density(0.15))
+# Math::SparseMatrix::CSR(:specified-elements(7), :dimensions((5, 8)), :density(0.175))
 ```
 
 ```perl6
@@ -185,11 +189,11 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# 10    10    10    10    10    10    10    10   
-# 10    10    10    10    10    10    10    10   
-# 10    10    10.35 10.85 10    10    10.52 10   
-# 10    10    10    10    10    10.92 10    10   
-# 10    10    10.43 10    10    10.07 10    10
+# 10    10.49 10.09 10    10    10    10    10   
+# 10    10    10.82 10    10    10    10    10   
+# 10    10.04 10    10    10    10    10    10   
+# 10.36 10.38 10    10    10    10    10    10   
+# 10    10    10.21 10    10    10    10    10
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
@@ -349,18 +353,23 @@ in order to have the named rows and columns functionalities.
 ### Packages
 
 [AAp1] Anton Antonov,
-[ML::StreamsBlendingRecommender Raku package](https://github.com/antononcube/Raku-ML-StreamsBlendingRecommender), 
+[ML::StreamsBlendingRecommender, Raku package](https://github.com/antononcube/Raku-ML-StreamsBlendingRecommender), 
 (2021-2024),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp2] Anton Antonov,
-[Graph Raku package](https://github.com/antononcube/Raku-Graph),
+[Graph, Raku package](https://github.com/antononcube/Raku-Graph),
 (2024),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp3] Anton Antonov,
-[Math::SparseMatrix::Native Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
+[Math::SparseMatrix::Native, Raku package](https://github.com/antononcube/Raku-Math-SparseMatrix-Native),
 (2024),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp4] Anton Antonov,
+[ML::SpareMatrixRecommender, Raku package](https://github.com/antononcube/Raku-ML-SparseMatrixRecommender),
+(2025),
 [GitHub/antononcube](https://github.com/antononcube).
 
 ### Videos
@@ -368,4 +377,9 @@ in order to have the named rows and columns functionalities.
 [AAv1] Anton Antonov,
 ["TRC 2022 Implementation of ML algorithms in Raku"](https://youtu.be/efRHfjYebs4?si=J5P8pK1TgGSxdlmD&t=193),
 (2022),
+[YouTube/antononcube](https://www.youtube.com/@AAA4prediction).
+
+[AAv2] Anton Antonov,
+["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w),
+(2024),
 [YouTube/antononcube](https://www.youtube.com/@AAA4prediction).
