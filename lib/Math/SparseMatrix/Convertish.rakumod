@@ -70,7 +70,7 @@ role Math::SparseMatrix::Convertish {
     #=================================================================
     # To NativeAdapter
     #=================================================================
-    proto method to-adapted(Math::SparseMatrix::CSR:D $m --> Math::SparseMatrix::NativeAdapter:D) {*}
+    proto method to-adapted(| --> Math::SparseMatrix::NativeAdapter:D) {*}
 
     multi method to-adapted(Math::SparseMatrix::NativeAdapter:D $m) {
         return $m;
@@ -82,7 +82,7 @@ role Math::SparseMatrix::Convertish {
                 col-index => $m.col-index,
                 nrow => $m.nrow,
                 ncol => $m.ncol,
-                implicit-values => $m.implicit-values,
+                implicit-value => $m.implicit-value,
                 );
     }
 
