@@ -1,13 +1,11 @@
 #!/usr/bin/env raku
 use v6.d;
 
-#use lib <. lib>;
 use Math::SparseMatrix;
 use Math::SparseMatrix::Utilities;
 
-
-my $nrow = 10_000;
-my $ncol = 1_000;
+my $nrow = 1_000;
+my $ncol = 10_000;
 my $density = 0.002;
 my $tol = 0.0;
 my $type = 'CSR';
@@ -38,16 +36,15 @@ say "Non-zero values 2: ", $matrix2.explicit-length;
 say "-" x 100;
 
 
-$tstart = now;
-my $result = $matrix1.dot($matrix2);
-$tend = now;
-
-say "Multiplication time dot        : {$tend - $tstart} seconds.";
-
 #$tstart = now;
-#my $result2 = $matrix1.dot-numeric($matrix2);
+#my $result = $matrix1.dot($matrix2);
 #$tend = now;
-#say "Multiplication time dot-numeric: {$tend - $tstart} seconds.";
+#say "Multiplication time dot        : {$tend - $tstart} seconds.";
+
+$tstart = now;
+my $result2 = $matrix1.dot-numeric($matrix2);
+$tend = now;
+say "Multiplication time dot-numeric: {$tend - $tstart} seconds.";
 
 $tstart = now;
 my $result3 = $matrix1.values.rotor($nrow, :partial).map({ sum($_ <<*>> $_) });
