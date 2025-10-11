@@ -564,7 +564,7 @@ class Math::SparseMatrix
         # But this is universal and quick to implement.
 
         my @sums = do for ^self.nrow -> $i {
-            self.row-at($i).tuples.map(*[2]).&op
+            self.core-matrix.row-at($i).tuples>>.tail.&op
         }
 
         if $pairs {
