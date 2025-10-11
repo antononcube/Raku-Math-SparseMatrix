@@ -493,6 +493,7 @@ class Math::SparseMatrix
             $obj.core-matrix = $obj.core-matrix.multiply($other);
         }
         else {
+            # This message is not helpful when mismatch of rows count and/or columns count happen.
             die "The first argument is expected to be a number, a Math::SparseMatrix object, or a Math::SparseMatrix::CSR object.";
         }
         return $obj;
@@ -685,6 +686,18 @@ class Math::SparseMatrix
         }
         $!core-matrix.conjugate(:!clone);
         return self;
+    }
+
+    #=================================================================
+    # Adaptation
+    #=================================================================
+    multi method to-adapted() {
+        return self.to-adapted(self);
+    }
+
+    multi method to-adapted(Math::SparseMatrix:D $m) {
+        $m.core-matrix = self.to-adapted($m.core-matrix);
+        return $m;
     }
 
     #=================================================================
