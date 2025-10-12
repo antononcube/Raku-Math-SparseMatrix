@@ -20,7 +20,7 @@ sub mult-by-rules($matrix1, $matrix2) {
     my %r2 = $matrix2.rules;
     my @keys = [|%r1.keys, |%r2.keys].unique;
 
-    my $use-iv = !($matrix1.implicit-value == 0 || $matrix2.implicit-value == 0);
+    my $use-iv = !($matrix1.implicit-value == 0 && $matrix2.implicit-value == 0);
 
     for @keys -> $pos {
         if (%r1{$pos}:exists) && (%r2{$pos}:exists) {
@@ -83,5 +83,49 @@ subtest {
             0,
             "Implicit value";
 }, "Multiplication with non-zero implicit value of one of the matrices";
+
+## 8
+subtest {
+    my @rules = (0, 2) => 10, (0, 5) => 4, (0, 6) => 2, (0, 9) => 1;
+    my $vec = Math::SparseMatrix::CSR.new(:@rules, :1nrow, :16ncol);
+    isa-ok $vec, Math::SparseMatrix::CSR:D, 'expected base vector type';
+
+    my @fRules = (0, 2) => 1, (0, 6) => 1;
+    my $filter = Math::SparseMatrix::CSR.new(rules => @fRules, :1nrow, :16ncol);
+    isa-ok $filter, Math::SparseMatrix::CSR:D, 'expected filter type';
+
+    my $newVec = $filter.multiply($vec);
+    isa-ok $newVec, Math::SparseMatrix::CSR:D, 'expected filtered vector type';
+    is
+            $newVec.rules.sort({ $_.head.tail }).Array,
+            [(0, 2) => 10, (0, 6) => 2],
+            'expected rules of filtered vector';
+
+    my $negFilter = Math::SparseMatrix::CSR.new(rules => @fRules, :1nrow, :16ncol).multiply(0);
+    # This also works:
+    #   my $negFilter = $filter.clone.multiply(0);
+    $negFilter.implicit-value = 1;
+    isa-ok $negFilter, Math::SparseMatrix::CSR:D, 'expected negative filter type';
+
+    my $negNewVec = $negFilter.multiply($vec);
+    isa-ok
+            $negNewVec,
+            Math::SparseMatrix::CSR:D,
+            'expected negatively filtered vector type';
+    is
+            $negNewVec.rules.sort({ $_.head.tail }).Array,
+            [(0, 2) => 0, (0, 5) => 4, (0, 6) => 0, (0, 9) => 1],
+            'expected rules of negatively filtered vector';
+
+    my $negNewVec2 = $vec.multiply($negFilter);
+    isa-ok
+            $negNewVec2,
+            Math::SparseMatrix::CSR:D,
+            'expected negatively filtered vector type, $vec * $negFilter';
+    is
+            $negNewVec2.rules.sort({ $_.head.tail }).Array,
+            [(0, 2) => 0, (0, 5) => 4, (0, 6) => 0, (0, 9) => 1],
+            'expected rules of negatively filtered vector, $vec * $negFilter';
+}, 'Multiplication as a filter';
 
 done-testing;
