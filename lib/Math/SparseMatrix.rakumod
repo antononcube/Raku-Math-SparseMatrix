@@ -13,7 +13,7 @@ class Math::SparseMatrix
         is Math::SparseMatrix::Abstract {
     has Math::SparseMatrix::Abstract:D $.core-matrix
             is rw
-            handles <columns-count explicit-length density dimensions
+            handles <adjacency-lists columns-count explicit-length density dimensions
                     implicit-value ncol nrow rows-count Array>
             = Math::SparseMatrix::CSR.new(:0nrow, :0ncol);
     has %.row-names-map;
