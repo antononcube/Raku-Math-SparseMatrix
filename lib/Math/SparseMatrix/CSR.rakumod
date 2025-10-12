@@ -753,7 +753,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
         die 'The dimensions of the argument must match the dimensions of the object.'
         unless $!nrow == $other.nrow && $!ncol == $other.ncol;
 
-        if $!implicit-value == 0 || $other.implicit-value == 0 {
+        if $!implicit-value == 0 && $other.implicit-value == 0 {
             return self!multiply0($other)
         } else {
             return self!multiply-iv($other)
