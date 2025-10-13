@@ -1,5 +1,16 @@
 Revision history for "Math::SparseMatrix"
 
+0.0.7 2025-10-12
+    - Bug fix -- correct handling of row-slices with all digit string row-names.
+    - Added references to "JavaScript::D3" in the README.
+
+0.0.6 2025-10-12
+    - Correct redirection to elementwise multiplication algorithms when implicit values are non-zero.
+    - Added missing delegation to .adjacency-lists()aa.
+
+0.0.5 2025-10-11
+    - "Small" fixes; faster row-suns.
+
 0.0.4 2025-10-10
     - Enhanced creation with rules and dense matrices to take row- and column names.
     - Implemented imposing of row- and column names.
