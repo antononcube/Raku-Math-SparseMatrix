@@ -16,8 +16,13 @@ Raku package for sparse matrix algorithms:
 
 - Provides convenient interface to accessing sparse matrix elements, rows, column, and sub-matrices. 
 
-- The video ["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w), [AAv2], 
-can be used as an introduction this package and its use in different computational workflows.  
+The video ["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w), [AAv2], 
+can be used as an introduction this package and its use in different computational workflows.
+
+The functions `js-d3-matrix-plot` and `js-d3-list-plot` of the package 
+[JavaScript::D3](https://github.com/antononcube/Raku-JavaScript-D3), [AAp5], 
+can be used to visualize sparse matrices. 
+(See [AAv2] and its [presentation notebook](https://github.com/antononcube/RakuForPrediction-blog/blob/main/Presentations/Notebooks/Sparse-matrix-neat-examples.ipynb).)
 
 -----
 
@@ -78,11 +83,11 @@ Here it is "pretty printed":
 $matrix1.print;
 ```
 ```
-# .    0.49 0.09 .    .    .    .    .   
-# .    .    0.82 .    .    .    .    .   
-# .    0.04 .    .    .    .    .    .   
-# 0.36 0.38 .    .    .    .    .    .   
-# .    .    0.21 .    .    .    .    .
+# 0.6  0.98 0.82 .    .    .    .    .   
+# .    .    .    .    .    .    .    .   
+# .    .    .    .    .    .    0.05 .   
+# .    .    .    0.62 .    .    .    .   
+# .    .    .    .    0.3  .    .    0.52
 ```
 
 Here `10` is multiplied with all elements:
@@ -93,11 +98,11 @@ my $matrix2 = $matrix1.multiply(10);
 $matrix2.print;
 ```
 ```
-# .   4.9 0.9 .   .   .   .   .  
-# .   .   8.2 .   .   .   .   .  
-# .   0.4 .   .   .   .   .   .  
-# 3.6 3.8 .   .   .   .   .   .  
-# .   .   2.1 .   .   .   .   .
+# 6   9.8 8.2 .   .   .   .   .  
+# .   .   .   .   .   .   .   .  
+# .   .   .   .   .   .   0.5 .  
+# .   .   .   6.2 .   .   .   .  
+# .   .   .   .   3   .   .   5.2
 ```
 
 Here is the dot-product of the original matrix with its transpose:
@@ -108,11 +113,11 @@ my $matrix3 = $matrix1.dot($matrix1.transpose);
 $matrix3.print;
 ```
 ```
-# 0.24819999999999998 0.07379999999999999 0.0196              0.1862              0.0189             
-# 0.07379999999999999 0.6723999999999999  .                   .                   0.1722             
-# 0.0196              .                   0.0016              0.0152              .                  
-# 0.1862              .                   0.0152              0.274               .                  
-# 0.0189              0.1722              .                   .                   0.04409999999999999
+# 1.9927999999999997    .                     .                     .                     .                    
+# .                     .                     .                     .                     .                    
+# .                     .                     0.0025000000000000005 .                     .                    
+# .                     .                     .                     0.3844                .                    
+# .                     .                     .                     .                     0.36040000000000005
 ```
 
 -----
@@ -137,11 +142,11 @@ $smat.print;
 # –––––––––––––––––––––––––––––––––––––––––––
 #     A    B    C    D    E    F    G    H   
 # ––┼––––––––––––––––––––––––––––––––––––––––
-# a │ .    0.49 0.09 .    .    .    .    .   
-# b │ .    .    0.82 .    .    .    .    .   
-# c │ .    0.04 .    .    .    .    .    .   
-# d │ 0.36 0.38 .    .    .    .    .    .   
-# e │ .    .    0.21 .    .    .    .    .
+# a │ 0.6  0.98 0.82 .    .    .    .    .   
+# b │ .    .    .    .    .    .    .    .   
+# c │ .    .    .    .    .    .    0.05 .   
+# d │ .    .    .    0.62 .    .    .    .   
+# e │ .    .    .    .    0.3  .    .    0.52
 ```
 
 
@@ -156,11 +161,11 @@ $smat2.round(0.02).print;
 # ––––––––––––––––––––––––––––
 #     a    b    c    d    e   
 # ––┼–––––––––––––––––––––––––
-# a │ 0.24 0.08 0.02 0.18 0.02
-# b │ 0.08 0.68 .    .    0.18
-# c │ 0.02 .    0    0.02 .   
-# d │ 0.18 .    0.02 0.28 .   
-# e │ 0.02 0.18 .    .    0.04
+# a │ 2    .    .    .    .   
+# b │ .    .    .    .    .   
+# c │ .    .    0    .    .   
+# d │ .    .    .    0.38 .   
+# e │ .    .    .    .    0.36
 ```
 
 ### Implicit value
@@ -189,11 +194,11 @@ Here is the pretty print:
 $matrix3.print(:iv)
 ```
 ```
-# 10    10.49 10.09 10    10    10    10    10   
-# 10    10    10.82 10    10    10    10    10   
-# 10    10.04 10    10    10    10    10    10   
-# 10.36 10.38 10    10    10    10    10    10   
-# 10    10    10.21 10    10    10    10    10
+# 10.6  10.98 10.82 10    10    10    10    10   
+# 10    10    10    10    10    10    10    10   
+# 10    10    10    10    10    10    10.05 10   
+# 10    10    10    10.62 10    10    10    10   
+# 10    10    10    10    10.3  10    10    10.52
 ```
 
 **Remark:** Currently, the implicit values are ignored in `dot`.
@@ -370,6 +375,11 @@ in order to have the named rows and columns functionalities.
 [AAp4] Anton Antonov,
 [ML::SpareMatrixRecommender, Raku package](https://github.com/antononcube/Raku-ML-SparseMatrixRecommender),
 (2025),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp5] Anton Antonov,
+[JavaScript::D3, Raku package](https://github.com/antononcube/Raku-JavaScript-D3),
+(2022-2025),
 [GitHub/antononcube](https://github.com/antononcube).
 
 ### Videos

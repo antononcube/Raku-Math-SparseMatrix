@@ -16,8 +16,13 @@ Raku package for sparse matrix algorithms:
 
 - Provides convenient interface to accessing sparse matrix elements, rows, column, and sub-matrices. 
 
-- The video ["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w), [AAv2], 
-can be used as an introduction this package and its use in different computational workflows.  
+The video ["Sparse matrix neat examples in Raku"](https://www.youtube.com/watch?v=kQo3wpiUu6w), [AAv2], 
+can be used as an introduction this package and its use in different computational workflows.
+
+The functions `js-d3-matrix-plot` and `js-d3-list-plot` of the package 
+[JavaScript::D3](https://github.com/antononcube/Raku-JavaScript-D3), [AAp5], 
+can be used to visualize sparse matrices. 
+(See [AAv2] and its [presentation notebook](https://github.com/antononcube/RakuForPrediction-blog/blob/main/Presentations/Notebooks/Sparse-matrix-neat-examples.ipynb).)
 
 -----
 
@@ -313,6 +318,11 @@ in order to have the named rows and columns functionalities.
 [AAp4] Anton Antonov,
 [ML::SpareMatrixRecommender, Raku package](https://github.com/antononcube/Raku-ML-SparseMatrixRecommender),
 (2025),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp5] Anton Antonov,
+[JavaScript::D3, Raku package](https://github.com/antononcube/Raku-JavaScript-D3),
+(2022-2025),
 [GitHub/antononcube](https://github.com/antononcube).
 
 ### Videos
