@@ -283,9 +283,11 @@ class Math::SparseMatrix
 
     method row-slice(*@indexes) {
         die 'The indexes are expected to be non-negative integers or strings.'
-        unless (@indexes.all ~~ Int:D | Str:D) && min(@indexes.grep(*~~ Int)) ≥ 0;
+        unless (@indexes.all ~~ Int:D | Str:D) && min(@indexes.grep(*~~ Int:D)) ≥ 0;
 
-        my @indexes2 = @indexes.map({ %!row-names-map{$_} // $_ });
+        # Note %!row-names-map{'5'} and %!row-names-map{5} will both work,
+        # hence using, say, %!row-names-map{$_} // $_ is wrong.
+        my @indexes2 = @indexes.map({ $_ ~~ Str:D ?? %!row-names-map{$_} !! $_ });
         return Math::SparseMatrix.new(
                 core-matrix => $!core-matrix.row-slice(@indexes2),
                 row-names => @indexes,
