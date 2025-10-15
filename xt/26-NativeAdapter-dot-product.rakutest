@@ -28,24 +28,26 @@ $matrix2 = Math::SparseMatrix::NativeAdapter.new($matrix2);
 isa-ok $matrix2, Math::SparseMatrix::NativeAdapter:D;
 
 ## 3
-my @vec3 = rand xx $ncol;
-isa-ok
-        $matrix1.dot(@vec3),
-        Array:D,
-        "Expected type of matrix-vector dot product";
+subtest {
+    my @vec3 = rand xx $ncol;
 
-## 4
-my $res4 = $matrix1.dot(@vec3);
-is
-        $res4.elems,
-        $nrow,
-        "Expected number of columns";
+    isa-ok
+            $matrix1.dot(@vec3),
+            Array:D,
+            "Expected type of matrix-vector dot prodct";
 
-## 5
-is
-        ($res4 <<->> dense-dot-product($matrix1.Array, @vec3.map({ [$_,] })).map(*.Slip))>>.abs.max < 1e-12,
-        True,
-        "Same vector dot product";
+    my $res4 = $matrix1.dot(@vec3);
+    is
+            $res4.elems,
+            $nrow,
+            "Expcted number of columns";
+
+    is
+            ($res4 <<->> dense-dot-product($matrix1.Array, @vec3.map({ [$_,] })).map(*.Slip))>>.abs.max < 1e-12,
+            True,
+            "Same vector dot product";
+
+}, 'dense vector dot product';
 
 ## 6
 isa-ok
