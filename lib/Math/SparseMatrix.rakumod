@@ -566,7 +566,7 @@ class Math::SparseMatrix
     #| Row sums of the sparse matrix
     #| C<:$pairs> -- Whether to return a row-index-to-row-sum hashmap or not.
     method row-sums(Bool:D :p(:$pairs) = False) {
-        my @sums = self.core-matrix.row-sums(:$pairs);
+        my @sums = self.core-matrix.row-sums;
         if $pairs {
             my @rn = self.row-names.defined ?? self.row-names !! (^self.nrow);
             return (@rn.Array Z=> @sums.Array).Hash;
@@ -577,7 +577,7 @@ class Math::SparseMatrix
     #| Row maxes of the sparse matrix
     #| C<:$pairs> -- Whether to return a row-index-to-row-max hashmap or not.
     method row-maxes(Bool:D :p(:$pairs) = False) {
-        my @maxes = self.core-matrix.row-maxes(:$pairs);
+        my @maxes = self.core-matrix.row-maxes;
         if $pairs {
             my @rn = self.row-names.defined ?? self.row-names !! (^self.nrow);
             return (@rn.Array Z=> @maxes.Array).Hash;
@@ -588,7 +588,7 @@ class Math::SparseMatrix
     #| Column sums of the sparse matrix
     #| C<:$pairs> -- Whether to return a column-index-to-column-sum hashmap or not.
     method column-sums(Bool:D :p(:$pairs) = False) {
-        my @sums = self.core-matrix.column-sums(:$pairs);
+        my @sums = self.core-matrix.column-sums;
         if $pairs {
             my @rn = self.column-names.defined ?? self.column-names !! (^self.ncol);
             return (@rn.Array Z=> @sums.Array).Hash;
@@ -599,7 +599,7 @@ class Math::SparseMatrix
     #| Column maxes of the sparse matrix
     #| C<:$pairs> -- Whether to return a column-index-to-column-max hashmap or not.
     method column-maxes(Bool:D :p(:$pairs) = False) {
-        my @maxes = self.core-matrix.column-maxes(:$pairs);
+        my @maxes = self.core-matrix.column-maxes;
         if $pairs {
             my @rn = self.column-names.defined ?? self.column-names !! (^self.ncol);
             return (@rn.Array Z=> @maxes.Array).Hash;
