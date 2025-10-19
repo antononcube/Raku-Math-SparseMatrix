@@ -13,7 +13,9 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
             "adjacency-lists", "columns-count", "explicit-length",
             "density", "dimensions", "implicit-value" => "implicit_value",
             "rows-count",
-            "rules", "tuples"
+            "rules", "tuples",
+            "row-sums", "row-maxes", "column-sums", "column-maxes",
+            "top-k-element-matrix"
             );
 
     # In principle we could use these handles:
@@ -230,6 +232,11 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
         my $csr-struct = $!csr-struct.multiply($other.csr-struct);
         return Math::SparseMatrix::NativeAdapter.new(:$csr-struct);
     }
+
+    #=================================================================
+    # Row sums and maxes
+    #=================================================================
+    # Handled by delegation
 
     #=================================================================
     # Unitize
