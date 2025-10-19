@@ -10,6 +10,7 @@ my $density = 0.002;
 my $tol = 0.0;
 my $type = 'CSR';
 
+#----------------------------------------------------------------------------------------------------
 say "-" x 100;
 say "Matrix 1:";
 my $tstart = now;
@@ -18,10 +19,13 @@ my $tend = now;
 say (:$matrix1);
 say "Creation time: {$tend - $tstart} seconds.";
 say "Non-zero values 1: ", $matrix1.explicit-length;
+#----------------------------------------------------------------------------------------------------
+
 say "-" x 100;
 
 #spurt 'test-sparse-matrix.wl', $matrix1.to-wl;
 
+#----------------------------------------------------------------------------------------------------
 say "-" x 100;
 say "Matrix 2:";
 #my $matrix2 = generate-random-sparse-matrix($ncol, 2, 0.9);
@@ -33,8 +37,9 @@ say (:$matrix2);
 say "Transpose time: {$tend - $tstart} seconds.";
 
 say "Non-zero values 2: ", $matrix2.explicit-length;
-say "-" x 100;
 
+#----------------------------------------------------------------------------------------------------
+say "-" x 100;
 
 #$tstart = now;
 #my $result = $matrix1.dot($matrix2);
@@ -46,9 +51,29 @@ my $result2 = $matrix1.dot-numeric($matrix2);
 $tend = now;
 say "Multiplication time dot-numeric: {$tend - $tstart} seconds.";
 
+#----------------------------------------------------------------------------------------------------
+say "-" x 100;
+
 $tstart = now;
 my $result3 = $matrix1.values.rotor($nrow, :partial).map({ sum($_ <<*>> $_) });
 #note (:$result3);
 $tend = now;
 
 say "Simple dot products time       : {$tend - $tstart} seconds.";
+
+#----------------------------------------------------------------------------------------------------
+say "-" x 100;
+
+my $matrix2 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
+
+$tstart = now;
+my @rowSums = $matrix2.row-sums;
+$tend = now;
+
+say "Generic row sums time : {$tend - $tstart} seconds.";
+
+$tstart = now;
+my @rowSums = $matrix2.core-matrix.row-sums;
+$tend = now;
+
+say "CSR row sums time     : {$tend - $tstart} seconds.";
