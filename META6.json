@@ -7,7 +7,7 @@
     ],
     "auth": "zef:antononcube",
     "depends": [
-        "Math::SparseMatrix::Native:ver<0.0.4+>"
+        "Math::SparseMatrix::Native:ver<0.0.5+>"
     ],
     "build-depends": [],
     "provides": {
