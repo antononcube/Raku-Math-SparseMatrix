@@ -48,4 +48,32 @@ subtest {
     ok $matrix1c.apply-elementwise({$_ + 2}, :skip-implicit-value, :clone);
 }, "apply-elementwise";
 
+## 6
+subtest {
+    ok $matrix1.row-sums;
+    ok $matrix1.column-sums;
+    is $matrix1.row-sums, $matrix1.Array.map({ $_.sum }), 'expected row sums';
+    is $matrix1.column-sums, $matrix1.transpose.Array.map({ $_.sum }), 'expected column sums';
+    is-deeply $matrix1.row-sums(:pairs), $matrix1.Array.kv.map(-> $k, @v { $k => @v.sum }).Hash, 'expected row sums, :pairs';
+
+    my $matrix1a = $matrix1.clone;
+    $matrix1a.implicit-value = 10;
+    is $matrix1a.row-sums, $matrix1a.Array.map({ $_.sum }), 'expected row sums with implicit value';
+
+}, "row-sums & column-sums";
+
+## 7
+subtest {
+    ok $matrix1.row-maxes;
+    ok $matrix1.column-maxes;
+    is $matrix1.row-maxes, $matrix1.Array.map({ $_.max }), 'expected row maxes';
+    is $matrix1.column-maxes, $matrix1.transpose.Array.map({ $_.max }), 'expected column maxes';
+    is-deeply $matrix1.row-maxes(:pairs), $matrix1.Array.kv.map(-> $k, @v { $k => @v.max }).Hash, 'expected row maxes, :pairs';
+
+    my $matrix1a = $matrix1.clone;
+    $matrix1a.implicit-value = 10;
+    is $matrix1a.row-maxes, $matrix1a.Array.map({ $_.max }), 'expected row maxes with implicit value';
+
+}, "row-maxes & column-maxes";
+
 done-testing;
