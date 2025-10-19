@@ -99,8 +99,6 @@ $tend = now;
 say (:$matrix3to10);
 say "CSR top-K elements matrix time : {$tend - $tstart} seconds.";
 
-
-
 $tstart = now;
 my $matrix3a10 = $matrix3a.top-k-elements-matrix(10);
 $tend = now;
