@@ -964,6 +964,23 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     }
 
     #=================================================================
+    # Top-k elements matrix
+    #=================================================================
+    #| Modify the sparse matrix or give a new sparse matrix with the largest, top-k elements only.
+    #| C<$k> -- Number of the top elements.
+    #| C<:$clone> -- Whether to operate in-place.
+    method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {
+        note 'In place top-K elements matrix modification is not implemented yet.' unless $clone;
+        my @rules = self.tuples.sort(-*.value).head($k);
+        return Math::SparseMatrix::CSR.new(
+                :@rules,
+                :$!nrow,
+                :$!ncol,
+                :$!implicit-value
+                );
+    }
+
+    #=================================================================
     # Pretty print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, Bool:D :$echo = True) {
