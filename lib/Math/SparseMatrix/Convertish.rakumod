@@ -87,6 +87,6 @@ role Math::SparseMatrix::Convertish {
     }
 
     multi method to-adapted(Math::SparseMatrix::DOK:D $m --> Math::SparseMatrix::NativeAdapter:D) {
-        return $m.to-csr.to-adapted;
+        return self.to-adapted($m.to-csr);
     }
 }
