@@ -35,6 +35,7 @@ subtest {
 
     isa-ok $smat1.row-sums, Array:D, 'expected array';
     isa-ok $smat1.row-sums(:pairs), Hash:D, 'expected map';
+    is $smat1.row-sums(:pairs).values.all ~~ Numeric:D, True, 'expected map values';
 
     my @sums = $smat1.Array>>.sum;
     is $smat1.row-sums, @sums, 'expected sums';
@@ -50,6 +51,7 @@ subtest {
 
     isa-ok $smat1.column-sums, Array:D, 'expected array';
     isa-ok $smat1.column-sums(:pairs), Hash:D, 'expected map';
+    is $smat1.column-sums(:pairs).values.all ~~ Numeric:D, True, 'expected map values';
 
     my @sums = $smat1.transpose.Array>>.sum;
     is $smat1.column-sums, @sums, 'expected sums';
