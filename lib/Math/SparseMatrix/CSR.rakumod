@@ -835,6 +835,57 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     }
 
     #=================================================================
+    # Row and column sums and maxes
+    #=================================================================
+    #| Row sums for a CSR sparse matrix.
+    method row-sums(Bool:D :p(:$pairs) = False) {
+        my @sums;
+        for @.row-ptr.kv -> $i, $ptr {
+            my $next_ptr = $i == @.row-ptr.end ?? @.values.elems !! @.row-ptr[$i + 1];
+            my $rowSum = 0;
+            for $ptr ..^ $next_ptr -> $j {
+                $rowSum += @.values[$j]
+            }
+            @sums.push($rowSum + (self.ncol - $next_ptr + $ptr) * $!implicit-value) if $i < @.row-ptr.end;
+        }
+
+        if $pairs {
+            return ((^self.nrow).Array Z=> @sums.Array).Hash;
+        }
+        return @sums;
+    }
+
+    #| Column sums for a CSR sparse matrix.
+    method column-sums(Bool:D :p(:$pairs) = False) {
+        # Quick to implement.
+        return self.transpose.row-sums(:$pairs);
+    }
+
+    #| Row maxes for a CSR sparse matrix.
+    method row-maxes(Bool:D :p(:$pairs) = False) {
+        my @maxes;
+        for @.row-ptr.kv -> $i, $ptr {
+            my $next_ptr = $i == @.row-ptr.end ?? @.values.elems !! @.row-ptr[$i + 1];
+            my $rowSum = 0;
+            for $ptr ..^ $next_ptr -> $j {
+                $rowSum max= @.values[$j]
+            }
+            @maxes.push(max($rowSum, $!implicit-value)) if $i < @.row-ptr.end;
+        }
+
+        if $pairs {
+            return ((^self.nrow).Array Z=> @maxes.Array).Hash;
+        }
+        return @maxes;
+    }
+
+    #| Column maxes for a CSR sparse matrix.
+    method column-maxes(Bool:D :p(:$pairs) = False) {
+        # Quick to implement.
+        return self.transpose.row-maxes(:$pairs);
+    }
+
+    #=================================================================
     # Unitize
     #=================================================================
     #| Unitize the sparse matrix
