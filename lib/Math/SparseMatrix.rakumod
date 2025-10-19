@@ -561,7 +561,51 @@ class Math::SparseMatrix
     #=================================================================
     # Row and column sums and maxes
     #=================================================================
-    # Defined in the Abstract class, so they can overridden by more optimized versoins.
+    # See the complete definitions in the Abstract class -- they can overridden by more optimized versions.
+
+    #| Row sums of the sparse matrix
+    #| C<:$pairs> -- Whether to return a row-index-to-row-sum hashmap or not.
+    method row-sums(Bool:D :p(:$pairs) = False) {
+        my @sums = self.core-matrix.row-sums(:$pairs);
+        if $pairs {
+            my @rn = self.row-names.defined ?? self.row-names !! (^self.nrow);
+            return (@rn.Array Z=> @sums.Array).Hash;
+        }
+        return @sums;
+    }
+
+    #| Row maxes of the sparse matrix
+    #| C<:$pairs> -- Whether to return a row-index-to-row-max hashmap or not.
+    method row-maxes(Bool:D :p(:$pairs) = False) {
+        my @maxes = self.core-matrix.row-maxes(:$pairs);
+        if $pairs {
+            my @rn = self.row-names.defined ?? self.row-names !! (^self.nrow);
+            return (@rn.Array Z=> @maxes.Array).Hash;
+        }
+        return @maxes;
+    }
+
+    #| Column sums of the sparse matrix
+    #| C<:$pairs> -- Whether to return a column-index-to-column-sum hashmap or not.
+    method column-sums(Bool:D :p(:$pairs) = False) {
+        my @sums = self.core-matrix.column-sums(:$pairs);
+        if $pairs {
+            my @rn = self.column-names.defined ?? self.column-names !! (^self.ncol);
+            return (@rn.Array Z=> @sums.Array).Hash;
+        }
+        return @sums;
+    }
+
+    #| Column maxes of the sparse matrix
+    #| C<:$pairs> -- Whether to return a column-index-to-column-max hashmap or not.
+    method column-maxes(Bool:D :p(:$pairs) = False) {
+        my @maxes = self.core-matrix.column-maxes(:$pairs);
+        if $pairs {
+            my @rn = self.column-names.defined ?? self.column-names !! (^self.nrow);
+            return (@rn.Array Z=> @maxes.Array).Hash;
+        }
+        return @maxes;
+    }
 
     #=================================================================
     # Print
