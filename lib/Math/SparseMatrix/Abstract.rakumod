@@ -180,6 +180,14 @@ class Math::SparseMatrix::Abstract {
     method round(Numeric:D $scale = 1, Bool:D :$clone = True) {...}
 
     #=================================================================
+    # Top-k elements matrix
+    #=================================================================
+    #| Give a new sparse matrix with the largest, top-k elements only
+    #| C<$k> -- Number of the top elements.
+    #| C<:$clone> -- Whether to operate in-place.
+    method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {...}
+
+    #=================================================================
     # Apply elementwise
     #=================================================================
     #| Apply a function to the elements of sparse matrix.

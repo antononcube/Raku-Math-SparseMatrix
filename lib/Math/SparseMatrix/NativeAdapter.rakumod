@@ -14,8 +14,7 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
             "density", "dimensions", "implicit-value" => "implicit_value",
             "rows-count",
             "rules", "tuples",
-            "row-sums", "row-maxes", "column-sums", "column-maxes",
-            "top-k-element-matrix"
+            "row-sums", "row-maxes", "column-sums", "column-maxes"
             );
 
     # In principle we could use these handles:
@@ -271,11 +270,26 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
     #=================================================================
     #| Round the sparse matrix
     #| C<:$scale> -- Scale to round to.
+    #| C<:$clone> -- Whether to operate in-place.
     method round(Numeric:D $scale = 1, Bool:D :$clone = True) {
         if $clone {
             return self.clone.round($scale, :!clone);
         }
         self.csr-struct.round($scale);
+        return self;
+    }
+
+    #=================================================================
+    # Top-k elements matrix
+    #=================================================================
+    #| Modify the sparse matrix or give a new sparse matrix with the largest, top-k elements only.
+    #| C<$k> -- Number of the top elements.
+    #| C<:$clone> -- Whether to operate in-place.
+    method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {
+        if $clone {
+            return self.clone.top-k-elements-matrix($k, :!clone);
+        }
+        self.csr-struct = self.csr-struct.top-k-elements-matrix($k);
         return self;
     }
 
