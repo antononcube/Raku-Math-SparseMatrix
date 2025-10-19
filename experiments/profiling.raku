@@ -1,6 +1,7 @@
 #!/usr/bin/env raku
 use v6.d;
 
+# use lib <. lib>;
 use Math::SparseMatrix;
 use Math::SparseMatrix::Utilities;
 
@@ -64,16 +65,45 @@ say "Simple dot products time       : {$tend - $tstart} seconds.";
 #----------------------------------------------------------------------------------------------------
 say "-" x 100;
 
-my $matrix2 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
+my $matrix3 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
 
 $tstart = now;
-my @rowSums = $matrix2.row-sums;
+my @rowSums = $matrix3.row-sums;
 $tend = now;
 
 say "Generic row sums time : {$tend - $tstart} seconds.";
 
 $tstart = now;
-my @rowSums = $matrix2.core-matrix.row-sums;
+@rowSums = $matrix3.core-matrix.row-sums;
 $tend = now;
 
 say "CSR row sums time     : {$tend - $tstart} seconds.";
+
+
+my $matrix3a = $matrix3.clone;
+$matrix3a.to-adapted;
+
+$tstart = now;
+@rowSums = $matrix3a.core-matrix.row-sums;
+$tend = now;
+
+say "Adapted row sums time : {$tend - $tstart} seconds.";
+
+#----------------------------------------------------------------------------------------------------
+say "-" x 100;
+
+$tstart = now;
+my $matrix3to10 = $matrix3.top-k-elements-matrix(10);
+$tend = now;
+
+say (:$matrix3to10);
+say "CSR top-K elements matrix time : {$tend - $tstart} seconds.";
+
+
+
+$tstart = now;
+my $matrix3a10 = $matrix3a.top-k-elements-matrix(10);
+$tend = now;
+
+say (:$matrix3a10);
+say "Adapted top-K elements matrix time : {$tend - $tstart} seconds.";
