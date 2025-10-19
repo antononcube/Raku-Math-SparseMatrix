@@ -608,6 +608,18 @@ class Math::SparseMatrix
     }
 
     #=================================================================
+    # Top-k elements matrix
+    #=================================================================
+    #| Modify the sparse matrix or give a new sparse matrix with the largest, top-k elements only.
+    #| C<$k> -- Number of the top elements.
+    #| C<:$clone> -- Whether to operate in-place.
+    method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {
+        if $clone { self.clone.top-k-elements-matrix($k, :!clone) }
+        self.core-matrix = self.core-matrix.top-k-elements-matrix($k);
+        return self;
+    }
+
+    #=================================================================
     # Print
     #=================================================================
     method print(Bool:D :iv(:implicit-value(:$show-implicit-value)) = False, ) {
