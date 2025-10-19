@@ -601,7 +601,7 @@ class Math::SparseMatrix
     method column-maxes(Bool:D :p(:$pairs) = False) {
         my @maxes = self.core-matrix.column-maxes(:$pairs);
         if $pairs {
-            my @rn = self.column-names.defined ?? self.column-names !! (^self.nrow);
+            my @rn = self.column-names.defined ?? self.column-names !! (^self.ncol);
             return (@rn.Array Z=> @maxes.Array).Hash;
         }
         return @maxes;
