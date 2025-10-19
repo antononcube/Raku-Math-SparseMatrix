@@ -694,12 +694,8 @@ class Math::SparseMatrix
     # Adaptation
     #=================================================================
     multi method to-adapted() {
-        return self.to-adapted(self);
-    }
-
-    multi method to-adapted(Math::SparseMatrix:D $m) {
-        $m.core-matrix = self.to-adapted($m.core-matrix);
-        return $m;
+        self.core-matrix = Math::SparseMatrix::Convertish.to-adapted(self.core-matrix);
+        return self;
     }
 
     #=================================================================
