@@ -971,7 +971,7 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #| C<:$clone> -- Whether to operate in-place.
     method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {
         note 'In place top-K elements matrix modification is not implemented yet.' unless $clone;
-        my @rules = self.tuples.sort(-*.value).head($k);
+        my @rules = self.rules.sort(-*.value).head($k);
         return Math::SparseMatrix::CSR.new(
                 :@rules,
                 :$!nrow,
