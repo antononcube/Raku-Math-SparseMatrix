@@ -286,11 +286,9 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
     #| C<$k> -- Number of the top elements.
     #| C<:$clone> -- Whether to operate in-place.
     method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {
-        if $clone {
-            return self.clone.top-k-elements-matrix($k, :!clone);
-        }
-        self.csr-struct = self.csr-struct.top-k-elements-matrix($k);
-        return self;
+        note 'In place top-K elements matrix modification is not implemented yet.' unless $clone;
+        my $csr-struct = self.csr-struct.top-k-elements-matrix($k);
+        return self.new(:$csr-struct);
     }
 
     #=================================================================
