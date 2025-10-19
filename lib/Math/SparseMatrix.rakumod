@@ -561,42 +561,7 @@ class Math::SparseMatrix
     #=================================================================
     # Row and column sums and maxes
     #=================================================================
-    method !row-op(&op, Bool:D :p(:$pairs) = False) {
-        # Probably more effective implementations can be provided by the core matrix classes.
-        # But this is universal and quick to implement.
-
-        my @sums = do for ^self.nrow -> $i {
-            self.core-matrix.row-at($i).tuples>>.tail.&op
-        }
-
-        if $pairs {
-            my @rn = self.row-names.defined ?? self.row-names !! (^self.nrow);
-            return (@rn.Array Z=> @sums.Array).Hash;
-        }
-        return @sums;
-    }
-
-    #| Row sums for a sparse matrix.
-    method row-sums(Bool:D :p(:$pairs) = False) {
-        my &asum = -> @a { @a.sum + self.implicit-value * (self.ncol - @a.elems) };
-        self!row-op(&asum, :$pairs);
-    }
-
-    method column-sums(Bool:D :p(:$pairs) = False) {
-        # Quick to implement.
-        return self.transpose.row-sums(:$pairs);
-    }
-
-    #| Row sums for a sparse matrix.
-    method row-maxes(Bool:D :p(:$pairs) = False) {
-        my &amax = -> @a { @a.Array.push(self.implicit-value).max };
-        self!row-op(&amax, :$pairs);
-    }
-
-    method column-maxes(Bool:D :p(:$pairs) = False) {
-        # Quick to implement.
-        return self.transpose.row-maxes(:$pairs);
-    }
+    # Defined in the Abstract class, so they can overridden by more optimized versoins.
 
     #=================================================================
     # Print
