@@ -10,7 +10,8 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
             handles(
             "nrow", "ncol", "nnz",
             "value-at",
-            "adjacency-lists", "columns-count", "explicit-length",
+            "adjacency-lists", "columns-count",
+            "explicit-length", "explicit-positions", "explicit-values",
             "density", "dimensions", "implicit-value" => "implicit_value",
             "rows-count",
             "rules", "tuples",
