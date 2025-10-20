@@ -105,3 +105,7 @@ $tend = now;
 
 say (:$matrix3a10);
 say "Adapted top-K elements matrix time : {$tend - $tstart} seconds.";
+
+say 'explicit-length    : ', $matrix3a10.core-matrix.explicit-length;
+say 'explicit-positions : ', $matrix3a10.core-matrix.explicit-positions;
+say 'explicit-values    : ', $matrix3a10.core-matrix.explicit-values;
