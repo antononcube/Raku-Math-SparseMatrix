@@ -146,17 +146,41 @@ class Math::SparseMatrix::NativeAdapter is Math::SparseMatrix::Abstract {
     #=================================================================
     # Row-bind
     #=================================================================
-    method row-bind(Math::SparseMatrix::NativeAdapter:D $other --> Math::SparseMatrix::NativeAdapter:D) {
+    multi method row-bind(Math::SparseMatrix::NativeAdapter:D $other --> Math::SparseMatrix::NativeAdapter:D) {
         my $csr-struct = $!csr-struct.row-bind($other.csr-struct);
         return Math::SparseMatrix::NativeAdapter.new(:$csr-struct);
+    }
+
+    multi method row-bind(Math::SparseMatrix::CSR:D $m --> Math::SparseMatrix::NativeAdapter:D) {
+        my $other = Math::SparseMatrix::NativeAdapter.new(
+                values => $m.values,
+                row-ptr => $m.row-ptr,
+                col-index => $m.col-index,
+                nrow => $m.nrow,
+                ncol => $m.ncol,
+                implicit-value => $m.implicit-value,
+                );
+        return self.row-bind($other);
     }
 
     #=================================================================
     # Column-bind
     #=================================================================
-    method column-bind(Math::SparseMatrix::NativeAdapter:D $other --> Math::SparseMatrix::NativeAdapter:D) {
+    multi method column-bind(Math::SparseMatrix::NativeAdapter:D $other --> Math::SparseMatrix::NativeAdapter:D) {
         my $csr-struct = $!csr-struct.row-bind($other.csr-struct);
         return Math::SparseMatrix::NativeAdapter.new(:$csr-struct);
+    }
+
+    multi method column-bind(Math::SparseMatrix::CSR:D $m --> Math::SparseMatrix::NativeAdapter:D) {
+        my $other = Math::SparseMatrix::NativeAdapter.new(
+                values => $m.values,
+                row-ptr => $m.row-ptr,
+                col-index => $m.col-index,
+                nrow => $m.nrow,
+                ncol => $m.ncol,
+                implicit-value => $m.implicit-value,
+                );
+        return self.column-bind($other);
     }
 
     #=================================================================
