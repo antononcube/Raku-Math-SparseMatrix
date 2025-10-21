@@ -262,7 +262,8 @@ class Math::SparseMatrix::DOK is Math::SparseMatrix::Abstract {
     #=================================================================
     # Transpose
     #=================================================================
-    method transpose(--> Math::SparseMatrix::DOK) {
+    method transpose(Bool:D :$clone = True--> Math::SparseMatrix::DOK) {
+        self.clone.transpose(:!clone) if $clone;
         my %transposed;
         for %!adjacency-list.kv -> $row, %cols {
             for %cols.kv -> $col, $value {

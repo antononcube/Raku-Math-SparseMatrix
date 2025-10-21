@@ -348,7 +348,8 @@ class Math::SparseMatrix::CSR is Math::SparseMatrix::Abstract {
     #=================================================================
     # Transpose
     #=================================================================
-    method transpose() {
+    # No in-place transposition for CSR (both Raku and native implementations.)
+    method transpose(Bool:D :$clone = True) {
         my @IAT = 0 xx ($!ncol + 1);
         my @JAT;
         my @ANT;
