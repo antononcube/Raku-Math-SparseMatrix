@@ -67,7 +67,7 @@ class Math::SparseMatrix
                 self!process-names($names.Array, $n, $arg-name)
             }
             when ($_ ~~ List:D | Array:D) && $_.unique.elems == $n {
-                ($names, $names.kv.rotor(2)>>.reverse.flat.Hash)
+                ($names, ($names.Array Z=> (^$names.elems)).Hash)
             }
             when ($_ ~~ Map:D) && $_.elems == $n {
                 my @names = $_.sort(*.value)>>.key;
@@ -79,7 +79,7 @@ class Math::SparseMatrix
                 (Empty, $_)
             }
             when Whatever {
-                ((^$n)>>.Str, ((^$n) Z=> (^$n)).Hash)
+                ((^$n)>>.Str.Array, ((^$n) Z=> (^$n)).Hash)
             }
             default {
                 die "The argument $arg-name is expected to be a Positional or a Map of length $n, or Whatever."
