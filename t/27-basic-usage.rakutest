@@ -17,6 +17,14 @@ my $rmat = Math::SparseMatrix.new(
         row-names => ["A", "B", "C", "D"],
         dimension-names => ["U", "V"]);
 
+my $rmatTCore = Math::SparseMatrix::CSR.new(rules => [[0, 0] => 1, [1, 1] => 2, [2, 3] => 3, [3, 0] => 4, [4, 2] => 2]);
+
+my $rmatT = Math::SparseMatrix.new(
+        $rmatTCore,
+        row-names => ["a", "b", "c", "d", "e"],
+        column-names => ["A", "B", "C", "D"],
+        dimension-names => ["V", "U"]);
+
 my $dmat2 = [2, 2, 4, 4, 4, 2, 3, 2, 0, 2, 1, 4, 4, 1, 1, 3, 1, 2, 1, 0].rotor(4);
 my $rmat2 = Math::SparseMatrix.new(dense-matrix => $dmat2);
 
@@ -70,6 +78,15 @@ subtest {
             $rmat.dot($rmat[0].transpose),
             Math::SparseMatrix.new(core-matrix => Math::SparseMatrix::CSR.new(values => [17e0], col-index => [0], row-ptr => [0, 1, 1, 1, 1], nrow => 4, ncol => 1, implicit-value => 0), row-names-map => {:A(0), :B(1), :C(2), :D(3)}, column-names-map => {:A(0)}, dimension-names-map => {}, row-names => ["A", "B", "C", "D"], column-names => ["A"], dimension-names => []),
             '$rmat.dot($rmat[0].transpose)';
+
+    ok
+            $rmat.transpose(:clone),
+            '$rmat.transpose(:clone)';
+
+    is $rmat.transpose(:clone), $rmatT, '$rmat.transpose(:clone) eqv $rmat';
+
+    my $rmatLocal = $rmat.clone;
+    is $rmatLocal.transpose(:!clone), $rmatT, '$rmat.transpose(:clone) eqv $rmat';
 
 }, "Transposing";
 
