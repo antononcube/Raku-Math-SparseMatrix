@@ -437,9 +437,31 @@ class Math::SparseMatrix
     #=================================================================
 
     #| Transpose the matrix
-    method transpose(-->Math::SparseMatrix) {
-        my $smat = $!core-matrix.transpose;
-        return Math::SparseMatrix.new(core-matrix => $smat, row-names => %!column-names-map, column-names => %!row-names-map);
+    method transpose(Bool:D :$clone = True-->Math::SparseMatrix) {
+        # Since the most performant Native transpose implementation always clones
+        # the core matrix is assumed to be always cloned.
+        # But if a more effective/in-place transposing is available, then it should be used.
+        # Processing of row- and column names is saved with :!clone.
+        if $clone {
+            my $smat = $!core-matrix.transpose(:clone);
+            return Math::SparseMatrix.new(core-matrix => $smat, row-names => %!column-names-map, column-names => %!row-names-map);
+        }
+
+        $!core-matrix = $!core-matrix.transpose(:$clone);
+
+        # Avoiding the preprocessing of row- and column names.
+        my %t = %!row-names-map;
+        %!row-names-map = %!column-names-map;
+        %!column-names-map = %t;
+        %!dimension-names-map = %!dimension-names-map.map({ $_.key => $_.value == 1 ?? 2 !! 1  });
+
+        my @t = @!row-names;
+        @!row-names = @!column-names;
+        @!column-names = @t;
+
+        @!dimension-names .= reverse;
+
+        return self;
     }
 
     #=================================================================
