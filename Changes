@@ -1,5 +1,14 @@
 Revision history for "Math::SparseMatrix"
 
+0.0.9 2025-10-21
+    - Performance improvements.
+        - Small ones: faster row/column names processing during creation and transposing.
+
+0.0.8 2025-10-20
+    - Dedicated row- and columns sums for CSR and DOK matrices.
+    - Implemented CSR top-K elements matrix making.
+    - Performance improvements.
+
 0.0.7 2025-10-12
     - Bug fix -- correct handling of row-slices with all digit string row-names.
     - Added references to "JavaScript::D3" in the README.
