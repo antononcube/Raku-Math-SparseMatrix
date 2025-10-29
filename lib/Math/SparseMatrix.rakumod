@@ -130,8 +130,8 @@ class Math::SparseMatrix
      }
 
     multi method new(:diag(:@diagonal)! where @diagonal.all ~~ Numeric:D,
-                     :$nrow is copy = @diagonal.elems,
-                     :$ncol is copy = @diagonal.elems,
+                     :$nrow = @diagonal.elems,
+                     :$ncol = @diagonal.elems,
                      :$row-names is copy = Whatever,
                      :$column-names is copy = Whatever,
                      :$dimension-names = Whatever,
