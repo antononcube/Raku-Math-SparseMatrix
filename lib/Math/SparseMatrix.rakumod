@@ -129,6 +129,17 @@ class Math::SparseMatrix
         self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
      }
 
+    multi method new(:diag(:@diagonal)! where @diagonal.all ~~ Numeric:D,
+                     :$nrow is copy = @diagonal.elems,
+                     :$ncol is copy = @diagonal.elems,
+                     :$row-names is copy = Whatever,
+                     :$column-names is copy = Whatever,
+                     :$dimension-names = Whatever,
+                     Numeric:D :$implicit-value = 0) {
+        my @rules = @diagonal.kv.map(-> $k, $v { ($k, $k) => $v });
+        self.new(:@rules, :$nrow, :$ncol, :$row-names, :$column-names, :$dimension-names, :$implicit-value);
+     }
+
     multi method new(:@dense-matrix! where @dense-matrix ~~ (Array:D | List:D | Seq:D) && @dense-matrix.all ~~ (Array:D | List:D | Seq:D),
                      :$nrow is copy = @dense-matrix.elems,
                      :$ncol is copy = @dense-matrix>>.elems.max,

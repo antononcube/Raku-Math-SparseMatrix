@@ -120,4 +120,20 @@ subtest {
     is $matrix.column-names, @column-names, 'expected column names';
 }, 'Using row-names and column names in creation with dense matrix';
 
+## 15
+subtest {
+    my @diagonal = 11 ... 20;
+    ok Math::SparseMatrix.new(:@diagonal), 'simple creation';
+
+    my $mat = Math::SparseMatrix.new(:@diagonal);
+
+    is $mat.Array.kv.map(-> $k, @v { @v[$k] }), @diagonal, 'expected diagonal values';
+
+    ok Math::SparseMatrix.new(:@diagonal, nrow => 15), 'different number of rows';
+
+    my $mat2 = Math::SparseMatrix.new(:@diagonal, nrow => 15);
+
+    is $mat2.transpose.Array.kv.map(-> $k, @v { @v[$k] }), @diagonal, 'expected diagonal values for non-square matrix';
+}, 'diagonal matrix';
+
 done-testing;
