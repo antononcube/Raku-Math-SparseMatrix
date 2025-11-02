@@ -745,8 +745,13 @@ class Math::SparseMatrix
     }
 
     #=================================================================
-    # Adaptation
+    # Conversion
     #=================================================================
+    multi method to-dok() {
+        self.core-matrix = Math::SparseMatrix::Convertish.to-dok(self.core-matrix);
+        return self;
+    }
+
     multi method to-adapted() {
         self.core-matrix = Math::SparseMatrix::Convertish.to-adapted(self.core-matrix);
         return self;
