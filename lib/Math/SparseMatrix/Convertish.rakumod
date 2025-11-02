@@ -44,23 +44,23 @@ role Math::SparseMatrix::Convertish {
     # To DOK
     #=================================================================
     #| To DOK sparse matrix.
-    proto method to-dok(Math::SparseMatrix::Abstract:D $m) {*}
+    proto method to-dok(|) {*}
 
     multi method to-dok(Math::SparseMatrix::DOK:D $m) {
         return $m;
     }
 
     multi method to-dok(Math::SparseMatrix::CSR:D $m) {
-        my %adjacency-map;
+        my %adjacency-list;
         for ^$m.nrow -> $row {
             my $start = $m.row-ptr[$row];
             my $end = $m.row-ptr[$row + 1];
             for $start ..^ $end -> $idx {
-                %adjacency-map{$row}{$m.col-index[$idx]} = $m.values[$idx];
+                %adjacency-list{$row}{$m.col-index[$idx]} = $m.values[$idx];
             }
         }
         return Math::SparseMatrix::DOK.new(
-                :%adjacency-map,
+                :%adjacency-list,
                 nrow => $m.nrow,
                 ncol => $m.ncol,
                 implicit-value => $m.implicit-value
