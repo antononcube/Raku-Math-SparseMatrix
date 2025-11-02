@@ -1,5 +1,12 @@
 Revision history for "Math::SparseMatrix"
 
+0.0.11 2025-11-02
+    - Better attribute name: using "adjacency-map" instead of "adjacency-list" for Math::SparseMatrix::DOK class.
+    - Better basic examples notebook.
+
+0.0.10 2025-11-01
+    - Implemented dedicated diagonal matrix creation with .new(:diagonal => @a, |).
+
 0.0.9 2025-10-21
     - Performance improvements.
         - Small ones: faster row/column names processing during creation and transposing.
