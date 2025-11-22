@@ -1,7 +1,7 @@
 Revision history for "Math::SparseMatrix"
 
 0.0.12 2025-11-22
-    - Diagonal matrices can be created with specifying the diagonal index.
+    - Diagonal matrices can be created by specifying the diagonal index.
         - The diagonal offset is an integer.
 
 0.0.11 2025-11-02
