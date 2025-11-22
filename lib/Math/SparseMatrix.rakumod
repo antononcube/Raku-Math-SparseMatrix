@@ -131,8 +131,8 @@ class Math::SparseMatrix
 
     multi method new(:diag(:@diagonal)! where @diagonal.all ~~ Numeric:D,
                      Int:D :k(:$offset) = 0,
-                     :$nrow = @diagonal.elems,
-                     :$ncol = @diagonal.elems,
+                     :$nrow = @diagonal.elems + abs($offset),
+                     :$ncol = @diagonal.elems + abs($offset),
                      :$row-names is copy = Whatever,
                      :$column-names is copy = Whatever,
                      :$dimension-names = Whatever,
