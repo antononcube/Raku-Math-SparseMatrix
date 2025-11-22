@@ -125,6 +125,8 @@ subtest {
     my @diagonal = 11 ... 20;
     ok Math::SparseMatrix.new(:@diagonal), 'simple creation';
 
+    ok Math::SparseMatrix.new(:@diagonal, :1k), 'simple creation with offset';
+
     my $mat = Math::SparseMatrix.new(:@diagonal);
 
     is $mat.Array.kv.map(-> $k, @v { @v[$k] }), @diagonal, 'expected diagonal values';
@@ -134,6 +136,15 @@ subtest {
     my $mat2 = Math::SparseMatrix.new(:@diagonal, nrow => 15);
 
     is $mat2.transpose.Array.kv.map(-> $k, @v { @v[$k] }), @diagonal, 'expected diagonal values for non-square matrix';
+
+    my $mat3 = Math::SparseMatrix.new(:@diagonal, :1k);
+
+    is $mat3.dimensions, (@diagonal.elems + 1, @diagonal.elems + 1), 'expected dimensions of 1-th diagonal matrix';
+
+    $mat3 = Math::SparseMatrix.new(:@diagonal, offset => -2);
+
+    is $mat3.dimensions, (@diagonal.elems + 2, @diagonal.elems + 2), 'expected dimensions of -2-th diagonal matrix';
+
 }, 'diagonal matrix';
 
 done-testing;
