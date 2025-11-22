@@ -130,13 +130,14 @@ class Math::SparseMatrix
      }
 
     multi method new(:diag(:@diagonal)! where @diagonal.all ~~ Numeric:D,
+                     Int:D :k(:$offset) = 0,
                      :$nrow = @diagonal.elems,
                      :$ncol = @diagonal.elems,
                      :$row-names is copy = Whatever,
                      :$column-names is copy = Whatever,
                      :$dimension-names = Whatever,
                      Numeric:D :$implicit-value = 0) {
-        my @rules = @diagonal.kv.map(-> $k, $v { ($k, $k) => $v });
+        my @rules = @diagonal.kv.map(-> $k, $v { ($k, $k + $offset) => $v }).grep({ 0 ≤ $_.key.head < $nrow && 0 ≤ $_.key.tail < $ncol });
         self.new(:@rules, :$nrow, :$ncol, :$row-names, :$column-names, :$dimension-names, :$implicit-value);
      }
 
