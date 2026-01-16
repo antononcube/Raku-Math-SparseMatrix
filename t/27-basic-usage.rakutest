@@ -195,4 +195,13 @@ subtest {
 
 }, "Tuples";
 
+#==========================================================
+# Dense matrix
+#==========================================================
+subtest {
+
+    is-deeply $rmat2.dense-matrix, $dmat2>>.Array.Array, 'Expected dense matrix';
+
+}, "Dense matrix";
+
 done-testing;
