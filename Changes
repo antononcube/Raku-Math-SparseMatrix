@@ -1,5 +1,9 @@
 Revision history for "Math::SparseMatrix"
 
+0.0.13 2026-01-16
+    - Conversion to dense matrix method: .dense-matrix().
+    - Allowing ":edges" to be used as a synonym of ":edge-dataset" in .new().
+
 0.0.12 2025-11-22
     - Diagonal matrices can be created by specifying the diagonal index.
         - The diagonal offset is an integer.
