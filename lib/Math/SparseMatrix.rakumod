@@ -152,7 +152,7 @@ class Math::SparseMatrix
         self.new(:$core-matrix, :$row-names, :$column-names, :$dimension-names);
     }
 
-    multi method new(:@edge-dataset! where @edge-dataset.all ~~ Map:D,
+    multi method new(:edges(:@edge-dataset)! where @edge-dataset.all ~~ Map:D,
                      Bool:D :$directed = False,
                      Numeric:D :$implicit-value = 0,
                      :$row-names is copy = Whatever,
@@ -651,6 +651,18 @@ class Math::SparseMatrix
         if $clone { self.clone.top-k-elements-matrix($k, :!clone) }
         self.core-matrix = self.core-matrix.top-k-elements-matrix($k);
         return self;
+    }
+
+    #=================================================================
+    # Print
+    #=================================================================
+    #| Give the corresponding dense matrix (as array or arrays.)
+    method dense-matrix() {
+        my @mat = (0 xx self.rows-count * self.columns-count).rotor(self.columns-count)».Array;
+        for self.tuples(:dataset) -> %rec {
+            @mat[%rec<i>][%rec<j>] = %rec<x>
+        }
+        return @mat;
     }
 
     #=================================================================
