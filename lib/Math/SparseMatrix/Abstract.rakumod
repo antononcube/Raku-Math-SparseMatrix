@@ -188,6 +188,15 @@ class Math::SparseMatrix::Abstract {
     method top-k-elements-matrix(UInt:D $k, Bool:D :$clone = True) {...}
 
     #=================================================================
+    # Singular Value Decomposition
+    #=================================================================
+    #| Thin singular value decomposition with k largest singular values.
+    #| Returns (u, s, v), where self ~= u * s * v.transpose when k is full rank.
+    #| C<$k> -- Find k largest singular values.
+    #| C<:$pairs> -- Whether to return hashmap or not.
+    method svd(UInt:D $k = min(self.rows-count, self.columns-count), Bool:D :p(:$pairs) = False) {...}
+
+    #=================================================================
     # Apply elementwise
     #=================================================================
     #| Apply a function to the elements of sparse matrix.
