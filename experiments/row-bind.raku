@@ -1,9 +1,10 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib <. lib>;
+#use lib <. lib>;
 use Math::SparseMatrix;
 use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
 
 
 my $nrow = 5;
@@ -36,4 +37,4 @@ say "-" x 100;
 $result.print();
 
 say "=" x 100;
-note $matrix1.transpose.verify():pairs;
+note $matrix1.transpose.core-matrix.verify():pairs;
