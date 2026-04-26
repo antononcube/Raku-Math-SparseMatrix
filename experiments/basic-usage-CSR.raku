@@ -1,7 +1,7 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib <. lib>;
+#use lib <. lib>;
 use Math::SparseMatrix::CSR;
 
 # Example tuples: (row, col, value)
@@ -49,4 +49,5 @@ $transposed.print;
 my $product = $matrix.dot($transposed);
 say "Product Matrix: ", $product.raku;
 
-say "Product Matrix pretty: ", $product.print;
+say "Product Matrix pretty: ";
+$product.print;
