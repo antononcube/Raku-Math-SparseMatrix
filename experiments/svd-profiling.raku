@@ -11,6 +11,7 @@ my $density = 0.002;
 my $tol = 0.0;
 my $type = 'CSR';
 my $k = 100;
+my $tolerance = 1e-4;
 
 say "-" x 100;
 say "Matrix:";
@@ -24,7 +25,7 @@ say "Fill in: ", $matrix1.explicit-length / $matrix1.rows-count / $matrix1.colum
 say "-" x 100;
 
 $tstart = now;
-my ($u, $s, $v) = $matrix1.svd($k);
+my ($u, $s, $v) = $matrix1.svd($k, :$tolerance);
 $tend = now;
 say "SVD time: { $tend - $tstart } seconds.";
 
