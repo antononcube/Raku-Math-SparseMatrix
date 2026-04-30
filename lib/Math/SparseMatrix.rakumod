@@ -701,10 +701,15 @@ class Math::SparseMatrix
     #| Thin singular value decomposition with k largest singular values.
     #| Returns (u, s, v), where self ~= u * s * v.transpose when k is full rank.
     #| C<$k> -- Find k largest singular values.
+    #| C<:$max-steps> -- Maximum number of steps.
     #| C<:$tolerance> -- Tolerance of the SVD computation.
     #| C<:$pairs> -- Whether to return hashmap or not.
-    method svd(UInt:D $k = min(self.rows-count, self.columns-count), Numeric:D :tol(:$tolerance) = 1e-8, Bool:D :p(:$pairs) = False) {
-        my ($u, $s, $v) = self.core-matrix.svd($k, :$tolerance, :!pairs);
+    method svd(
+            UInt:D $k = min(self.rows-count, self.columns-count),
+            :$max-steps = Whatever,
+            Numeric:D :tol(:$tolerance) = 1e-8,
+            Bool:D :p(:$pairs) = False) {
+        my ($u, $s, $v) = self.core-matrix.svd($k, :$max-steps, :$tolerance, :!pairs);
         my ($U, $S, $V) = self.new($u), self.new($s), self.new($v);
         $U.set-row-names(self.row-names);
         $V.set-row-names(self.column-names);
