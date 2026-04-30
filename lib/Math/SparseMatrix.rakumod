@@ -348,6 +348,7 @@ class Math::SparseMatrix
         my $obj = Math::SparseMatrix.new(:@rules, nrow => @names.elems, ncol => self.columns-count);
         $obj.set-row-names(@names);
         $obj.set-column-names(self.column-names);
+        if self.core-matrix ~~ Math::SparseMatrix::NativeAdapter:D { $obj.to-adapted }
         return $obj;
     }
 
@@ -393,6 +394,7 @@ class Math::SparseMatrix
         my $obj = Math::SparseMatrix.new(:@rules,  nrow => self.rows-count, ncol => @names.elems);
         $obj.set-row-names(self.row-names);
         $obj.set-column-names(@names);
+        if self.core-matrix ~~ Math::SparseMatrix::NativeAdapter:D { $obj.to-adapted }
         return $obj;
     }
 
