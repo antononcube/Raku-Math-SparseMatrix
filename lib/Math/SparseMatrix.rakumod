@@ -334,6 +334,26 @@ class Math::SparseMatrix
     #=================================================================
     #| Impose row names. (New Math::SparseMatrix object is created.)
     method impose-row-names(@names, Bool:D :$clone = True) {
+        die 'Setting the argument $clone has no effect -- new object is always created.' unless $clone;
+        die "The first argument is expected to be a list of strings."
+        unless @names ~~ (Array:D | List:D | Seq:D) && @names.all ~~ Str:D;
+
+        my %names = @names Z=> (^@names.elems);
+        my @rules;
+        for self.rules -> $p {
+            if %names{self.row-names[$p.key.head]}:exists {
+                @rules .= push((%names{self.row-names[$p.key.head]}, $p.key.tail) => $p.value)
+            }
+        }
+        my $obj = Math::SparseMatrix.new(:@rules, nrow => @names.elems, ncol => self.columns-count);
+        $obj.set-row-names(@names);
+        $obj.set-column-names(self.column-names);
+        return $obj;
+    }
+
+    #| Impose row names by row-binding.
+    #| Slow, kept for optimization research purposes.
+    method impose-row-names-by-row-bind(@names, Bool:D :$clone = True) {
         my $obj = $clone ?? self.clone !! self;
 
         die "The first argument is expected to be a list of strings."
@@ -359,6 +379,26 @@ class Math::SparseMatrix
 
     #| Impose column names. (New Math::SparseMatrix object is created.)
     method impose-column-names(@names, Bool:D :$clone = True) {
+        die 'Setting the argument $clone has no effect -- new object is always created.' unless $clone;
+        die "The first argument is expected to be a list of strings."
+        unless @names ~~ (Array:D | List:D | Seq:D) && @names.all ~~ Str:D;
+
+        my %names = @names Z=> (^@names.elems);
+        my @rules;
+        for self.rules -> $p {
+            if %names{self.column-names[$p.key.tail]}:exists {
+                @rules .= push(($p.key.head, %names{self.column-names[$p.key.tail]}) => $p.value)
+            }
+        }
+        my $obj = Math::SparseMatrix.new(:@rules,  nrow => self.rows-count, ncol => @names.elems);
+        $obj.set-row-names(self.row-names);
+        $obj.set-column-names(@names);
+        return $obj;
+    }
+
+    #| Impose column names. (New Math::SparseMatrix object is created.)
+    #| Kept for optimization research purposes.
+    method impose-column-names-by-transpose(@names, Bool:D :$clone = True) {
         # Not effective, but very quick to implement.
         # The method .transpose() always clones,
         # hence, this should be re-written to be same/similar to .impose-row-names().
