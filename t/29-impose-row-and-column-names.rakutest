@@ -58,6 +58,7 @@ subtest {
     #say "Imposing large number of column names time: {$tEnd - $tStart}";
     #say $smatLarge;
     is $smatLarge.rows-count, @names.elems, 'expected number of row names';
+    isa-ok $smatLarge.core-matrix, Math::SparseMatrix::NativeAdapter, 'expected core matrix type';
 }, 'Impose very large number of row names';
 
 #==========================================================
@@ -92,6 +93,7 @@ subtest {
     #say "Imposing large number of column names time: {$tEnd - $tStart}";
     #say $smatLarge;
     is $smatLarge.columns-count, @names.elems, 'expected number of column names';
+    isa-ok $smatLarge.core-matrix, Math::SparseMatrix::NativeAdapter, 'expected core matrix type';
 }, 'Impose very large number of column names';
 
 done-testing;
