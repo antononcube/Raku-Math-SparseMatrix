@@ -47,6 +47,19 @@ subtest {
 
 }, 'Impose row names';
 
+subtest {
+    my $smat = $smat1.to-adapted;
+    my @names = (rand xx 2_000).map({ $_ * 100_000})>>.Str;
+    for $smat.row-names.kv -> $i, $rn { @names[$i * 10] = $rn }
+    ok $smat.impose-row-names(@names), 'large set of names call';
+    #my $tStart = now;
+    my $smatLarge = $smat.impose-row-names(@names);
+    #my $tEnd = now;
+    #say "Imposing large number of column names time: {$tEnd - $tStart}";
+    #say $smatLarge;
+    is $smatLarge.rows-count, @names.elems, 'expected number of row names';
+}, 'Impose very large number of row names';
+
 #==========================================================
 # Impose column names
 #==========================================================
@@ -67,5 +80,18 @@ subtest {
     dies-ok { $smat3.value-at('d', 'E') }, 'at <d E>';
 
 }, 'Impose column names';
+
+subtest {
+    my $smat = $smat1.to-adapted;
+    my @names = (rand xx 2_000).map({ $_ * 100_000})>>.Str;
+    for $smat.column-names.kv -> $i, $rn { @names[$i * 10] = $rn }
+    ok $smat.impose-column-names(@names), 'large set of names call';
+    #my $tStart = now;
+    my $smatLarge = $smat.impose-column-names(@names);
+    #my $tEnd = now;
+    #say "Imposing large number of column names time: {$tEnd - $tStart}";
+    #say $smatLarge;
+    is $smatLarge.columns-count, @names.elems, 'expected number of column names';
+}, 'Impose very large number of column names';
 
 done-testing;
