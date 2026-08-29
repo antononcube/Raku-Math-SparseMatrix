@@ -16,6 +16,7 @@ my $n = 10;
 my $matrix1 = generate-random-sparse-matrix($nrow, $ncol, :$density, :$tol, :$type):decorated;
 my $matrix2 = generate-random-sparse-matrix(nrow => $ncol, ncol => $nrow, :$density, :$tol, :$type):decorated;
 
+#====================================================================================================
 say '=' x 100;
 say 'Raku implementation';
 say '=' x 100;
@@ -32,8 +33,9 @@ say "Total time : { $tend - $tstart }";
 say "Mean time  : { ($tend - $tstart) / $n }";
 say '◻️';
 
+#====================================================================================================
 say '=' x 100;
-say 'Raku/C/NativeCall implementation';
+say 'Raku/C/NativeCall implementation (adapted)';
 say '=' x 100;
 
 $matrix1 = $matrix1.to-adapted;
@@ -50,4 +52,25 @@ my $tend2 = now;
 
 say "Total time : { $tend2 - $tstart2 }";
 say "Mean time  : { ($tend2 - $tstart2) / $n }";
+say '◻️';
+
+#====================================================================================================
+say '=' x 100;
+say 'Raku/C/NativeCall implementation (direct)';
+say '=' x 100;
+
+$matrix1 = $matrix1.to-adapted.core-matrix;
+$matrix2 = $matrix2.to-adapted.core-matrix;
+
+say (:$matrix1);
+say (:$matrix2);
+
+my $tstart3 = now;
+for ^$n {
+    $matrix1.dot($matrix2)
+}
+my $tend3 = now;
+
+say "Total time : { $tend3 - $tstart3 }";
+say "Mean time  : { ($tend3 - $tstart3) / $n }";
 say '◻️';
