@@ -1,5 +1,12 @@
 Revision history for "Math::SparseMatrix"
 
+0.0.16 2026-10-29
+    - Minimal implementation of Compressed Sparse Column (CSC).
+       - For interfacing / conversion purposes.
+
+0.0.15 2026-04-30
+    - Making the matrices with imposed rows or columns to be NativeAdapter:D if the original matrix is NativeAdapter:D.
+
 0.0.14 2026-04-26
     - Implemented abstract SVD method and hooked up to Math::SparseMatrix::Native.svd.
 
