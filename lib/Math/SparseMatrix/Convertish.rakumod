@@ -1,5 +1,6 @@
 use Math::SparseMatrix::Abstract;
 use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::CSC;
 use Math::SparseMatrix::DOK;
 use Math::SparseMatrix::NativeAdapter;
 
@@ -15,6 +16,10 @@ role Math::SparseMatrix::Convertish {
         return $m;
     }
 
+    multi method to-csr(Math::SparseMatrix::CSC:D $m) {
+        return self.to-csr(self.to-dok($m));
+    }
+
     multi method to-csr(Math::SparseMatrix::DOK:D $m) {
         my @values;
         my @col-index;
@@ -22,7 +27,7 @@ role Math::SparseMatrix::Convertish {
         my $nnz = 0;
 
         for ^$m.nrow -> $row {
-            for %.adjacency-list{$row}.kv -> $col, $value {
+            for $m.adjacency-map{$row}.kv -> $col, $value {
                 @values.push($value);
                 @col-index.push($col);
                 $nnz++;
@@ -41,6 +46,33 @@ role Math::SparseMatrix::Convertish {
     }
 
     #=================================================================
+    # To CSC
+    #=================-===============================================
+    #| To CSC sparse matrix.
+    proto method to-csc(Math::SparseMatrix::Abstract:D $m) {*}
+
+    multi method to-csc(Math::SparseMatrix::CSC:D $m) {
+        return $m;
+    }
+
+    multi method to-csc(Math::SparseMatrix::CSR:D $m) {
+        my $mt = $m.transpose;
+        return
+                Math::SparseMatrix::CSC.new(
+                        values => $mt.values,
+                        col-ptr => $mt.row-ptr,
+                        row-index => $mt.col-index,
+                        nrow => $mt.ncol,
+                        ncol => $mt.nrow,
+                        implicit-value => $mt.implicit-value
+                )
+    }
+
+    multi method to-csc(Math::SparseMatrix::DOK:D $m) {
+       return self.to-csc(self.to-csr($m))
+    }
+
+    #=================================================================
     # To DOK
     #=================================================================
     #| To DOK sparse matrix.
@@ -51,16 +83,33 @@ role Math::SparseMatrix::Convertish {
     }
 
     multi method to-dok(Math::SparseMatrix::CSR:D $m) {
-        my %adjacency-list;
+        my %adjacency-map;
         for ^$m.nrow -> $row {
             my $start = $m.row-ptr[$row];
             my $end = $m.row-ptr[$row + 1];
             for $start ..^ $end -> $idx {
-                %adjacency-list{$row}{$m.col-index[$idx]} = $m.values[$idx];
+                %adjacency-map{$row}{$m.col-index[$idx]} = $m.values[$idx];
             }
         }
         return Math::SparseMatrix::DOK.new(
-                :%adjacency-list,
+                :%adjacency-map,
+                nrow => $m.nrow,
+                ncol => $m.ncol,
+                implicit-value => $m.implicit-value
+                );
+    }
+
+    multi method to-dok(Math::SparseMatrix::CSC:D $m) {
+        my %adjacency-map;
+        for ^$m.ncol -> $col {
+            my $start = $m.col-ptr[$col];
+            my $end = $m.col-ptr[$col + 1];
+            for $start ..^ $end -> $idx {
+                %adjacency-map{$m.row-index[$idx]}{$col} = $m.values[$idx];
+            }
+        }
+        return Math::SparseMatrix::DOK.new(
+                :%adjacency-map,
                 nrow => $m.nrow,
                 ncol => $m.ncol,
                 implicit-value => $m.implicit-value
