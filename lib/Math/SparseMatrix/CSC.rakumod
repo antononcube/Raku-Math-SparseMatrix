@@ -21,4 +21,39 @@ class Math::SparseMatrix::CSC is Math::SparseMatrix::Abstract {
                      Numeric:D :$implicit-value = 0) {
         self.bless(:@values, :@row-index, :@col-ptr, :$nrow, :$ncol, :$implicit-value);
     }
+
+    #=================================================================
+    # Transpose
+    #=================================================================
+    method transpose() {
+        my @col-ptr = 0 xx ($!nrow + 1);
+
+        # Each row of the original matrix becomes a column of its transpose.
+        for @!row-index -> $row {
+            @col-ptr[$row + 1]++;
+        }
+        for ^$!nrow -> $col {
+            @col-ptr[$col + 1] += @col-ptr[$col];
+        }
+
+        my @next = @col-ptr.clone;
+        my @values;
+        my @row-index;
+        for ^$!ncol -> $col {
+            for @!col-ptr[$col] ..^ @!col-ptr[$col + 1] -> $idx {
+                my $dest = @next[@!row-index[$idx]]++;
+                @values[$dest] = @!values[$idx];
+                @row-index[$dest] = $col;
+            }
+        }
+
+        return Math::SparseMatrix::CSC.new(
+                :@values,
+                :@row-index,
+                :@col-ptr,
+                nrow => $!ncol,
+                ncol => $!nrow,
+                implicit-value => $!implicit-value
+                );
+    }
 }
