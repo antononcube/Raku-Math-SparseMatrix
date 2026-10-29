@@ -1,6 +1,9 @@
 #!/usr/bin/env raku
 use v6.d;
 
+# This code was used in the early versions of the package "Math::SparseMatrix".
+# Since Raku(do) is too slow the NativeCall implementation "Math::SparseMatrix::Native" was done.
+
 #use lib <. lib>;
 use Math::SparseMatrix;
 use Math::SparseMatrix::Utilities;
