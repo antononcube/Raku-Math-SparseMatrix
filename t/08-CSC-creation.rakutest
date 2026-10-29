@@ -36,4 +36,24 @@ subtest {
             'Expected round trip equivalence';
 }
 
+# 2
+subtest {
+    my $matrix = Math::SparseMatrix::CSC.new(
+            values => [10, 20, 30, 40],
+            row-index => [2, 0, 2, 1],
+            col-ptr => [0, 2, 2, 3, 4],
+            nrow => 4,
+            ncol => 4,
+            implicit-value => -1);
+    my $csr = Math::SparseMatrix.to-csr($matrix);
+
+    is-deeply $csr.row-ptr, [0, 1, 2, 4, 4],
+            'Expected row pointers for empty and populated CSC columns';
+    is-deeply $csr.col-index, [0, 3, 0, 2],
+            'Expected column indexes ordered within each CSR row';
+    is-deeply $csr.values, [20, 40, 10, 30],
+            'Expected values aligned with the CSR indexes';
+    is $csr.implicit-value, -1, 'Expected implicit value preservation';
+}
+
 done-testing;
