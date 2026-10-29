@@ -1,0 +1,39 @@
+use v6.d;
+
+# use lib <. lib>;
+use Math::SparseMatrix;
+use Math::SparseMatrix::CSC;
+use Math::SparseMatrix::CSR;
+use Math::SparseMatrix::Utilities;
+use Test;
+
+my $nrow = 5;
+my $ncol = 8;
+my $density = 0.25;
+my $tol = 0.01;
+
+plan *;
+
+# 1
+subtest {
+    my $matrix = generate-random-sparse-matrix(:$nrow, :$ncol, :$density, :$tol):!decorated;
+    isa-ok
+            $matrix,
+            Math::SparseMatrix::CSR,
+            "Expected type after CSR creation";
+
+    isa-ok
+            Math::SparseMatrix.to-csc($matrix),
+            Math::SparseMatrix::CSC:D,
+            "Expected type after CSR conversion to CSC";
+
+    my $matrix2 = Math::SparseMatrix.to-csc($matrix);
+    my $matrix3 = Math::SparseMatrix.to-csr($matrix2);
+
+    is
+            $matrix3.eqv($matrix),
+            True,
+            'Expected round trip equivalence';
+}
+
+done-testing;
