@@ -1,7 +1,7 @@
 {
     "name": "Math::SparseMatrix",
     "description": "Sparse matrix algorithms.",
-    "version": "0.0.15",
+    "version": "0.0.16",
     "authors": [
         "Anton Antonov"
     ],
@@ -13,6 +13,7 @@
     "provides": {
         "Math::SparseMatrix": "lib/Math/SparseMatrix.rakumod",
         "Math::SparseMatrix::Abstract": "lib/Math/SparseMatrix/Abstract.rakumod",
+        "Math::SparseMatrix::CSC": "lib/Math/SparseMatrix/CSC.rakumod",
         "Math::SparseMatrix::CSR": "lib/Math/SparseMatrix/CSR.rakumod",
         "Math::SparseMatrix::Convertish": "lib/Math/SparseMatrix/Convertish.rakumod",
         "Math::SparseMatrix::DOK": "lib/Math/SparseMatrix/DOK.rakumod",
