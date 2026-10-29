@@ -17,7 +17,39 @@ role Math::SparseMatrix::Convertish {
     }
 
     multi method to-csr(Math::SparseMatrix::CSC:D $m) {
-        return self.to-csr(self.to-dok($m));
+        my @row-ptr = 0 xx ($m.nrow + 1);
+
+        # Count the non-zero entries in each row.  The cumulative counts
+        # become the CSR row pointers.
+        for $m.row-index -> $row {
+            @row-ptr[$row + 1]++;
+        }
+        for ^$m.nrow -> $row {
+            @row-ptr[$row + 1] += @row-ptr[$row];
+        }
+
+        # Keep a separate set of insertion positions: 
+        # row-ptr must retain the starts of the CSR rows after scattering.
+        my @next = @row-ptr.clone;
+        my @values;
+        my @col-index;
+        for ^$m.ncol -> $col {
+            for $m.col-ptr[$col] ..^ $m.col-ptr[$col + 1] -> $idx {
+                my $row = $m.row-index[$idx];
+                my $dest = @next[$row]++;
+                @values[$dest] = $m.values[$idx];
+                @col-index[$dest] = $col;
+            }
+        }
+
+        return Math::SparseMatrix::CSR.new(
+                :@values,
+                :@col-index,
+                :@row-ptr,
+                nrow => $m.nrow,
+                ncol => $m.ncol,
+                implicit-value => $m.implicit-value
+                );
     }
 
     multi method to-csr(Math::SparseMatrix::DOK:D $m) {
